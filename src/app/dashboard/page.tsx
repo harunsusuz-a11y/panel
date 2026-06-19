@@ -2,27 +2,25 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
-import { ArrowUpRight, ArrowDownRight, ArrowRight } from 'lucide-react'
+import { ArrowUpRight, ArrowDownRight, ArrowRight, TrendingUp, Wallet, FolderOpen, Clock, CheckCircle2 } from 'lucide-react'
 
-/* ──────────────────────────────────────
-   Bar Chart — thin, professional
-────────────────────────────────────── */
-function BarChart({ bars }: { bars: { label: string; v: number; hi?: boolean }[] }) {
+/* ── Bar Chart ── */
+function BarChart({ bars }: { bars: { label:string; v:number; hi?:boolean }[] }) {
   const [m, setM] = useState(false)
-  useEffect(() => { const t = setTimeout(() => setM(true), 80); return () => clearTimeout(t) }, [])
+  useEffect(() => { const t = setTimeout(() => setM(true), 100); return () => clearTimeout(t) }, [])
   const max = Math.max(...bars.map(b => b.v), 1)
   return (
-    <div style={{ display:'flex', alignItems:'flex-end', gap:6, height:72, paddingBottom:2 }}>
+    <div style={{display:'flex',alignItems:'flex-end',gap:6,height:80}}>
       {bars.map((b, i) => (
-        <div key={i} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:4, height:'100%', justifyContent:'flex-end' }}>
+        <div key={i} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:5,height:'100%',justifyContent:'flex-end'}}>
           <div style={{
             width:'100%',
-            height: m ? `${Math.max((b.v / max) * 60, b.v > 0 ? 3 : 0)}px` : '0',
-            background: b.hi ? 'var(--gold)' : 'var(--c4)',
-            borderRadius:'2px 2px 0 0',
-            transition: `height .5s cubic-bezier(.22,1,.36,1) ${i*30}ms`,
+            height: m ? `${Math.max((b.v/max)*66, b.v>0?3:0)}px` : '0',
+            background: b.hi ? 'var(--accent)' : 'var(--surface-3)',
+            borderRadius:'4px 4px 0 0',
+            transition:`height .5s cubic-bezier(.22,1,.36,1) ${i*35}ms`,
           }}/>
-          <span style={{ fontSize:9, color: b.hi ? 'var(--gold)' : 'var(--t3)', fontWeight: b.hi ? 600 : 400 }}>
+          <span style={{fontSize:10,color:b.hi?'var(--accent)':'var(--text-faint)',fontWeight:b.hi?600:400,lineHeight:1}}>
             {b.label}
           </span>
         </div>
@@ -31,40 +29,31 @@ function BarChart({ bars }: { bars: { label: string; v: number; hi?: boolean }[]
   )
 }
 
-/* ──────────────────────────────────────
-   Donut — compact
-────────────────────────────────────── */
-function Donut({ segs, size = 80 }: { segs: { v:number; color:string; label:string }[]; size?: number }) {
+/* ── Donut ── */
+function Donut({ segs }: { segs:{v:number;color:string;label:string}[] }) {
   const [m, setM] = useState(false)
-  useEffect(() => { setTimeout(() => setM(true), 150) }, [])
-  const total = segs.reduce((s, x) => s + x.v, 0) || 1
-  const r = (size - 10) / 2
-  const circ = 2 * Math.PI * r
-  let off = 0
+  useEffect(() => { setTimeout(() => setM(true), 160) }, [])
+  const total = segs.reduce((s,x) => s+x.v, 0) || 1
+  const sz=96, r=(sz-12)/2, circ=2*Math.PI*r
+  let off=0
   return (
-    <div style={{ display:'flex', alignItems:'center', gap:14 }}>
-      <svg width={size} height={size} style={{ transform:'rotate(-90deg)', flexShrink:0 }}>
-        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="var(--c3)" strokeWidth={8}/>
-        {segs.map((s, i) => {
-          const pct = s.v / total
-          const dash = m ? pct * circ : 0
-          const o = off; off += pct * circ
-          return (
-            <circle key={i} cx={size/2} cy={size/2} r={r} fill="none"
-              stroke={s.color} strokeWidth={8}
-              strokeDasharray={`${dash} ${circ - dash}`}
-              strokeDashoffset={-o}
-              style={{ transition:`stroke-dasharray .7s ease ${i*60}ms` }}
-            />
-          )
+    <div style={{display:'flex',alignItems:'center',gap:18}}>
+      <svg width={sz} height={sz} style={{transform:'rotate(-90deg)',flexShrink:0}}>
+        <circle cx={sz/2} cy={sz/2} r={r} fill="none" stroke="var(--surface-3)" strokeWidth={9}/>
+        {segs.map((s,i) => {
+          const pct=s.v/total, dash=m?pct*circ:0
+          const o=off; off+=pct*circ
+          return <circle key={i} cx={sz/2} cy={sz/2} r={r} fill="none" stroke={s.color} strokeWidth={9}
+            strokeDasharray={`${dash} ${circ-dash}`} strokeDashoffset={-o}
+            style={{transition:`stroke-dasharray .7s ease ${i*60}ms`}}/>
         })}
       </svg>
-      <div style={{ display:'flex', flexDirection:'column', gap:5 }}>
-        {segs.map((s, i) => (
-          <div key={i} style={{ display:'flex', alignItems:'center', gap:7 }}>
-            <div style={{ width:6, height:6, borderRadius:1, background:s.color, flexShrink:0 }}/>
-            <span style={{ fontSize:10.5, color:'var(--t2)', flex:1 }}>{s.label}</span>
-            <span style={{ fontSize:11, fontWeight:600, color:'var(--text)', fontFamily:'JetBrains Mono', minWidth:18, textAlign:'right' }}>{s.v}</span>
+      <div style={{display:'flex',flexDirection:'column',gap:7}}>
+        {segs.map((s,i) => (
+          <div key={i} style={{display:'flex',alignItems:'center',gap:8}}>
+            <div style={{width:7,height:7,borderRadius:2,background:s.color,flexShrink:0}}/>
+            <span style={{fontSize:12.5,color:'var(--text-dim)',flex:1}}>{s.label}</span>
+            <span style={{fontSize:13,fontWeight:600,color:'var(--text)',fontFamily:'JetBrains Mono,monospace',minWidth:20,textAlign:'right'}}>{s.v}</span>
           </div>
         ))}
       </div>
@@ -72,299 +61,254 @@ function Donut({ segs, size = 80 }: { segs: { v:number; color:string; label:stri
   )
 }
 
-/* ──────────────────────────────────────
-   Stat Card — compact, left accent bar
-────────────────────────────────────── */
-function Stat({ label, value, sub, accent, trend }: {
-  label:string; value:string; sub?:string; accent:string; trend?: { v:string; up:boolean }
+/* ── Stat Card ── */
+function StatCard({ label, value, sub, color, trend, Icon }: {
+  label:string; value:string; sub?:string; color:string; trend?:{v:string;up:boolean}; Icon:any
 }) {
   return (
-    <div className="stat-item" style={{ '--accent': accent } as any}>
+    <div className="stat-card slide-up">
+      <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:10}}>
+        <div style={{width:36,height:36,borderRadius:10,background:`${color}18`,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+          <Icon size={17} color={color} strokeWidth={1.8}/>
+        </div>
+        {trend && (
+          <div className="stat-trend" style={{color:trend.up?'var(--green)':'var(--red)'}}>
+            {trend.up ? <ArrowUpRight size={13} strokeWidth={2}/> : <ArrowDownRight size={13} strokeWidth={2}/>}
+            {trend.v}
+          </div>
+        )}
+      </div>
       <div className="stat-label">{label}</div>
       <div className="stat-value">{value}</div>
       {sub && <div className="stat-sub">{sub}</div>}
-      {trend && (
-        <div style={{ display:'flex', alignItems:'center', gap:3, marginTop:2 }}>
-          {trend.up
-            ? <ArrowUpRight size={11} color="var(--green)" strokeWidth={2}/>
-            : <ArrowDownRight size={11} color="var(--red)" strokeWidth={2}/>}
-          <span style={{ fontSize:10, color: trend.up ? 'var(--green)' : 'var(--red)', fontWeight:600 }}>{trend.v}</span>
-        </div>
-      )}
     </div>
   )
 }
 
-/* ──────────────────────────────────────
-   Main
-────────────────────────────────────── */
+/* ── Main ── */
 export default function DashboardPage() {
-  const [data, setData] = useState<any>({ tasks:[], projects:[], clients:[], transactions:[], approvals:[] })
+  const [data, setData] = useState<any>({tasks:[],projects:[],clients:[],transactions:[],approvals:[]})
   const [loading, setLoading] = useState(true)
   const [now, setNow] = useState(new Date())
   const [userName, setUserName] = useState('')
 
-  useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 1000)
-    return () => clearInterval(id)
-  }, [])
+  useEffect(() => { const id=setInterval(()=>setNow(new Date()),1000); return ()=>clearInterval(id) }, [])
 
   useEffect(() => {
     const sb = createClient()
-    sb.auth.getUser().then(({ data: { user } }) => {
+    sb.auth.getUser().then(({data:{user}}) => {
       if (!user) return
-      sb.from('profiles').select('full_name').eq('id', user.id).single()
-        .then(({ data }) => setUserName(data?.full_name?.split(' ')[0] || ''))
+      sb.from('profiles').select('full_name').eq('id',user.id).single().then(({data})=>setUserName(data?.full_name?.split(' ')[0]||''))
     })
     Promise.all([
-      sb.from('tasks').select('id,status,priority,due_date'),
+      sb.from('tasks').select('id,title,status,priority,due_date'),
       sb.from('projects').select('id,name,status,progress,deadline,client_id'),
       sb.from('clients').select('id,name,status'),
-      sb.from('transactions').select('type,amount,date,status'),
+      sb.from('transactions').select('type,amount,date'),
       sb.from('approvals').select('id,status'),
     ]).then(([t,p,c,tr,ap]) => {
-      setData({ tasks:t.data||[], projects:p.data||[], clients:c.data||[], transactions:tr.data||[], approvals:ap.data||[] })
+      setData({tasks:t.data||[],projects:p.data||[],clients:c.data||[],transactions:tr.data||[],approvals:ap.data||[]})
       setLoading(false)
     })
   }, [])
 
-  const { tasks, projects, clients, transactions, approvals } = data
+  const {tasks,projects,clients,transactions,approvals} = data
+  const income  = transactions.filter((t:any)=>t.type==='income').reduce((s:number,t:any)=>s+Number(t.amount),0)
+  const expense = transactions.filter((t:any)=>t.type==='expense').reduce((s:number,t:any)=>s+Number(t.amount),0)
+  const net = income-expense
+  const activeProj = projects.filter((p:any)=>p.status==='active')
+  const overdue    = tasks.filter((t:any)=>t.status!=='done'&&t.due_date&&new Date(t.due_date)<now)
+  const done       = tasks.filter((t:any)=>t.status==='done')
+  const pending    = approvals.filter((a:any)=>a.status==='pending')
 
-  const income  = transactions.filter((t:any) => t.type==='income').reduce((s:number,t:any) => s+Number(t.amount),0)
-  const expense = transactions.filter((t:any) => t.type==='expense').reduce((s:number,t:any) => s+Number(t.amount),0)
-  const net     = income - expense
-
-  const activeProj    = projects.filter((p:any) => p.status==='active')
-  const activeClients = clients.filter((c:any) => c.status==='active')
-  const overdueList   = tasks.filter((t:any) => t.status!=='done' && t.due_date && new Date(t.due_date)<now)
-  const pendingAp     = approvals.filter((a:any) => a.status==='pending')
-  const doneTasks     = tasks.filter((t:any) => t.status==='done')
-
-  // Aylık gelir - son 6 ay
-  const MONTHS = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara']
-  const cm = now.getMonth()
-  const monthBars = Array.from({length:6}, (_,i) => {
-    const m = (cm-5+i+12)%12
-    const v = transactions.filter((t:any) => t.type==='income' && t.date && new Date(t.date).getMonth()===m)
-                          .reduce((s:number,t:any) => s+Number(t.amount),0)
-    return { label:MONTHS[m], v:Math.round(v/1000), hi: i===5 }
+  const MONTHS=['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara']
+  const cm=now.getMonth()
+  const bars=Array.from({length:6},(_,i)=>{
+    const m=(cm-5+i+12)%12
+    const v=transactions.filter((t:any)=>t.type==='income'&&t.date&&new Date(t.date).getMonth()===m).reduce((s:number,t:any)=>s+Number(t.amount),0)
+    return {label:MONTHS[m],v:Math.round(v/1000),hi:i===5}
   })
 
-  // Görev dağılımı
-  const taskSegs = [
-    { v:tasks.filter((t:any)=>t.status==='todo').length,        color:'var(--c5)',    label:'Bekliyor'    },
-    { v:tasks.filter((t:any)=>t.status==='in_progress').length, color:'var(--blue)',  label:'Devam'       },
-    { v:tasks.filter((t:any)=>t.status==='review').length,      color:'var(--amber)', label:'İncelemede'  },
-    { v:doneTasks.length,                                        color:'var(--green)', label:'Tamamlandı'  },
+  const taskSegs=[
+    {v:tasks.filter((t:any)=>t.status==='todo').length,        color:'var(--surface-3)', label:'Bekliyor'},
+    {v:tasks.filter((t:any)=>t.status==='in_progress').length, color:'var(--blue)',       label:'Devam'},
+    {v:tasks.filter((t:any)=>t.status==='review').length,      color:'var(--amber)',      label:'İnceleme'},
+    {v:done.length,                                             color:'var(--green)',      label:'Tamamlandı'},
   ]
 
-  // Gecikmiş (öncelik sırasıyla)
-  const overdueTop = [...overdueList]
-    .sort((a:any,b:any) => {
-      const po: Record<string,number> = { critical:0, high:1, normal:2, low:3 }
-      return (po[a.priority]||2) - (po[b.priority]||2)
-    }).slice(0,6)
+  const fmt=(v:number)=>v>=1000?`₺${Math.round(v/1000)}K`:`₺${v}`
+  const PRI_C:Record<string,string>={critical:'var(--red)',high:'var(--amber)',normal:'var(--blue)',low:'var(--text-faint)'}
 
-  // Bu hafta teslimler
-  const weekEnd = new Date(now.getTime() + 7*86400000)
-  const weekTasks = tasks.filter((t:any) =>
-    t.due_date && t.status!=='done' &&
-    new Date(t.due_date)>=now && new Date(t.due_date)<=weekEnd
-  ).sort((a:any,b:any) => String(a.due_date).localeCompare(String(b.due_date))).slice(0,5)
+  const overdueTop=[...overdue].sort((a:any,b:any)=>{
+    const o={critical:0,high:1,normal:2,low:3}
+    return (o[a.priority as keyof typeof o]||2)-(o[b.priority as keyof typeof o]||2)
+  }).slice(0,6)
 
-  const fmt = (v:number) =>
-    v>=1000000 ? `${(v/1000000).toFixed(1)}M ₺` :
-    v>=1000    ? `${Math.round(v/1000)}K ₺`     : `${v} ₺`
-
-  const PRI_COLOR: Record<string,string> = { critical:'var(--red)', high:'var(--amber)', normal:'var(--blue)', low:'var(--t3)' }
+  const weekEnd=new Date(now.getTime()+7*86400000)
+  const weekTasks=tasks.filter((t:any)=>t.due_date&&t.status!=='done'&&new Date(t.due_date)>=now&&new Date(t.due_date)<=weekEnd)
+    .sort((a:any,b:any)=>String(a.due_date).localeCompare(String(b.due_date))).slice(0,5)
 
   return (
-    <>
-      <style>{`
-        .db-grid   { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:10px }
-        .db-mid    { display:grid; grid-template-columns:1.6fr 1fr; gap:8px; margin-bottom:10px }
-        .db-bot    { display:grid; grid-template-columns:1.2fr 1fr 1fr; gap:8px }
-        @media(max-width:900px){ .db-mid{grid-template-columns:1fr}; .db-bot{grid-template-columns:1fr} }
-        @media(max-width:640px){ .db-grid{grid-template-columns:repeat(2,1fr)} }
-      `}</style>
+    <div style={{display:'flex',flexDirection:'column',height:'100%',overflow:'hidden'}}>
+      <TopBar
+        title={`Merhaba${userName?', '+userName:''}`}
+        subtitle={now.toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}
+        action={
+          <div style={{display:'flex',alignItems:'center',gap:6,background:'var(--surface-2)',border:'1px solid var(--border)',borderRadius:10,padding:'5px 12px'}}>
+            <div className="pulse" style={{width:6,height:6,borderRadius:'50%',background:'var(--green)',flexShrink:0}}/>
+            <span style={{fontSize:12,fontFamily:'JetBrains Mono,monospace',color:'var(--green)',fontWeight:500}}>
+              {now.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}
+            </span>
+          </div>
+        }
+      />
 
-      <div style={{display:'flex',flexDirection:'column',height:'100%',overflow:'hidden'}}>
-        <TopBar
-          title={userName ? `Merhaba, ${userName}` : 'Dashboard'}
-          subtitle={now.toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric',weekday:'long'})}
-          action={
-            <div style={{display:'flex',alignItems:'center',gap:5,background:'var(--c2)',border:'1px solid var(--bdr)',borderRadius:5,padding:'4px 10px'}}>
-              <div className="pulse" style={{width:5,height:5,borderRadius:'50%',background:'var(--green)',flexShrink:0}}/>
-              <span style={{fontSize:10.5,fontFamily:'JetBrains Mono',color:'var(--green)',fontWeight:500,letterSpacing:'.02em'}}>
-                {now.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}
-              </span>
-            </div>
-          }
-        />
+      <div style={{flex:1,overflowY:'auto',padding:'20px 20px 80px'}}>
+        {loading ? (
+          <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:200,color:'var(--text-faint)',fontSize:14}}>Yükleniyor...</div>
+        ) : (<>
 
-        <div style={{flex:1,overflowY:'auto',padding:'12px 14px 80px'}}>
-          {loading ? (
-            <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',color:'var(--t3)',fontSize:12,padding:'60px 0'}}>Yükleniyor...</div>
-          ) : (<>
+          {/* ── KPI ── */}
+          <div className="db-stat-grid">
+            <StatCard label="Toplam Gelir"   value={fmt(income)}              sub={`Gider: ${fmt(expense)}`}              color="var(--green)"  Icon={TrendingUp}    trend={{v:'+12%',up:true}}/>
+            <StatCard label="Net Kar"         value={fmt(net)}                 sub={net>=0?'Kârlı dönem':'Zarar'}          color={net>=0?'var(--accent)':'var(--red)'} Icon={Wallet}/>
+            <StatCard label="Aktif Proje"     value={String(activeProj.length)} sub={`${clients.filter((c:any)=>c.status==='active').length} müşteri`} color="var(--blue)"   Icon={FolderOpen}/>
+            <StatCard label="Geciken Görev"   value={String(overdue.length)}   sub={overdue.length>0?'Kontrol gerekli':'Temiz'} color={overdue.length>0?'var(--red)':'var(--green)'} Icon={Clock}/>
+            <StatCard label="Onay Bekliyor"   value={String(pending.length)}   sub={`${tasks.length} toplam görev`}        color="var(--amber)"  Icon={CheckCircle2}/>
+          </div>
 
-            {/* ── 5 Stat Kartı ── */}
-            <div className="db-grid">
-              <Stat label="TOPLAM GELİR"    value={fmt(income)}  sub={`Gider: ${fmt(expense)}`}      accent="var(--green)"  trend={{v:'+12%',up:true}}/>
-              <Stat label="NET KAR"          value={fmt(net)}     sub={net>=0?'Kârlı dönem':'Zarar'}  accent={net>=0?'var(--gold)':'var(--red)'}/>
-              <Stat label="AKTİF PROJE"      value={String(activeProj.length)} sub={`${activeClients.length} müşteri`}      accent="var(--blue)"/>
-              <Stat label="GECİKEN GÖREV"    value={String(overdueList.length)} sub={overdueList.length>0?'Acil kontrol':'Temiz'} accent={overdueList.length>0?'var(--red)':'var(--green)'}/>
-              <Stat label="ONAY BEKLİYOR"    value={String(pendingAp.length)}   sub={`${tasks.length} toplam görev`}         accent="var(--amber)"/>
-            </div>
-
-            {/* ── Orta: Gelir Grafiği + Görev Dağılımı ── */}
-            <div className="db-mid">
-              {/* Gelir */}
-              <div className="card fade-in">
-                <div className="ch">
-                  <span className="ch-title">Aylık Gelir</span>
-                  <span className="ch-meta">Son 6 ay</span>
-                </div>
-                <div style={{padding:'12px 14px 10px'}}>
-                  <div style={{display:'flex',alignItems:'baseline',gap:8,marginBottom:12}}>
-                    <span style={{fontSize:24,fontWeight:700,fontFamily:'JetBrains Mono',color:'var(--gold)',letterSpacing:'-1px',lineHeight:1}}>{fmt(income)}</span>
-                    <span style={{display:'flex',alignItems:'center',gap:2,fontSize:10,color:'var(--green)',fontWeight:600}}>
-                      <ArrowUpRight size={11} strokeWidth={2.5}/>12%
-                    </span>
-                  </div>
-                  <BarChart bars={monthBars}/>
-                  <div style={{display:'flex',gap:12,marginTop:10}}>
-                    {[{l:'Gelir',v:income,c:'var(--green)'},{l:'Gider',v:expense,c:'var(--red)'},{l:'Net',v:net,c:'var(--gold)'}].map(s=>(
-                      <div key={s.l}>
-                        <div style={{fontSize:9,color:'var(--t3)',fontWeight:600,letterSpacing:'.06em',textTransform:'uppercase',marginBottom:2}}>{s.l}</div>
-                        <div style={{fontSize:11.5,fontWeight:600,color:s.c,fontFamily:'JetBrains Mono'}}>{fmt(s.v)}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+          {/* ── Orta ── */}
+          <div className="db-mid">
+            {/* Gelir */}
+            <div className="card fade-in">
+              <div className="card-h">
+                <span className="card-title">Aylık Gelir Trendi</span>
+                <span className="card-meta">Son 6 ay</span>
               </div>
-
-              {/* Görev Dağılımı */}
-              <div className="card fade-in">
-                <div className="ch">
-                  <span className="ch-title">Görev Durumu</span>
-                  <span className="ch-meta">{tasks.length} toplam</span>
+              <div style={{padding:'18px 20px 16px'}}>
+                <div style={{display:'flex',alignItems:'baseline',gap:10,marginBottom:16}}>
+                  <span style={{fontSize:28,fontWeight:700,fontFamily:'JetBrains Mono,monospace',color:'var(--text)',letterSpacing:'-1.5px',lineHeight:1}}>{fmt(income)}</span>
+                  <span style={{display:'flex',alignItems:'center',gap:3,fontSize:12,color:'var(--green)',fontWeight:600}}>
+                    <ArrowUpRight size={13} strokeWidth={2.5}/>12% artış
+                  </span>
                 </div>
-                <div style={{padding:'14px'}}>
-                  <Donut segs={taskSegs}/>
-                  <div style={{display:'flex',gap:6,marginTop:12}}>
-                    <div style={{flex:1,background:'var(--c2)',borderRadius:5,padding:'7px 10px',textAlign:'center'}}>
-                      <div style={{fontSize:16,fontWeight:700,fontFamily:'JetBrains Mono',color:'var(--green)',lineHeight:1}}>{doneTasks.length}</div>
-                      <div style={{fontSize:9,color:'var(--t3)',marginTop:3,textTransform:'uppercase',letterSpacing:'.05em'}}>Tamamlanan</div>
-                    </div>
-                    <div style={{flex:1,background:'var(--c2)',borderRadius:5,padding:'7px 10px',textAlign:'center'}}>
-                      <div style={{fontSize:16,fontWeight:700,fontFamily:'JetBrains Mono',color:'var(--red)',lineHeight:1}}>{overdueList.length}</div>
-                      <div style={{fontSize:9,color:'var(--t3)',marginTop:3,textTransform:'uppercase',letterSpacing:'.05em'}}>Geciken</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* ── Alt: Projeler + Gecikmeler + Bu Hafta ── */}
-            <div className="db-bot">
-
-              {/* Aktif Projeler */}
-              <div className="card fade-in">
-                <div className="ch">
-                  <span className="ch-title">Aktif Projeler</span>
-                  <a href="/dashboard/projeler" style={{display:'flex',alignItems:'center',gap:2,fontSize:10,color:'var(--t3)'}}>
-                    Tümü<ArrowRight size={10} strokeWidth={2}/>
-                  </a>
-                </div>
-                {activeProj.length===0
-                  ? <div style={{padding:'24px 13px',textAlign:'center',color:'var(--t3)',fontSize:11}}>Aktif proje yok</div>
-                  : activeProj.slice(0,5).map((p:any,i:number) => (
-                    <div key={p.id} className="tr">
-                      <div style={{flex:1,minWidth:0}}>
-                        <div style={{fontSize:11.5,fontWeight:500,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',marginBottom:5}}>
-                          {p.name}
-                        </div>
-                        <div style={{display:'flex',alignItems:'center',gap:8}}>
-                          <div className="pb-track" style={{flex:1}}>
-                            <div className="pb-fill" style={{
-                              width:`${p.progress||0}%`,
-                              background: p.progress>70?'var(--green)':p.progress>40?'var(--gold)':'var(--red)'
-                            }}/>
-                          </div>
-                          <span style={{fontSize:10,color:'var(--t2)',fontFamily:'JetBrains Mono',flexShrink:0,fontWeight:500}}>
-                            {p.progress||0}%
-                          </span>
-                        </div>
-                        {p.deadline && <div style={{fontSize:9,color:'var(--t3)',marginTop:3}}>Bitiş: {p.deadline}</div>}
-                      </div>
+                <BarChart bars={bars}/>
+                <div style={{display:'flex',gap:16,marginTop:14,paddingTop:14,borderTop:'1px solid var(--border)'}}>
+                  {[{l:'Gelir',v:income,c:'var(--green)'},{l:'Gider',v:expense,c:'var(--red)'},{l:'Net',v:net,c:'var(--accent)'}].map(s=>(
+                    <div key={s.l}>
+                      <div style={{fontSize:11,color:'var(--text-faint)',fontWeight:600,textTransform:'uppercase',letterSpacing:'.05em',marginBottom:3}}>{s.l}</div>
+                      <div style={{fontSize:13.5,fontWeight:600,color:s.c,fontFamily:'JetBrains Mono,monospace'}}>{fmt(s.v)}</div>
                     </div>
                   ))}
-              </div>
-
-              {/* Gecikmeler */}
-              <div className="card fade-in">
-                <div className="ch">
-                  <span className="ch-title">Gecikmeler</span>
-                  {overdueList.length>0 && (
-                    <span className="badge" style={{background:'var(--red-d)',color:'var(--red)'}}>{overdueList.length}</span>
-                  )}
                 </div>
-                {overdueTop.length===0
-                  ? <div style={{padding:'24px 13px',textAlign:'center',color:'var(--green)',fontSize:11,fontWeight:500}}>Geciken görev yok</div>
-                  : overdueTop.map((t:any,i:number) => {
-                    const daysLate = Math.floor((now.getTime()-new Date(t.due_date).getTime())/86400000)
-                    const c = PRI_COLOR[t.priority]||'var(--t3)'
-                    return (
-                      <div key={t.id} className="tr">
-                        <div style={{width:5,height:5,borderRadius:'50%',background:c,flexShrink:0}}/>
-                        <div style={{flex:1,minWidth:0}}>
-                          <div style={{fontSize:11,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',color:'var(--text)'}}>
-                            {t.title||'Görev'}
-                          </div>
-                          <div style={{fontSize:9.5,color:'var(--t3)',marginTop:1}}>{t.due_date}</div>
-                        </div>
-                        <span style={{fontSize:10,fontWeight:600,color:c,fontFamily:'JetBrains Mono',flexShrink:0}}>
-                          +{daysLate}g
-                        </span>
-                      </div>
-                    )
-                  })}
               </div>
-
-              {/* Bu Hafta Teslim */}
-              <div className="card fade-in">
-                <div className="ch">
-                  <span className="ch-title">Bu Hafta Teslim</span>
-                  <span className="ch-meta">{weekTasks.length} görev</span>
-                </div>
-                {weekTasks.length===0
-                  ? <div style={{padding:'24px 13px',textAlign:'center',color:'var(--t3)',fontSize:11}}>Bu hafta teslim yok</div>
-                  : weekTasks.map((t:any,i:number) => {
-                    const diff = Math.ceil((new Date(t.due_date).getTime()-now.getTime())/86400000)
-                    const urgent = diff<=1
-                    return (
-                      <div key={t.id} className="tr">
-                        <div style={{width:5,height:5,borderRadius:'50%',background:urgent?'var(--red)':'var(--t3)',flexShrink:0}}/>
-                        <div style={{flex:1,minWidth:0}}>
-                          <div style={{fontSize:11,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',color:'var(--text)'}}>
-                            {t.title||'Görev'}
-                          </div>
-                          <div style={{fontSize:9.5,color:'var(--t3)',marginTop:1}}>
-                            {diff===0?'Bugün':diff===1?'Yarın':`${diff} gün sonra`}
-                          </div>
-                        </div>
-                        <span style={{fontSize:10,fontWeight:500,color:urgent?'var(--red)':'var(--t2)',fontFamily:'JetBrains Mono',flexShrink:0}}>
-                          {String(t.due_date).slice(5,10)}
-                        </span>
-                      </div>
-                    )
-                  })}
-              </div>
-
             </div>
-          </>)}
-        </div>
+
+            {/* Görev Dağılımı */}
+            <div className="card fade-in">
+              <div className="card-h">
+                <span className="card-title">Görev Durumu</span>
+                <span className="card-meta">{tasks.length} toplam</span>
+              </div>
+              <div style={{padding:'18px 20px'}}>
+                <Donut segs={taskSegs}/>
+                <div style={{display:'flex',gap:10,marginTop:16}}>
+                  <div style={{flex:1,background:'var(--green-soft)',borderRadius:10,padding:'10px 12px',textAlign:'center'}}>
+                    <div style={{fontSize:20,fontWeight:700,fontFamily:'JetBrains Mono,monospace',color:'var(--green)',lineHeight:1}}>{done.length}</div>
+                    <div style={{fontSize:11,color:'var(--text-faint)',marginTop:4,textTransform:'uppercase',letterSpacing:'.04em'}}>Tamamlandı</div>
+                  </div>
+                  <div style={{flex:1,background:'var(--red-soft)',borderRadius:10,padding:'10px 12px',textAlign:'center'}}>
+                    <div style={{fontSize:20,fontWeight:700,fontFamily:'JetBrains Mono,monospace',color:'var(--red)',lineHeight:1}}>{overdue.length}</div>
+                    <div style={{fontSize:11,color:'var(--text-faint)',marginTop:4,textTransform:'uppercase',letterSpacing:'.04em'}}>Geciken</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Alt ── */}
+          <div className="db-bot">
+            {/* Projeler */}
+            <div className="card fade-in">
+              <div className="card-h">
+                <span className="card-title">Aktif Projeler</span>
+                <a href="/dashboard/projeler" style={{display:'flex',alignItems:'center',gap:3,fontSize:12,color:'var(--text-faint)',transition:'color .15s'}}
+                  onMouseEnter={e=>(e.currentTarget.style.color='var(--accent)')}
+                  onMouseLeave={e=>(e.currentTarget.style.color='var(--text-faint)')}>
+                  Tümü <ArrowRight size={12}/>
+                </a>
+              </div>
+              {activeProj.length===0
+                ? <div style={{padding:'28px',textAlign:'center',color:'var(--text-faint)',fontSize:13}}>Aktif proje yok</div>
+                : activeProj.slice(0,5).map((p:any) => (
+                  <div key={p.id} className="tr">
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontSize:13.5,fontWeight:500,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',marginBottom:6}}>{p.name}</div>
+                      <div style={{display:'flex',alignItems:'center',gap:10}}>
+                        <div className="pb-track" style={{flex:1}}>
+                          <div className="pb-fill" style={{width:`${p.progress||0}%`,background:p.progress>70?'var(--green)':p.progress>40?'var(--accent)':'var(--red)'}}/>
+                        </div>
+                        <span style={{fontSize:12,color:'var(--text-dim)',fontFamily:'JetBrains Mono,monospace',flexShrink:0}}>{p.progress||0}%</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </div>
+
+            {/* Gecikmeler */}
+            <div className="card fade-in">
+              <div className="card-h">
+                <span className="card-title">Gecikmeler</span>
+                {overdue.length>0 && <span className="badge badge-red">{overdue.length}</span>}
+              </div>
+              {overdueTop.length===0
+                ? <div style={{padding:'28px',textAlign:'center',color:'var(--green)',fontSize:13,fontWeight:500}}>✓ Geciken görev yok</div>
+                : overdueTop.map((t:any) => {
+                  const days=Math.floor((now.getTime()-new Date(t.due_date).getTime())/86400000)
+                  const c=PRI_C[t.priority]||'var(--text-faint)'
+                  return (
+                    <div key={t.id} className="tr">
+                      <div style={{width:6,height:6,borderRadius:'50%',background:c,flexShrink:0}}/>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{fontSize:13,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{t.title||'Görev'}</div>
+                        <div style={{fontSize:11.5,color:'var(--text-faint)',marginTop:2}}>{t.due_date}</div>
+                      </div>
+                      <span style={{fontSize:12,fontWeight:500,color:c,fontFamily:'JetBrains Mono,monospace',flexShrink:0}}>+{days}g</span>
+                    </div>
+                  )
+                })}
+            </div>
+
+            {/* Bu Hafta */}
+            <div className="card fade-in">
+              <div className="card-h">
+                <span className="card-title">Bu Hafta Teslim</span>
+                <span className="card-meta">{weekTasks.length} görev</span>
+              </div>
+              {weekTasks.length===0
+                ? <div style={{padding:'28px',textAlign:'center',color:'var(--text-faint)',fontSize:13}}>Bu hafta teslim yok</div>
+                : weekTasks.map((t:any) => {
+                  const diff=Math.ceil((new Date(t.due_date).getTime()-now.getTime())/86400000)
+                  const urgent=diff<=1
+                  return (
+                    <div key={t.id} className="tr">
+                      <div style={{width:6,height:6,borderRadius:'50%',background:urgent?'var(--red)':'var(--border-strong)',flexShrink:0}}/>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{fontSize:13,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{t.title||'Görev'}</div>
+                        <div style={{fontSize:11.5,color:'var(--text-faint)',marginTop:2}}>
+                          {diff===0?'Bugün':diff===1?'Yarın':`${diff} gün sonra`}
+                        </div>
+                      </div>
+                      <span style={{fontSize:12,fontWeight:500,color:urgent?'var(--red)':'var(--text-dim)',fontFamily:'JetBrains Mono,monospace',flexShrink:0}}>
+                        {String(t.due_date).slice(5,10)}
+                      </span>
+                    </div>
+                  )
+                })}
+            </div>
+          </div>
+        </>)}
       </div>
-    </>
+    </div>
   )
 }
