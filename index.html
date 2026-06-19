@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Ajans</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0c0e14;--s1:#111318;--s2:#16181f;--s3:#1c1f28;--s4:#242733;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.1);
+  --gold:#e9a825;--gold-d:rgba(233,168,37,0.12);
+  --text:#dde1f0;--t2:#7b8099;--t3:#3e4258;
+  --green:#22c55e;--green-d:rgba(34,197,94,0.1);
+  --red:#f04444;--red-d:rgba(240,68,68,0.1);
+  --blue:#5b7cf6;--blue-d:rgba(91,124,246,0.1);
+  --amber:#f59e0b;--amber-d:rgba(245,158,11,0.1);
+  --sw:224px;--th:54px;--r:10px;--r-sm:7px;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;font-size:13px}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:var(--s4);border-radius:3px}
+.sb{width:var(--sw);background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;flex-shrink:0}
+.sb-logo{padding:18px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.sb-mark{width:30px;height:30px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-mark svg{width:16px;height:16px;fill:#000}
+.sb-name{font-size:14px;font-weight:600;color:var(--text);letter-spacing:-0.2px}
+.sb-sub{font-size:10px;color:var(--t3);margin-top:1px}
+.sb-nav{flex:1;overflow-y:auto;padding:6px 0 12px}
+.sb-group{padding:18px 14px 4px;font-size:9px;font-weight:700;letter-spacing:0.1em;color:var(--t3);text-transform:uppercase}
+.ni{display:flex;align-items:center;gap:8px;padding:7px 12px;margin:1px 6px;border-radius:var(--r-sm);cursor:pointer;color:var(--t2);font-size:12.5px;font-weight:400;transition:all .12s;position:relative}
+.ni:hover{background:var(--s3);color:var(--text)}
+.ni.on{background:var(--gold-d);color:var(--gold);font-weight:500}
+.ni.on::before{content:'';position:absolute;left:-6px;top:50%;transform:translateY(-50%);width:2.5px;height:16px;background:var(--gold);border-radius:0 2px 2px 0}
+.ni i{font-size:15px;width:17px;text-align:center;flex-shrink:0}
+.ni-label{flex:1}
+.ni-badge{font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;background:var(--red-d);color:var(--red)}
+.ni-badge.neutral{background:var(--s4);color:var(--t2)}
+.ni-badge.warn{background:var(--amber-d);color:var(--amber)}
+.sb-user{padding:12px 14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:9px;cursor:pointer}
+.u-av{width:28px;height:28px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#000;flex-shrink:0;position:relative}
+.u-online{position:absolute;bottom:-1px;right:-1px;width:8px;height:8px;border-radius:50%;background:var(--green);border:1.5px solid var(--s1)}
+.u-name{font-size:12.5px;font-weight:500;color:var(--t2);transition:color .12s}
+.u-role{font-size:10px;color:var(--t3)}
+.u-more{margin-left:auto;color:var(--t3);font-size:13px}
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.topbar{height:var(--th);background:var(--s1);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 22px;gap:10px;flex-shrink:0}
+.tb-title{font-size:14px;font-weight:600;color:var(--text)}
+.tb-search{margin-left:18px;background:var(--s2);border:1px solid var(--border);border-radius:var(--r-sm);display:flex;align-items:center;gap:7px;padding:0 11px;height:32px;width:240px;transition:border-color .15s}
+.tb-search:focus-within{border-color:var(--border2)}
+.tb-search i{font-size:14px;color:var(--t3)}
+.tb-search input{background:transparent;border:none;outline:none;font-size:12.5px;color:var(--text);font-family:'Inter',sans-serif;width:100%}
+.tb-search input::placeholder{color:var(--t3)}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:7px}
+.ib{width:32px;height:32px;border-radius:var(--r-sm);background:var(--s2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t2);transition:all .12s;position:relative}
+.ib:hover{background:var(--s3);color:var(--text);border-color:var(--border2)}
+.ib i{font-size:16px}
+.ib-dot{position:absolute;top:5px;right:5px;width:6px;height:6px;border-radius:50%;background:var(--red);border:1.5px solid var(--s1)}
+.tb-btn{background:var(--gold);color:#000;font-size:12px;font-weight:600;padding:0 14px;height:32px;border-radius:var(--r-sm);border:none;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:5px;transition:opacity .12s}
+.tb-btn:hover{opacity:0.88}
+.tb-btn i{font-size:14px}
+.content{flex:1;overflow-y:auto;padding:20px 22px;display:flex;flex-direction:column;gap:14px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.sc{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;cursor:pointer;transition:border-color .15s,transform .15s;position:relative;overflow:hidden}
+.sc::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent,transparent);border-radius:var(--r) var(--r) 0 0}
+.sc:hover{border-color:var(--border2);transform:translateY(-1px)}
+.sc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.sc-icon{width:32px;height:32px;border-radius:8px;background:var(--icon-bg);display:flex;align-items:center;justify-content:center}
+.sc-icon i{font-size:16px;color:var(--icon-c)}
+.sc-chip{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--chip-bg);color:var(--chip-c)}
+.sc-val{font-size:26px;font-weight:600;color:var(--text);letter-spacing:-0.5px;font-family:'JetBrains Mono',monospace}
+.sc-label{font-size:10.5px;color:var(--t3);margin-top:3px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase}
+.panel{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.ph{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid var(--border)}
+.ph-left{display:flex;align-items:center;gap:8px}
+.ph-title{font-size:13px;font-weight:600;color:var(--text)}
+.ph-count{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:var(--s3);color:var(--t2)}
+.ph-action{font-size:11.5px;color:var(--t3);cursor:pointer;transition:color .12s;display:flex;align-items:center;gap:4px}
+.ph-action:hover{color:var(--gold)}
+.pb{padding:0 18px}
+.delay-table{width:100%;border-collapse:collapse}
+.delay-table th{font-size:9.5px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.08em;padding:10px 0 8px;text-align:left;border-bottom:1px solid var(--border)}
+.delay-table td{padding:9px 0;border-bottom:1px solid var(--border);font-size:12.5px;vertical-align:middle}
+.delay-table tr:last-child td{border-bottom:none}
+.delay-table tr:hover td{background:rgba(255,255,255,0.01)}
+.person-cell{display:flex;align-items:center;gap:9px}
+.p-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.p-name{font-size:12.5px;font-weight:500;color:var(--text)}
+.p-role{font-size:10px;color:var(--t3)}
+.delay-bar-wrap{display:flex;align-items:center;gap:8px;min-width:120px}
+.delay-bar{flex:1;height:4px;background:var(--s4);border-radius:2px;overflow:hidden}
+.delay-fill{height:100%;border-radius:2px;transition:width .4s}
+.delay-hrs{font-size:11px;font-weight:600;min-width:52px;text-align:right;font-family:'JetBrains Mono',monospace}
+.sev-dot{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600}
+.sev-dot::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+.task-r{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.task-r:last-child{border-bottom:none}
+.task-cb{width:15px;height:15px;border-radius:4px;border:1.5px solid var(--border2);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s}
+.task-cb:hover{border-color:var(--green)}
+.task-cb.done{background:var(--green);border-color:var(--green)}
+.task-cb.done i{font-size:9px;color:#fff}
+.task-text{flex:1;font-size:12.5px;color:var(--text)}
+.task-text.done{text-decoration:line-through;color:var(--t3)}
+.task-meta{display:flex;align-items:center;gap:6px}
+.tag{font-size:10px;font-weight:600;padding:2px 8px;border-radius:5px}
+.tag-r{background:var(--red-d);color:var(--red)}
+.tag-a{background:var(--amber-d);color:var(--amber)}
+.tag-g{background:var(--green-d);color:var(--green)}
+.tag-b{background:var(--blue-d);color:var(--blue)}
+.tag-n{background:var(--s3);color:var(--t2)}
+.t-av{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700}
+.prog-r{padding:9px 0;border-bottom:1px solid var(--border)}
+.prog-r:last-child{border-bottom:none}
+.prog-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.prog-name{font-size:12.5px;font-weight:500;color:var(--text)}
+.prog-client{font-size:10.5px;color:var(--t3)}
+.prog-num{font-size:11px;font-weight:500;font-family:'JetBrains Mono',monospace;color:var(--t2)}
+.prog-bar{height:3px;background:var(--s4);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;border-radius:2px}
+.act-r{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.act-r:last-child{border-bottom:none}
+.act-col{display:flex;flex-direction:column;align-items:center;flex-shrink:0;padding-top:3px}
+.act-d{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.act-line{flex:1;width:1px;background:var(--border);margin-top:4px}
+.act-text{font-size:12px;color:var(--t2);line-height:1.5}
+.act-text b{color:var(--text);font-weight:500}
+.act-time{font-size:10px;color:var(--t3);margin-top:2px;font-family:'JetBrains Mono',monospace}
+.mem-r{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--border)}
+.mem-r:last-child{border-bottom:none}
+.mem-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.mem-name{font-size:12.5px;font-weight:500;flex:1}
+.mem-role{font-size:10px;color:var(--t3)}
+.status-pill{font-size:10px;font-weight:600;padding:2px 9px;border-radius:20px}
+.sp-g{background:var(--green-d);color:var(--green)}
+.sp-a{background:var(--amber-d);color:var(--amber)}
+.sp-n{background:var(--s3);color:var(--t3)}
+.g2{display:grid;grid-template-columns:1.5fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.stats{animation:up .25s ease both}
+.panel{animation:up .3s ease both;animation-delay:.08s}
+</style>
+</head>
+<body>
+<aside class="sb">
+  <div class="sb-logo">
+    <div class="sb-mark"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="7" height="11" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+    <div><div class="sb-name">Test Ajans</div><div class="sb-sub">Dijital Pazarlama Ajansı</div></div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-group">Genel</div>
+    <div class="ni on"><i class="ti ti-layout-dashboard"></i><span class="ni-label">Dashboard</span></div>
+    <div class="ni"><i class="ti ti-calendar"></i><span class="ni-label">Takvim</span></div>
+    <div class="sb-group">CRM</div>
+    <div class="ni"><i class="ti ti-building"></i><span class="ni-label">Müşteriler</span><span class="ni-badge neutral">12</span></div>
+    <div class="ni"><i class="ti ti-phone-call"></i><span class="ni-label">İletişimler</span></div>
+    <div class="sb-group">Projeler</div>
+    <div class="ni"><i class="ti ti-folder"></i><span class="ni-label">Tüm Projeler</span></div>
+    <div class="ni"><i class="ti ti-check"></i><span class="ni-label">Görevlerim</span><span class="ni-badge">5</span></div>
+    <div class="ni"><i class="ti ti-alert-triangle"></i><span class="ni-label">Gecikmeler</span><span class="ni-badge warn">7</span></div>
+    <div class="ni"><i class="ti ti-clock"></i><span class="ni-label">Zaman Takibi</span></div>
+    <div class="sb-group">İçerik</div>
+    <div class="ni"><i class="ti ti-pencil"></i><span class="ni-label">İçerik Panosu</span></div>
+    <div class="ni"><i class="ti ti-calendar-event"></i><span class="ni-label">Yayın Takvimi</span></div>
+    <div class="ni"><i class="ti ti-checks"></i><span class="ni-label">Onay Akışı</span><span class="ni-badge warn">3</span></div>
+    <div class="sb-group">Raporlar</div>
+    <div class="ni"><i class="ti ti-chart-bar"></i><span class="ni-label">Performans</span></div>
+    <div class="ni"><i class="ti ti-file-text"></i><span class="ni-label">Dökümanlar</span></div>
+    <div class="sb-group">Sistem</div>
+    <div class="ni"><i class="ti ti-users"></i><span class="ni-label">Ekip & Yetkiler</span></div>
+    <div class="ni"><i class="ti ti-bolt"></i><span class="ni-label">Butler Otomasyonu</span></div>
+    <div class="ni"><i class="ti ti-settings"></i><span class="ni-label">Ayarlar</span></div>
+  </nav>
+  <div class="sb-user">
+    <div class="u-av">M<div class="u-online"></div></div>
+    <div><div class="u-name">Mert Yılmaz</div><div class="u-role">Kurucu · CEO</div></div>
+    <div class="u-more"><i class="ti ti-dots-vertical"></i></div>
+  </div>
+</aside>
+<div class="main">
+  <div class="topbar">
+    <span class="tb-title">Dashboard</span>
+    <div class="tb-search"><i class="ti ti-search"></i><input type="text" placeholder="Proje, müşteri veya görev ara..."></div>
+    <div class="tb-right">
+      <div class="ib"><i class="ti ti-bell"></i><div class="ib-dot"></div></div>
+      <div class="ib"><i class="ti ti-settings"></i></div>
+      <button class="tb-btn"><i class="ti ti-plus"></i> Yeni Görev</button>
+    </div>
+  </div>
+  <div class="content">
+    <div class="stats">
+      <div class="sc" style="--accent:var(--gold);--icon-bg:var(--gold-d);--icon-c:var(--gold);--chip-bg:var(--gold-d);--chip-c:var(--gold)">
+        <div class="sc-top"><div class="sc-icon"><i class="ti ti-building"></i></div><span class="sc-chip">↑ +2 bu ay</span></div>
+        <div class="sc-val">12</div><div class="sc-label">Aktif Müşteri</div>
+      </div>
+      <div class="sc" style="--accent:var(--blue);--icon-bg:var(--blue-d);--icon-c:var(--blue);--chip-bg:var(--blue-d);--chip-c:var(--blue)">
+        <div class="sc-top"><div class="sc-icon"><i class="ti ti-folder"></i></div><span class="sc-chip">8 aktif</span></div>
+        <div class="sc-val">8</div><div class="sc-label">Devam Eden Proje</div>
+      </div>
+      <div class="sc" style="--accent:var(--red);--icon-bg:var(--red-d);--icon-c:var(--red);--chip-bg:var(--red-d);--chip-c:var(--red)">
+        <div class="sc-top"><div class="sc-icon"><i class="ti ti-alert-triangle"></i></div><span class="sc-chip">⚠ Kritik</span></div>
+        <div class="sc-val">7</div><div class="sc-label">Geciken Görev</div>
+      </div>
+      <div class="sc" style="--accent:var(--amber);--icon-bg:var(--amber-d);--icon-c:var(--amber);--chip-bg:var(--amber-d);--chip-c:var(--amber)">
+        <div class="sc-top"><div class="sc-icon"><i class="ti ti-checks"></i></div><span class="sc-chip">Acil</span></div>
+        <div class="sc-val">3</div><div class="sc-label">Onay Bekleyen</div>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="panel">
+        <div class="ph">
+          <div class="ph-left"><i class="ti ti-alert-triangle" style="color:var(--red);font-size:15px"></i><span class="ph-title">Geciken Görevler</span><span class="ph-count">7</span></div>
+          <span class="ph-action">Tümünü gör <i class="ti ti-arrow-right"></i></span>
+        </div>
+        <div class="pb" style="padding-top:2px;padding-bottom:4px">
+          <table class="delay-table">
+            <thead><tr><th>Kişi</th><th>Görev</th><th>Gecikme</th><th>Öncelik</th></tr></thead>
+            <tbody>
+              <tr><td><div class="person-cell"><div class="p-av" style="background:var(--red-d);color:var(--red)">EK</div><div><div class="p-name">Emre K.</div><div class="p-role">İçerik</div></div></div></td><td style="color:var(--t2)">Delta Haziran postları</td><td><div class="delay-bar-wrap"><div class="delay-bar"><div class="delay-fill" style="width:100%;background:var(--red)"></div></div><span class="delay-hrs" style="color:var(--red)">+38 sa</span></div></td><td><span class="sev-dot" style="color:var(--red)">Kritik</span></td></tr>
+              <tr><td><div class="person-cell"><div class="p-av" style="background:var(--red-d);color:var(--red)">SA</div><div><div class="p-name">Selin A.</div><div class="p-role">Tasarım</div></div></div></td><td style="color:var(--t2)">Beta logo 2. tur</td><td><div class="delay-bar-wrap"><div class="delay-bar"><div class="delay-fill" style="width:75%;background:var(--red)"></div></div><span class="delay-hrs" style="color:var(--red)">+26 sa</span></div></td><td><span class="sev-dot" style="color:var(--red)">Kritik</span></td></tr>
+              <tr><td><div class="person-cell"><div class="p-av" style="background:var(--amber-d);color:var(--amber)">ZY</div><div><div class="p-name">Zeynep Y.</div><div class="p-role">Müşteri İlişkileri</div></div></div></td><td style="color:var(--t2)">Alfa brifing onayı</td><td><div class="delay-bar-wrap"><div class="delay-bar"><div class="delay-fill" style="width:55%;background:var(--amber)"></div></div><span class="delay-hrs" style="color:var(--amber)">+18 sa</span></div></td><td><span class="sev-dot" style="color:var(--amber)">Yüksek</span></td></tr>
+              <tr><td><div class="person-cell"><div class="p-av" style="background:var(--amber-d);color:var(--amber)">EK</div><div><div class="p-name">Emre K.</div><div class="p-role">İçerik</div></div></div></td><td style="color:var(--t2)">Gama blog yazısı #2</td><td><div class="delay-bar-wrap"><div class="delay-bar"><div class="delay-fill" style="width:40%;background:var(--amber)"></div></div><span class="delay-hrs" style="color:var(--amber)">+12 sa</span></div></td><td><span class="sev-dot" style="color:var(--amber)">Yüksek</span></td></tr>
+              <tr><td><div class="person-cell"><div class="p-av" style="background:var(--blue-d);color:var(--blue)">SA</div><div><div class="p-name">Selin A.</div><div class="p-role">Tasarım</div></div></div></td><td style="color:var(--t2)">Epsilon reklam görseli</td><td><div class="delay-bar-wrap"><div class="delay-bar"><div class="delay-fill" style="width:22%;background:var(--blue)"></div></div><span class="delay-hrs" style="color:var(--blue)">+6 sa</span></div></td><td><span class="sev-dot" style="color:var(--blue)">Normal</span></td></tr>
+              <tr><td><div class="person-cell"><div class="p-av" style="background:var(--gold-d);color:var(--gold)">M</div><div><div class="p-name">Mert Yılmaz</div><div class="p-role">Yönetici</div></div></div></td><td style="color:var(--t2)">Haftalık rapor hazırlığı</td><td><div class="delay-bar-wrap"><div class="delay-bar"><div class="delay-fill" style="width:14%;background:var(--blue)"></div></div><span class="delay-hrs" style="color:var(--blue)">+4 sa</span></div></td><td><span class="sev-dot" style="color:var(--blue)">Normal</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ph">
+          <div class="ph-left"><i class="ti ti-check" style="color:var(--gold);font-size:15px"></i><span class="ph-title">Bugünün Görevleri</span></div>
+          <span class="ph-action">Tümünü gör <i class="ti ti-arrow-right"></i></span>
+        </div>
+        <div class="pb" style="padding-top:2px;padding-bottom:4px">
+          <div class="task-r"><div class="task-cb done"><i class="ti ti-check"></i></div><span class="task-text done">Alfa Dijital brifing</span><div class="task-meta"><span style="font-size:10px;color:var(--t3);font-family:'JetBrains Mono',monospace">09:00</span></div></div>
+          <div class="task-r"><div class="task-cb"></div><span class="task-text">Gama teklif revizyonu gönder</span><div class="task-meta"><div class="t-av" style="background:var(--gold-d);color:var(--gold)">M</div></div></div>
+          <div class="task-r"><div class="task-cb"></div><span class="task-text">Delta sosyal medya içerikleri</span><div class="task-meta"><span class="tag tag-r">Gecikti</span></div></div>
+          <div class="task-r"><div class="task-cb"></div><span class="task-text">Beta logo sunum dosyası</span><div class="task-meta"><span class="tag tag-a">Bugün</span></div></div>
+          <div class="task-r"><div class="task-cb"></div><span class="task-text" style="color:var(--red)">Epsilon fatura kesimi</span><div class="task-meta"><span class="tag tag-r">Gecikti</span></div></div>
+          <div class="task-r"><div class="task-cb"></div><span class="task-text">Onay bekleyen içerikleri incele</span><div class="task-meta"><span class="tag tag-n">14:00</span></div></div>
+          <div class="task-r"><div class="task-cb done"><i class="ti ti-check"></i></div><span class="task-text done">Ekip toplantısı notları</span><div class="task-meta"><span style="font-size:10px;color:var(--t3);font-family:'JetBrains Mono',monospace">10:30</span></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="panel">
+        <div class="ph">
+          <div class="ph-left"><i class="ti ti-folder" style="color:var(--blue);font-size:15px"></i><span class="ph-title">Aktif Projeler</span></div>
+          <span class="ph-action">Tümünü gör <i class="ti ti-arrow-right"></i></span>
+        </div>
+        <div class="pb" style="padding-top:4px;padding-bottom:4px">
+          <div class="prog-r"><div class="prog-top"><div><div class="prog-name">Web Yenileme</div><div class="prog-client">Alfa Dijital</div></div><span class="prog-num" style="color:var(--green)">72%</span></div><div class="prog-bar"><div class="prog-fill" style="width:72%;background:var(--green)"></div></div></div>
+          <div class="prog-r"><div class="prog-top"><div><div class="prog-name">Sosyal Medya Yönetimi</div><div class="prog-client">Delta Ltd</div></div><span class="prog-num">45%</span></div><div class="prog-bar"><div class="prog-fill" style="width:45%;background:var(--gold)"></div></div></div>
+          <div class="prog-r"><div class="prog-top"><div><div class="prog-name">Logo & Kurumsal Kimlik</div><div class="prog-client">Beta Marka</div></div><span class="prog-num" style="color:var(--amber)">90%</span></div><div class="prog-bar"><div class="prog-fill" style="width:90%;background:var(--amber)"></div></div></div>
+          <div class="prog-r"><div class="prog-top"><div><div class="prog-name">SEO Paketi</div><div class="prog-client">Gama AŞ</div></div><span class="prog-num" style="color:var(--t3)">0%</span></div><div class="prog-bar"><div class="prog-fill" style="width:0%;background:var(--blue)"></div></div></div>
+          <div class="prog-r"><div class="prog-top"><div><div class="prog-name">Reklam Yönetimi</div><div class="prog-client">Epsilon Ltd</div></div><span class="prog-num" style="color:var(--red)">30%</span></div><div class="prog-bar"><div class="prog-fill" style="width:30%;background:var(--red)"></div></div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ph">
+          <div class="ph-left"><i class="ti ti-activity" style="color:var(--blue);font-size:15px"></i><span class="ph-title">Son Aktiviteler</span></div>
+          <span class="ph-action">Tümünü gör <i class="ti ti-arrow-right"></i></span>
+        </div>
+        <div class="pb" style="padding-top:2px;padding-bottom:4px">
+          <div class="act-r"><div class="act-col"><div class="act-d" style="background:var(--green)"></div><div class="act-line"></div></div><div><div class="act-text"><b>Selin A.</b> Beta logo taslağı yükledi</div><div class="act-time">14 dk önce</div></div></div>
+          <div class="act-r"><div class="act-col"><div class="act-d" style="background:var(--blue)"></div><div class="act-line"></div></div><div><div class="act-text"><b>Mert Yılmaz</b> Gama teklifini güncelledi</div><div class="act-time">1 sa önce</div></div></div>
+          <div class="act-r"><div class="act-col"><div class="act-d" style="background:var(--amber)"></div><div class="act-line"></div></div><div><div class="act-text"><b>Emre K.</b> Delta içerikleri onaya gönderdi</div><div class="act-time">2 sa önce</div></div></div>
+          <div class="act-r"><div class="act-col"><div class="act-d" style="background:var(--red)"></div><div class="act-line"></div></div><div><div class="act-text"><b>Sistem</b> Epsilon fatura gecikme uyarısı</div><div class="act-time">Dün 18:00</div></div></div>
+          <div class="act-r"><div class="act-col"><div class="act-d" style="background:var(--green)"></div></div><div><div class="act-text"><b>Alfa Dijital</b> teklifi onayladı</div><div class="act-time">Dün 11:30</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="g3">
+      <div class="panel">
+        <div class="ph">
+          <div class="ph-left"><i class="ti ti-users" style="color:var(--gold);font-size:15px"></i><span class="ph-title">Ekip</span></div>
+          <span class="ph-action">Yönet <i class="ti ti-arrow-right"></i></span>
+        </div>
+        <div class="pb" style="padding-top:2px;padding-bottom:4px">
+          <div class="mem-r"><div class="mem-av" style="background:var(--blue-d);color:var(--blue)">M</div><div><div class="mem-name">Mert Yılmaz</div><div class="mem-role">Yönetici</div></div><span class="status-pill sp-g">Aktif</span></div>
+          <div class="mem-r"><div class="mem-av" style="background:var(--green-d);color:var(--green)">SA</div><div><div class="mem-name">Selin A.</div><div class="mem-role">Tasarımcı</div></div><span class="status-pill sp-g">Aktif</span></div>
+          <div class="mem-r"><div class="mem-av" style="background:var(--amber-d);color:var(--amber)">EK</div><div><div class="mem-name">Emre K.</div><div class="mem-role">İçerik</div></div><span class="status-pill sp-a">Meşgul</span></div>
+          <div class="mem-r"><div class="mem-av" style="background:var(--s3);color:var(--t3)">ZY</div><div><div class="mem-name">Zeynep Y.</div><div class="mem-role">Müşteri İlişkileri</div></div><span class="status-pill sp-n">İzinde</span></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ph">
+          <div class="ph-left"><i class="ti ti-checks" style="color:var(--amber);font-size:15px"></i><span class="ph-title">İçerik Onayları</span></div>
+          <span class="ph-action">Panoya <i class="ti ti-arrow-right"></i></span>
+        </div>
+        <div class="pb" style="padding-top:2px;padding-bottom:4px">
+          <div class="task-r"><div style="width:6px;height:6px;border-radius:50%;background:var(--amber);flex-shrink:0"></div><span class="task-text">Delta — Haziran Postları</span><span class="tag tag-a">Bekliyor</span></div>
+          <div class="task-r"><div style="width:6px;height:6px;border-radius:50%;background:var(--amber);flex-shrink:0"></div><span class="task-text">Alfa — Blog Yazısı #3</span><span class="tag tag-a">Bekliyor</span></div>
+          <div class="task-r"><div style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0"></div><span class="task-text">Gama — Reklam Görselleri</span><span class="tag tag-g">Onaylandı</span></div>
+          <div class="task-r"><div style="width:6px;height:6px;border-radius:50%;background:var(--red);flex-shrink:0"></div><span class="task-text">Beta — Story Serisi</span><span class="tag tag-r">Revizyon</span></div>
+          <div class="task-r"><div style="width:6px;height:6px;border-radius:50%;background:var(--blue);flex-shrink:0"></div><span class="task-text">Epsilon — Kapak Tasarımları</span><span class="tag tag-b">Hazırlanıyor</span></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ph">
+          <div class="ph-left"><i class="ti ti-chart-bar" style="color:var(--blue);font-size:15px"></i><span class="ph-title">Bu Ay</span></div>
+        </div>
+        <div class="pb" style="padding-top:4px;padding-bottom:4px">
+          <div class="prog-r"><div class="prog-top"><span style="font-size:12px;color:var(--t2)">Tamamlanan Görev</span><span class="prog-num" style="color:var(--green)">47 / 60</span></div><div class="prog-bar"><div class="prog-fill" style="width:78%;background:var(--green)"></div></div></div>
+          <div class="prog-r"><div class="prog-top"><span style="font-size:12px;color:var(--t2)">Müşteri Memnuniyeti</span><span class="prog-num" style="color:var(--green)">92%</span></div><div class="prog-bar"><div class="prog-fill" style="width:92%;background:var(--green)"></div></div></div>
+          <div class="prog-r"><div class="prog-top"><span style="font-size:12px;color:var(--t2)">Zamanında Teslim</span><span class="prog-num" style="color:var(--gold)">85%</span></div><div class="prog-bar"><div class="prog-fill" style="width:85%;background:var(--gold)"></div></div></div>
+          <div class="prog-r"><div class="prog-top"><span style="font-size:12px;color:var(--t2)">Yeni Müşteri Hedefi</span><span class="prog-num" style="color:var(--blue)">2 / 3</span></div><div class="prog-bar"><div class="prog-fill" style="width:66%;background:var(--blue)"></div></div></div>
+          <div class="prog-r"><div class="prog-top"><span style="font-size:12px;color:var(--t2)">İçerik Üretimi</span><span class="prog-num" style="color:var(--green)">38 / 45</span></div><div class="prog-bar"><div class="prog-fill" style="width:84%;background:var(--green)"></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
