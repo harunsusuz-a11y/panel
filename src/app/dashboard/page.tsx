@@ -2,34 +2,29 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
-import { TrendingUp, Wallet, FolderKanban, Clock, AlertTriangle, Users, ClipboardCheck, BarChart2 } from 'lucide-react'
+import {
+  TrendingUp, Wallet, FolderKanban, Clock,
+  AlertTriangle, Users, ClipboardCheck, CheckSquare,
+  ArrowUpRight, ArrowRight
+} from 'lucide-react'
 
-/* ── Sparkline ── */
-function Spark({ data, color }: { data: number[]; color: string }) {
-  if (data.length < 2) return null
-  const w = 64, h = 22
-  const max = Math.max(...data), min = Math.min(...data), range = max - min || 1
-  const step = w / (data.length - 1)
-  const pts = data.map((v, i) => `${i * step},${h - ((v - min) / range) * (h - 4) - 2}`)
-  return (
-    <svg width={w} height={h} style={{ display: 'block', flexShrink: 0 }}>
-      <path d={`M${pts.join(' L')} L${w},${h} L0,${h} Z`} fill={color} fillOpacity="0.15"/>
-      <path d={`M${pts.join(' L')}`} stroke={color} strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  )
-}
-
-/* ── Bar Chart ── */
-function BarChart({ bars }: { bars: { label: string; value: number; highlight: boolean }[] }) {
+/* ── Mini bar chart ── */
+function BarChart({ bars }: { bars: { label: string; value: number; hi: boolean }[] }) {
   const [m, setM] = useState(false)
-  useEffect(() => { const t = setTimeout(() => setM(true), 100); return () => clearTimeout(t) }, [])
+  useEffect(() => { const t = setTimeout(() => setM(true), 120); return () => clearTimeout(t) }, [])
   const max = Math.max(...bars.map(b => b.value), 1)
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 96, width: '100%' }}>
+    <div style={{ display: 'flex', alignItems: 'flex-end', gap: 5, height: 80 }}>
       {bars.map((b, i) => (
-        <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, height: '100%', justifyContent: 'flex-end' }}>
-          <div style={{ width: '100%', height: m ? `${(b.value / max) * 80}px` : '0px', background: b.highlight ? 'var(--gold)' : 'var(--s5)', borderRadius: '3px 3px 0 0', transition: `height 0.55s cubic-bezier(0.22,1,0.36,1) ${i * 35}ms`, minHeight: b.value > 0 ? 3 : 0 }}/>
-          <div style={{ fontSize: 9, color: b.highlight ? 'var(--gold)' : 'var(--t3)', fontWeight: b.highlight ? 600 : 400 }}>{b.label}</div>
+        <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, height: '100%', justifyContent: 'flex-end' }}>
+          <div style={{
+            width: '100%',
+            height: m ? `${Math.max((b.value / max) * 64, b.value > 0 ? 4 : 0)}px` : '0px',
+            background: b.hi ? 'var(--gold)' : 'var(--s5)',
+            borderRadius: '4px 4px 0 0',
+            transition: `height .55s cubic-bezier(.22,1,.36,1) ${i * 40}ms`,
+          }}/>
+          <div style={{ fontSize: 9, color: b.hi ? 'var(--gold)' : 'var(--t3)', fontWeight: b.hi ? 600 : 400, whiteSpace: 'nowrap' }}>{b.label}</div>
         </div>
       ))}
     </div>
@@ -39,27 +34,28 @@ function BarChart({ bars }: { bars: { label: string; value: number; highlight: b
 /* ── Donut ── */
 function Donut({ segs }: { segs: { value: number; color: string; label: string }[] }) {
   const [m, setM] = useState(false)
-  useEffect(() => { setTimeout(() => setM(true), 250) }, [])
+  useEffect(() => { setTimeout(() => setM(true), 200) }, [])
   const total = segs.reduce((s, x) => s + x.value, 0) || 1
-  const size = 88, r = (size - 12) / 2, circ = 2 * Math.PI * r
+  const sz = 96, r = (sz - 14) / 2, circ = 2 * Math.PI * r
   let off = 0
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-      <svg width={size} height={size} style={{ transform: 'rotate(-90deg)', flexShrink: 0 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+      <svg width={sz} height={sz} style={{ transform: 'rotate(-90deg)', flexShrink: 0 }}>
+        <circle cx={sz/2} cy={sz/2} r={r} fill="none" stroke="var(--s4)" strokeWidth="11"/>
         {segs.map((s, i) => {
-          const pct = s.value / total, dash = m ? pct * circ : 0, gap = circ - dash
-          const thisOff = off; off += pct * circ
-          return <circle key={i} cx={size/2} cy={size/2} r={r} fill="none" stroke={s.color} strokeWidth="9"
-            strokeDasharray={`${dash} ${gap}`} strokeDashoffset={-thisOff}
-            style={{ transition: `stroke-dasharray 0.85s cubic-bezier(0.22,1,0.36,1) ${i*70}ms` }}/>
+          const pct = s.value / total, dash = m ? pct * circ : 0
+          const o = off; off += pct * circ
+          return <circle key={i} cx={sz/2} cy={sz/2} r={r} fill="none" stroke={s.color} strokeWidth="11"
+            strokeDasharray={`${dash} ${circ - dash}`} strokeDashoffset={-o}
+            style={{ transition: `stroke-dasharray .85s cubic-bezier(.22,1,.36,1) ${i * 80}ms` }}/>
         })}
       </svg>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
         {segs.map((s, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <div style={{ width: 6, height: 6, borderRadius: 1.5, background: s.color, flexShrink: 0 }}/>
-            <span style={{ fontSize: 10.5, color: 'var(--t2)' }}>{s.label}</span>
-            <span style={{ fontSize: 10.5, fontWeight: 700, color: s.color, fontFamily: 'JetBrains Mono', marginLeft: 'auto', paddingLeft: 8 }}>{s.value}</span>
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+            <div style={{ width: 8, height: 8, borderRadius: 2, background: s.color, flexShrink: 0 }}/>
+            <span style={{ fontSize: 11, color: 'var(--t2)', flex: 1 }}>{s.label}</span>
+            <span style={{ fontSize: 12, fontWeight: 700, color: s.color, fontFamily: 'JetBrains Mono', marginLeft: 8 }}>{s.value}</span>
           </div>
         ))}
       </div>
@@ -67,289 +63,283 @@ function Donut({ segs }: { segs: { value: number; color: string; label: string }
   )
 }
 
-/* ── KPI ── */
-function KPI({ label, value, sub, color, spark, Icon }: any) {
+/* ── KPI Card ── */
+function KPI({ label, value, sub, accent, accentD, Icon, trend }: {
+  label: string; value: string; sub?: string
+  accent: string; accentD: string; Icon: any; trend?: string
+}) {
   return (
-    <div className="stat-card erp-card" style={{ padding: '11px 13px', display: 'flex', flexDirection: 'column', gap: 7 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: 10.5, color: 'var(--t2)', fontWeight: 500 }}>{label}</span>
-        <div style={{ width: 24, height: 24, borderRadius: 5, background: `${color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <Icon size={12} color={color} strokeWidth={1.9}/>
+    <div className="kpi-card fade-up" style={{ '--accent': accent, '--accent-d': accentD } as any}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 10 }}>
+        <div className="kpi-icon" style={{ '--accent-d': accentD } as any}>
+          <Icon size={17} color={accent} strokeWidth={1.9}/>
         </div>
+        {trend && (
+          <span style={{ fontSize: 10, fontWeight: 700, color: trend.startsWith('+') ? 'var(--green)' : 'var(--red)', display: 'flex', alignItems: 'center', gap: 2 }}>
+            <ArrowUpRight size={11} strokeWidth={2}/>{trend}
+          </span>
+        )}
       </div>
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 6 }}>
-        <div>
-          <div style={{ fontSize: 21, fontWeight: 700, fontFamily: 'JetBrains Mono', color, letterSpacing: '-0.5px', lineHeight: 1 }}>{value}</div>
-          {sub && <div style={{ fontSize: 9.5, color: 'var(--t3)', marginTop: 4 }}>{sub}</div>}
-        </div>
-        {spark && <Spark data={spark} color={color}/>}
-      </div>
+      <div className="kpi-value">{value}</div>
+      <div className="kpi-label">{label}</div>
+      {sub && <div style={{ fontSize: 10, color: 'var(--t3)', marginTop: 5 }}>{sub}</div>}
     </div>
   )
 }
 
-/* ── Priority Badge ── */
-function PBadge({ p }: { p: string }) {
-  const m: any = { critical: ['Kritik','var(--red)','var(--red-d)'], high: ['Yüksek','var(--amber)','var(--amber-d)'], medium: ['Normal','var(--t2)','var(--s4)'], low: ['Düşük','var(--t3)','var(--s3)'] }
-  const [label, color, bg] = m[p] || m.medium
-  return <span className="erp-badge" style={{ color, background: bg }}>{label}</span>
-}
-
 /* ── Main ── */
 export default function DashboardPage() {
-  const [data, setData] = useState<any>({ tasks: [], projects: [], clients: [], transactions: [], profiles: [], contents: [] })
-  const [time, setTime] = useState('')
+  const [d, setD] = useState<any>({ tasks: [], projects: [], clients: [], transactions: [], contents: [], approvals: [] })
   const [loading, setLoading] = useState(true)
+  const [now, setNow] = useState(new Date())
+  const [userName, setUserName] = useState('')
 
   useEffect(() => {
-    const tick = () => setTime(new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }))
-    tick(); const id = setInterval(tick, 1000); return () => clearInterval(id)
+    const id = setInterval(() => setNow(new Date()), 1000)
+    return () => clearInterval(id)
   }, [])
 
   useEffect(() => {
     const sb = createClient()
+    sb.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        sb.from('profiles').select('full_name').eq('id', user.id).single().then(({ data }) => {
+          setUserName(data?.full_name?.split(' ')[0] || user.email?.split('@')[0] || '')
+        })
+      }
+    })
     Promise.all([
       sb.from('tasks').select('*'),
       sb.from('projects').select('*,client:clients(name)'),
       sb.from('clients').select('*'),
       sb.from('transactions').select('*').order('date'),
-      sb.from('profiles').select('*'),
       sb.from('contents').select('*'),
-    ]).then(([t, p, c, tr, pr, co]) => {
-      setData({ tasks: t.data||[], projects: p.data||[], clients: c.data||[], transactions: tr.data||[], profiles: pr.data||[], contents: co.data||[] })
+      sb.from('approvals').select('*'),
+    ]).then(([t, p, c, tr, co, ap]) => {
+      setD({ tasks: t.data||[], projects: p.data||[], clients: c.data||[], transactions: tr.data||[], contents: co.data||[], approvals: ap.data||[] })
       setLoading(false)
     })
   }, [])
 
-  const { tasks, projects, clients, transactions, profiles, contents } = data
-  const now = new Date()
+  const { tasks, projects, clients, transactions, contents, approvals } = d
+  const today = now
 
-  const income      = transactions.filter((t: any) => t.type === 'income').reduce((s: number, t: any) => s + Number(t.amount), 0)
-  const expense     = transactions.filter((t: any) => t.type === 'expense').reduce((s: number, t: any) => s + Number(t.amount), 0)
-  const net         = income - expense
-  const pending_inv = transactions.filter((t: any) => t.status === 'pending' || t.status === 'overdue').reduce((s: number, t: any) => s + Number(t.amount), 0)
+  // Hesaplamalar
+  const income  = transactions.filter((t:any) => t.type === 'income').reduce((s:number,t:any) => s + Number(t.amount), 0)
+  const expense = transactions.filter((t:any) => t.type === 'expense').reduce((s:number,t:any) => s + Number(t.amount), 0)
+  const net = income - expense
+  const overdue  = tasks.filter((t:any) => t.status !== 'done' && t.due_date && new Date(t.due_date) < today)
+  const doneTasks = tasks.filter((t:any) => t.status === 'done')
+  const pendingApprovals = approvals.filter((a:any) => a.status === 'pending')
+  const activeProjects = projects.filter((p:any) => p.status === 'active')
+  const activeClients = clients.filter((c:any) => c.status === 'active')
 
-  const overdue_tasks     = tasks.filter((t: any) => t.status !== 'done' && t.due_date && new Date(t.due_date) < now)
-  const active_projects   = projects.filter((p: any) => p.status === 'active')
-  const active_clients    = clients.filter((c: any) => c.status === 'active')
-  const pending_approvals = contents.filter((c: any) => c.status === 'pending')
-
-  const months = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara']
-  const cm = now.getMonth()
-  const monthlyBars = Array.from({ length: 6 }, (_, i) => {
+  // Son 6 ay gelir
+  const MONTHS = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara']
+  const cm = today.getMonth()
+  const monthBars = Array.from({ length: 6 }, (_, i) => {
     const m = (cm - 5 + i + 12) % 12
-    const val = transactions.filter((t: any) => t.type === 'income' && t.date && new Date(t.date).getMonth() === m).reduce((s: number, t: any) => s + Number(t.amount), 0)
-    return { label: months[m], value: val, highlight: i === 5 }
+    const v = transactions.filter((t:any) => t.type === 'income' && t.date && new Date(t.date).getMonth() === m).reduce((s:number,t:any) => s + Number(t.amount), 0)
+    return { label: MONTHS[m], value: v, hi: i === 5 }
   })
 
+  // Görev durum dağılımı
   const taskSegs = [
-    { value: tasks.filter((t: any) => t.status === 'todo').length,        color: 'var(--t3)',   label: 'Bekliyor' },
-    { value: tasks.filter((t: any) => t.status === 'in_progress').length, color: 'var(--blue)', label: 'Devam' },
-    { value: tasks.filter((t: any) => t.status === 'review').length,      color: 'var(--amber)',label: 'İnceleme' },
-    { value: tasks.filter((t: any) => t.status === 'done').length,        color: 'var(--green)',label: 'Tamamlandı' },
+    { value: tasks.filter((t:any) => t.status === 'todo').length,        color: 'var(--t3)',    label: 'Bekliyor' },
+    { value: tasks.filter((t:any) => t.status === 'in_progress').length, color: 'var(--blue)',  label: 'Devam' },
+    { value: tasks.filter((t:any) => t.status === 'review').length,      color: 'var(--amber)', label: 'Kontrol' },
+    { value: doneTasks.length,                                            color: 'var(--green)', label: 'Tamamlandı' },
   ]
 
-  const topProjects   = active_projects.slice(0, 5)
-  const recentTasks   = [...tasks].sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 5)
-  const criticalTasks = overdue_tasks.filter((t: any) => t.priority === 'critical' || t.priority === 'high').slice(0, 4)
+  // Aktif projeler (top 5)
+  const topProjects = activeProjects.slice(0, 5)
+
+  // Son gecikmiş
+  const criticalOverdue = overdue.sort((a:any,b:any) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime()).slice(0, 5)
+
+  // Yaklaşan teslimler (bugünden itibaren 7 gün)
+  const upcoming = tasks.filter((t:any) => {
+    if (!t.due_date || t.status === 'done') return false
+    const dd = new Date(t.due_date)
+    const diff = (dd.getTime() - today.getTime()) / 86400000
+    return diff >= 0 && diff <= 7
+  }).sort((a:any,b:any) => a.due_date.localeCompare(b.due_date)).slice(0, 5)
+
+  const dateStr = today.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+  const timeStr = today.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+
+  const fmtMoney = (v: number) => v >= 1000000 ? `${(v/1000000).toFixed(1)}M ₺` : v >= 1000 ? `${Math.round(v/1000)}K ₺` : `${v} ₺`
 
   return (
     <>
       <style>{`
-        .db-wrap{flex:1;overflow-y:auto;padding:12px 14px 60px;display:flex;flex-direction:column;gap:10px}
-        .db-kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-        .db-row2{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:8px}
-        .db-row3{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-        .db-row4{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-        .task-row{display:flex;align-items:center;gap:8px;padding:7px 12px;border-bottom:1px solid var(--glass-border)}
-        .task-row:last-child{border-bottom:none}
-        .proj-row{padding:8px 12px;border-bottom:1px solid var(--glass-border)}
-        .proj-row:last-child{border-bottom:none}
-        .fin-row{display:flex;justify-content:space-between;align-items:center;padding:6px 12px;border-bottom:1px solid var(--glass-border)}
-        .fin-row:last-child{border-bottom:none}
-        @media(max-width:1100px){.db-row2{grid-template-columns:1fr 1fr}}
-        @media(max-width:768px){
-          .db-kpi{grid-template-columns:repeat(2,1fr)}
-          .db-row2,.db-row3,.db-row4{grid-template-columns:1fr}
-        }
+        .db-kpi { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
+        .db-mid  { display: grid; grid-template-columns: 1.5fr 1fr; gap: 12px; }
+        .db-bot  { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 12px; }
+        @media(max-width:900px){ .db-mid{grid-template-columns:1fr} .db-bot{grid-template-columns:1fr} }
+        @media(max-width:600px){ .db-kpi{grid-template-columns:repeat(2,1fr)} }
       `}</style>
 
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+      <div style={{ display:'flex', flexDirection:'column', height:'100%', overflow:'hidden' }}>
         <TopBar
-          title="Dashboard"
-          subtitle={new Date().toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+          title={`Merhaba${userName ? ', '+userName : ''} 👋`}
+          subtitle={dateStr}
           action={
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '3px 9px', borderRadius: 6, background: 'var(--s2)', border: '1px solid var(--glass-border)' }}>
-              <div className="pulse-dot" style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--green)', flexShrink: 0 }}/>
-              <span style={{ fontSize: 10.5, fontFamily: 'JetBrains Mono', color: 'var(--t2)' }}>{time}</span>
+            <div style={{ display:'flex', alignItems:'center', gap:6, background:'var(--s2)', border:'1px solid var(--glass-border)', borderRadius:8, padding:'5px 12px' }}>
+              <div className="pulse-dot" style={{ width:5, height:5, borderRadius:'50%', background:'var(--green)', flexShrink:0 }}/>
+              <span style={{ fontSize:11, fontFamily:'JetBrains Mono', color:'var(--green)', fontWeight:600, letterSpacing:'.02em' }}>{timeStr}</span>
             </div>
           }
         />
 
-        <div className="db-wrap">
+        <div style={{ flex:1, overflowY:'auto', padding:'16px 18px 80px', display:'flex', flexDirection:'column', gap:14 }}>
           {loading ? (
-            <div style={{ color: 'var(--t3)', padding: '40px 0', textAlign: 'center', fontSize: 12 }}>Yükleniyor...</div>
+            <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', color:'var(--t3)', fontSize:13 }}>
+              Yükleniyor...
+            </div>
           ) : (<>
 
-            {/* KPI */}
+            {/* ── KPI Kartları ── */}
             <div className="db-kpi">
-              <KPI label="Toplam Gelir"       value={`₺${Math.round(income/1000)}K`}      sub={`Gider: ₺${Math.round(expense/1000)}K`}  color="var(--green)"  spark={monthlyBars.map(b=>b.value)}  Icon={TrendingUp}/>
-              <KPI label="Net Kâr"            value={`₺${Math.round(net/1000)}K`}         sub={net>=0?'Kâr':'Zarar'}                     color={net>=0?'var(--gold)':'var(--red)'} Icon={Wallet}/>
-              <KPI label="Aktif Proje"        value={String(active_projects.length)}       sub={`${active_clients.length} aktif müşteri`} color="var(--blue)"   Icon={FolderKanban}/>
-              <KPI label="Tahsilat Bekleyen"  value={`₺${Math.round(pending_inv/1000)}K`} sub={`${overdue_tasks.length} geciken görev`}  color={pending_inv>0?'var(--amber)':'var(--green)'} Icon={Clock}/>
+              <KPI label="Toplam Gelir"    value={fmtMoney(income)}  sub={`Gider: ${fmtMoney(expense)}`} accent="var(--green)"  accentD="var(--green-d)"  Icon={TrendingUp}    trend="+12%" />
+              <KPI label="Net Kar"          value={fmtMoney(net)}     sub={net>=0?'Bu ay':'Zarar'}        accent={net>=0?'var(--gold)':'var(--red)'} accentD={net>=0?'var(--gold-d)':'var(--red-d)'} Icon={Wallet} />
+              <KPI label="Aktif Proje"      value={String(activeProjects.length)} sub={`${activeClients.length} aktif müşteri`} accent="var(--blue)"   accentD="var(--blue-d)"   Icon={FolderKanban} />
+              <KPI label="Onay Bekleyen"    value={String(pendingApprovals.length)} sub={`${overdue.length} geciken görev`}    accent="var(--amber)"  accentD="var(--amber-d)"  Icon={ClipboardCheck} />
             </div>
 
-            {/* Row 2 */}
-            <div className="db-row2">
-              {/* Gelir Grafiği */}
-              <div className="erp-card panel">
-                <div className="erp-card-h">
-                  <span className="erp-card-title">Aylık Gelir Trendi</span>
-                  <span className="erp-meta">Son 6 ay</span>
+            {/* ── Orta: Gelir Grafiği + Görev Dağılımı ── */}
+            <div className="db-mid">
+              {/* Gelir Bar Chart */}
+              <div className="card">
+                <div className="card-h">
+                  <span className="card-title">Aylık Gelir Trendi</span>
+                  <span className="card-meta">Son 6 ay</span>
                 </div>
-                <div style={{ padding: '11px 13px 10px' }}>
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 12 }}>
-                    <span style={{ fontSize: 20, fontWeight: 700, fontFamily: 'JetBrains Mono', color: 'var(--gold)', letterSpacing: '-0.5px' }}>₺{(income/1000).toFixed(0)}K</span>
-                    <span style={{ fontSize: 11, color: 'var(--green)', fontWeight: 600 }}>toplam gelir</span>
+                <div style={{ padding:'16px 16px 12px' }}>
+                  <div style={{ display:'flex', alignItems:'baseline', gap:10, marginBottom:16 }}>
+                    <span style={{ fontSize:30, fontWeight:800, fontFamily:'JetBrains Mono', color:'var(--gold)', letterSpacing:'-1.5px', lineHeight:1 }}>{fmtMoney(income)}</span>
+                    <span style={{ fontSize:11, color:'var(--green)', fontWeight:700 }}>↑ Bu ay</span>
                   </div>
-                  <BarChart bars={monthlyBars}/>
+                  <BarChart bars={monthBars}/>
                 </div>
               </div>
 
-              {/* Görev Durumu */}
-              <div className="erp-card panel">
-                <div className="erp-card-h">
-                  <span className="erp-card-title">Görev Durumu</span>
-                  <span className="erp-meta" style={{ fontFamily: 'JetBrains Mono' }}>{tasks.length}</span>
+              {/* Görev Donut */}
+              <div className="card">
+                <div className="card-h">
+                  <span className="card-title">Görev Durumu</span>
+                  <span className="card-meta">{tasks.length} toplam</span>
                 </div>
-                <div style={{ padding: '13px' }}>
+                <div style={{ padding:'16px' }}>
                   <Donut segs={taskSegs}/>
-                  <div style={{ marginTop: 11, padding: '7px 10px', background: 'var(--s2)', borderRadius: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: 10.5, color: 'var(--t3)' }}>Tamamlanma</span>
-                    <span style={{ fontSize: 12, fontWeight: 700, fontFamily: 'JetBrains Mono', color: 'var(--green)' }}>
-                      {tasks.length ? Math.round((tasks.filter((t:any)=>t.status==='done').length/tasks.length)*100) : 0}%
-                    </span>
+                  <div style={{ marginTop:14, display:'flex', gap:8 }}>
+                    <div style={{ flex:1, background:'var(--s2)', borderRadius:8, padding:'8px 10px', textAlign:'center' }}>
+                      <div style={{ fontSize:18, fontWeight:800, fontFamily:'JetBrains Mono', color:'var(--green)' }}>{doneTasks.length}</div>
+                      <div style={{ fontSize:9.5, color:'var(--t3)', marginTop:2 }}>Tamamlanan</div>
+                    </div>
+                    <div style={{ flex:1, background:'var(--s2)', borderRadius:8, padding:'8px 10px', textAlign:'center' }}>
+                      <div style={{ fontSize:18, fontWeight:800, fontFamily:'JetBrains Mono', color:'var(--red)' }}>{overdue.length}</div>
+                      <div style={{ fontSize:9.5, color:'var(--t3)', marginTop:2 }}>Geciken</div>
+                    </div>
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Kritik */}
-              <div className="erp-card panel">
-                <div className="erp-card-h">
-                  <span className="erp-card-title" style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                    <AlertTriangle size={11} color="var(--red)" strokeWidth={2}/>
-                    Kritik Gecikmeler
-                  </span>
-                  <span className="erp-badge" style={{ color: 'var(--red)', background: 'var(--red-d)' }}>{overdue_tasks.length}</span>
+            {/* ── Alt: Projeler + Gecikmeler + Yaklaşan ── */}
+            <div className="db-bot">
+
+              {/* Aktif Projeler */}
+              <div className="card">
+                <div className="card-h">
+                  <span className="card-title">Aktif Projeler</span>
+                  <a href="/dashboard/projeler" style={{ display:'flex', alignItems:'center', gap:3, fontSize:10, color:'var(--t3)', transition:'color .15s' }}
+                    onMouseEnter={e=>(e.currentTarget.style.color='var(--gold)')}
+                    onMouseLeave={e=>(e.currentTarget.style.color='var(--t3)')}>
+                    Tümü <ArrowRight size={11}/>
+                  </a>
                 </div>
-                <div>
-                  {criticalTasks.length === 0 ? (
-                    <div style={{ padding: '20px', textAlign: 'center', color: 'var(--green)', fontSize: 11, fontWeight: 500 }}>Kritik gecikme yok</div>
-                  ) : criticalTasks.map((t: any, i: number) => (
-                    <div key={t.id} className="task-row">
-                      <div style={{ width: 5, height: 5, borderRadius: '50%', background: t.priority==='critical'?'var(--red)':'var(--amber)', flexShrink: 0 }}/>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 11, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.title}</div>
-                        <div style={{ fontSize: 9.5, color: 'var(--t3)', marginTop: 1, fontFamily: 'JetBrains Mono' }}>{t.due_date?.slice(0,10)}</div>
+                <div style={{ padding:'4px 0' }}>
+                  {topProjects.length === 0 ? (
+                    <div style={{ padding:'24px 14px', textAlign:'center', color:'var(--t3)', fontSize:12 }}>Aktif proje yok</div>
+                  ) : topProjects.map((p:any, i:number) => (
+                    <div key={p.id} className="erp-row">
+                      <div style={{ flex:1, minWidth:0 }}>
+                        <div style={{ fontSize:12, fontWeight:600, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', marginBottom:4 }}>{p.name}</div>
+                        <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                          <div className="prog-track" style={{ flex:1 }}>
+                            <div className="prog-fill" style={{ width:`${p.progress||0}%`, background: p.progress>70?'var(--green)':p.progress>40?'var(--gold)':'var(--red)' }}/>
+                          </div>
+                          <span style={{ fontSize:10, fontWeight:700, color:'var(--t2)', fontFamily:'JetBrains Mono', flexShrink:0 }}>{p.progress||0}%</span>
+                        </div>
+                        <div style={{ fontSize:10, color:'var(--t3)', marginTop:3 }}>{p.client?.name||'—'}</div>
                       </div>
-                      <PBadge p={t.priority}/>
                     </div>
                   ))}
                 </div>
               </div>
-            </div>
 
-            {/* Row 3 */}
-            <div className="db-row3">
-              {/* Aktif Projeler */}
-              <div className="erp-card panel">
-                <div className="erp-card-h">
-                  <span className="erp-card-title">Aktif Projeler</span>
-                  <span className="erp-meta">{active_projects.length} proje</span>
+              {/* Gecikmeler */}
+              <div className="card">
+                <div className="card-h">
+                  <span className="card-title">Gecikmeler</span>
+                  {overdue.length > 0 && <span className="badge" style={{ background:'var(--red-d)', color:'var(--red)' }}>{overdue.length}</span>}
                 </div>
-                <div>
-                  {topProjects.length===0 ? (
-                    <div style={{ padding: '20px', textAlign: 'center', color: 'var(--t3)', fontSize: 11 }}>Aktif proje yok</div>
-                  ) : topProjects.map((p: any, i: number) => {
-                    const pc = p.progress>70?'var(--green)':p.progress>40?'var(--gold)':'var(--red)'
+                <div style={{ padding:'4px 0' }}>
+                  {criticalOverdue.length === 0 ? (
+                    <div style={{ padding:'24px 14px', textAlign:'center', color:'var(--green)', fontSize:12, fontWeight:600 }}>
+                      ✓ Geciken görev yok
+                    </div>
+                  ) : criticalOverdue.map((t:any, i:number) => {
+                    const daysLate = Math.floor((today.getTime() - new Date(t.due_date).getTime()) / 86400000)
+                    const c = t.priority === 'critical' ? 'var(--red)' : t.priority === 'high' ? 'var(--amber)' : 'var(--t2)'
                     return (
-                      <div key={p.id} className="proj-row">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
-                          <div style={{ minWidth: 0, flex: 1 }}>
-                            <div style={{ fontSize: 11.5, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</div>
-                            <div style={{ fontSize: 9.5, color: 'var(--t3)', marginTop: 1 }}>{p.client?.name||'—'}</div>
-                          </div>
-                          <span style={{ fontSize: 11.5, fontWeight: 700, fontFamily: 'JetBrains Mono', color: pc, marginLeft: 10, flexShrink: 0 }}>{p.progress}%</span>
+                      <div key={t.id} className="erp-row">
+                        <div style={{ width:6, height:6, borderRadius:'50%', background:c, flexShrink:0 }}/>
+                        <div style={{ flex:1, minWidth:0 }}>
+                          <div style={{ fontSize:11.5, fontWeight:500, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{t.title}</div>
+                          <div style={{ fontSize:10, color:'var(--t3)', marginTop:2 }}>{t.due_date?.slice(0,10)}</div>
                         </div>
-                        <div className="prog-track"><div className="prog-fill" style={{ width: `${p.progress}%`, background: pc }}/></div>
+                        <span style={{ fontSize:10, fontWeight:700, color:c, fontFamily:'JetBrains Mono', flexShrink:0, whiteSpace:'nowrap' }}>
+                          +{daysLate}g
+                        </span>
                       </div>
                     )
                   })}
                 </div>
               </div>
 
-              {/* Finans + Son Görevler */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <div className="erp-card panel">
-                  <div className="erp-card-h"><span className="erp-card-title">Finans Özeti</span></div>
-                  {[
-                    { l: 'Toplam Gelir',      v: income,      c: 'var(--green)' },
-                    { l: 'Toplam Gider',      v: expense,     c: 'var(--red)' },
-                    { l: 'Net Kâr',           v: net,         c: net>=0?'var(--gold)':'var(--red)' },
-                    { l: 'Tahsilat Bekleyen', v: pending_inv, c: 'var(--amber)' },
-                  ].map(s => (
-                    <div key={s.l} className="fin-row">
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <div style={{ width: 2, height: 11, background: s.c, borderRadius: 2 }}/>
-                        <span style={{ fontSize: 11, color: 'var(--t2)' }}>{s.l}</span>
-                      </div>
-                      <span style={{ fontSize: 11.5, fontWeight: 700, color: s.c, fontFamily: 'JetBrains Mono' }}>₺{Math.round(s.v).toLocaleString('tr-TR')}</span>
-                    </div>
-                  ))}
+              {/* Yaklaşan Teslimler */}
+              <div className="card">
+                <div className="card-h">
+                  <span className="card-title">Bu Hafta Teslim</span>
+                  <span className="card-meta">{upcoming.length} görev</span>
                 </div>
-
-                <div className="erp-card panel" style={{ flex: 1 }}>
-                  <div className="erp-card-h">
-                    <span className="erp-card-title">Son Görevler</span>
-                    <span className="erp-meta">{tasks.length} toplam</span>
-                  </div>
-                  <div>
-                    {recentTasks.map((t: any, i: number) => {
-                      const done = t.status==='done'
-                      return (
-                        <div key={t.id} className="task-row">
-                          <div style={{ width: 5, height: 5, borderRadius: 1.5, flexShrink: 0, background: done?'var(--green)':t.status==='in_progress'?'var(--blue)':'var(--s5)' }}/>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: 11, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textDecoration: done?'line-through':'none', opacity: done?0.45:1 }}>{t.title}</div>
-                            <div style={{ fontSize: 9.5, color: 'var(--t3)', marginTop: 1, fontFamily: 'JetBrains Mono' }}>{new Date(t.created_at).toLocaleDateString('tr-TR')}</div>
+                <div style={{ padding:'4px 0' }}>
+                  {upcoming.length === 0 ? (
+                    <div style={{ padding:'24px 14px', textAlign:'center', color:'var(--t3)', fontSize:12 }}>Bu hafta teslim yok</div>
+                  ) : upcoming.map((t:any, i:number) => {
+                    const dd = new Date(t.due_date)
+                    const diff = Math.ceil((dd.getTime() - today.getTime()) / 86400000)
+                    const urgent = diff <= 1
+                    return (
+                      <div key={t.id} className="erp-row">
+                        <div style={{ width:6, height:6, borderRadius:'50%', background:urgent?'var(--red)':'var(--t3)', boxShadow:urgent?'0 0 5px var(--red)':'none', flexShrink:0 }}/>
+                        <div style={{ flex:1, minWidth:0 }}>
+                          <div style={{ fontSize:11.5, fontWeight:500, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{t.title}</div>
+                          <div style={{ fontSize:10, color:'var(--t3)', marginTop:2 }}>
+                            {diff === 0 ? 'Bugün' : diff === 1 ? 'Yarın' : `${diff} gün sonra`}
                           </div>
-                          <PBadge p={t.priority}/>
                         </div>
-                      )
-                    })}
-                    {recentTasks.length===0 && <div style={{ padding: '18px', textAlign: 'center', color: 'var(--t3)', fontSize: 11 }}>Henüz görev yok</div>}
-                  </div>
+                        <span style={{ fontSize:10, fontWeight:600, color:urgent?'var(--red)':'var(--t2)', fontFamily:'JetBrains Mono', flexShrink:0 }}>
+                          {t.due_date?.slice(5,10)}
+                        </span>
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
-            </div>
 
-            {/* Row 4 */}
-            <div className="db-row4">
-              {[
-                { label: 'Ekip Üyesi',    value: profiles.length,           Icon: Users,          color: 'var(--purple)' },
-                { label: 'Onay Bekleyen', value: pending_approvals.length,  Icon: ClipboardCheck, color: 'var(--amber)' },
-                { label: 'Toplam Müşteri',value: clients.length,            Icon: BarChart2,      color: 'var(--blue)' },
-              ].map(({ label, value, Icon, color }) => (
-                <div key={label} className="erp-card" style={{ padding: '11px 13px', display: 'flex', alignItems: 'center', gap: 11 }}>
-                  <div style={{ width: 32, height: 32, borderRadius: 7, background: `${color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <Icon size={15} color={color} strokeWidth={1.8}/>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 19, fontWeight: 700, fontFamily: 'JetBrains Mono', color, lineHeight: 1 }}>{value}</div>
-                    <div style={{ fontSize: 10.5, color: 'var(--t2)', marginTop: 3 }}>{label}</div>
-                  </div>
-                </div>
-              ))}
             </div>
 
           </>)}
