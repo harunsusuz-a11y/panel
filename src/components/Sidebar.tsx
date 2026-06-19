@@ -2,108 +2,80 @@
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
-const nav = [
-  { group: 'Genel', items: [
-    { href: '/dashboard', icon: '▪', label: 'Dashboard' },
-    { href: '/dashboard/takvim', icon: '◻', label: 'Takvim' },
+const NAV = [
+  { group: 'Ana', items: [
+    { href: '/dashboard', label: 'Dashboard', icon: '⊞' },
   ]},
-  { group: 'CRM', items: [
-    { href: '/dashboard/musteriler', icon: '◻', label: 'Müşteriler', badge: null },
-    { href: '/dashboard/iletisimler', icon: '◻', label: 'İletişimler' },
+  { group: 'İş Yönetimi', items: [
+    { href: '/dashboard/musteriler', label: 'CRM / Müşteriler', icon: '🏢' },
+    { href: '/dashboard/projeler', label: 'Projeler', icon: '📁' },
+    { href: '/dashboard/gorevler', label: 'Görev Yönetimi', icon: '✓' },
+    { href: '/dashboard/takvim', label: 'Takvim', icon: '📅' },
   ]},
-  { group: 'Projeler', items: [
-    { href: '/dashboard/projeler', icon: '◻', label: 'Tüm Projeler' },
-    { href: '/dashboard/gorevler', icon: '◻', label: 'Görevlerim', badge: 'warn' },
-    { href: '/dashboard/gecikmeler', icon: '◻', label: 'Gecikmeler', badge: 'red' },
-    { href: '/dashboard/zaman', icon: '◻', label: 'Zaman Takibi' },
+  { group: 'İçerik & Operasyon', items: [
+    { href: '/dashboard/icerik', label: 'İçerik Merkezi', icon: '✏' },
+    { href: '/dashboard/operasyon', label: 'Operasyon Merkezi', icon: '⚡' },
   ]},
-  { group: 'İçerik', items: [
-    { href: '/dashboard/icerik', icon: '◻', label: 'İçerik Panosu' },
-    { href: '/dashboard/yayın', icon: '◻', label: 'Yayın Takvimi' },
-    { href: '/dashboard/onay', icon: '◻', label: 'Onay Akışı', badge: 'warn' },
-  ]},
-  { group: 'Raporlar', items: [
-    { href: '/dashboard/performans', icon: '◻', label: 'Performans' },
-    { href: '/dashboard/dokumanlar', icon: '◻', label: 'Dökümanlar' },
+  { group: 'Finans', items: [
+    { href: '/dashboard/muhasebe', label: 'Muhasebe', icon: '🧾' },
+    { href: '/dashboard/finans', label: 'Finans', icon: '💰' },
   ]},
   { group: 'Sistem', items: [
-    { href: '/dashboard/ekip', icon: '◻', label: 'Ekip & Yetkiler' },
-    { href: '/dashboard/ayarlar', icon: '◻', label: 'Ayarlar' },
+    { href: '/dashboard/kullanicilar', label: 'Kullanıcılar', icon: '👥' },
+    { href: '/dashboard/otomasyonlar', label: 'Otomasyonlar', icon: '🤖' },
+    { href: '/dashboard/entegrasyonlar', label: 'Entegrasyonlar', icon: '🔌' },
+    { href: '/dashboard/ayarlar', label: 'Sistem Ayarları', icon: '⚙' },
   ]},
 ]
-
-const icons: Record<string, string> = {
-  '/dashboard': '⊞',
-  '/dashboard/takvim': '📅',
-  '/dashboard/musteriler': '🏢',
-  '/dashboard/iletisimler': '📞',
-  '/dashboard/projeler': '📁',
-  '/dashboard/gorevler': '✓',
-  '/dashboard/gecikmeler': '⚠',
-  '/dashboard/zaman': '⏱',
-  '/dashboard/icerik': '✏',
-  '/dashboard/yayın': '📆',
-  '/dashboard/onay': '✅',
-  '/dashboard/performans': '📊',
-  '/dashboard/dokumanlar': '📄',
-  '/dashboard/ekip': '👥',
-  '/dashboard/ayarlar': '⚙',
-}
 
 export default function Sidebar({ user }: { user: any }) {
   const pathname = usePathname()
   const router = useRouter()
-  const supabase = createClient()
 
   async function logout() {
+    const supabase = createClient()
     await supabase.auth.signOut()
     router.push('/login')
     router.refresh()
   }
 
   const initials = (user?.user_metadata?.full_name || user?.email || 'U')
-    .split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2)
+    .split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0,2)
+
+  const isActive = (href: string) => href === '/dashboard' ? pathname === href : pathname.startsWith(href)
 
   return (
-    <aside style={{ width: 224, background: 'var(--s1)', borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', height: '100vh', flexShrink: 0 }}>
+    <aside style={{width:220,background:'var(--s1)',borderRight:'1px solid var(--border)',display:'flex',flexDirection:'column',height:'100vh',flexShrink:0}}>
       {/* Logo */}
-      <div style={{ padding: '18px 16px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{ width: 30, height: 30, background: 'var(--gold)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="#000"><rect x="3" y="3" width="7" height="11" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <div style={{padding:'16px 14px',borderBottom:'1px solid var(--border)',display:'flex',alignItems:'center',gap:9}}>
+        <div style={{width:28,height:28,background:'var(--gold)',borderRadius:7,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#000"><rect x="3" y="3" width="7" height="11" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
         </div>
         <div>
-          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>Panel</div>
-          <div style={{ fontSize: 10, color: 'var(--t3)' }}>Ajans Yönetim Sistemi</div>
+          <div style={{fontSize:13,fontWeight:600,color:'var(--text)'}}>Agency ERP</div>
+          <div style={{fontSize:9,color:'var(--t3)'}}>Ajans Yönetim Sistemi</div>
         </div>
       </div>
 
       {/* Nav */}
-      <nav style={{ flex: 1, overflowY: 'auto', padding: '6px 0 12px' }}>
-        {nav.map(section => (
+      <nav style={{flex:1,overflowY:'auto',padding:'4px 0 12px'}}>
+        {NAV.map(section => (
           <div key={section.group}>
-            <div style={{ padding: '18px 14px 4px', fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', color: 'var(--t3)', textTransform: 'uppercase' }}>
+            <div style={{padding:'14px 12px 3px',fontSize:9,fontWeight:700,letterSpacing:'0.08em',color:'var(--t3)',textTransform:'uppercase'}}>
               {section.group}
             </div>
             {section.items.map(item => {
-              const active = pathname === item.href
+              const active = isActive(item.href)
               return (
-                <div
-                  key={item.href}
-                  onClick={() => router.push(item.href)}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 8,
-                    padding: '7px 12px', margin: '1px 6px', borderRadius: 7,
-                    cursor: 'pointer', fontSize: 12.5, fontWeight: active ? 500 : 400,
-                    color: active ? 'var(--gold)' : 'var(--t2)',
-                    background: active ? 'var(--gold-d)' : 'transparent',
-                    position: 'relative', transition: 'all .12s',
-                  }}
-                >
-                  {active && <div style={{ position: 'absolute', left: -6, top: '50%', transform: 'translateY(-50%)', width: 2.5, height: 16, background: 'var(--gold)', borderRadius: '0 2px 2px 0' }} />}
-                  <span style={{ fontSize: 13, width: 17, textAlign: 'center' }}>{icons[item.href] || '·'}</span>
-                  <span style={{ flex: 1 }}>{item.label}</span>
-                  {item.badge === 'red' && <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 7px', borderRadius: 20, background: 'rgba(240,68,68,0.1)', color: 'var(--red)' }}>!</span>}
-                  {item.badge === 'warn' && <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 7px', borderRadius: 20, background: 'rgba(245,158,11,0.1)', color: 'var(--amber)' }}>!</span>}
+                <div key={item.href} onClick={() => router.push(item.href)}
+                  style={{display:'flex',alignItems:'center',gap:7,padding:'7px 10px',margin:'1px 5px',borderRadius:6,
+                    cursor:'pointer',fontSize:12,fontWeight:active?500:400,
+                    color:active?'var(--gold)':'var(--t2)',
+                    background:active?'var(--gold-d)':'transparent',
+                    position:'relative',transition:'all .1s'}}>
+                  {active && <div style={{position:'absolute',left:-5,top:'50%',transform:'translateY(-50%)',width:2.5,height:14,background:'var(--gold)',borderRadius:'0 2px 2px 0'}}/>}
+                  <span style={{fontSize:14,width:16,textAlign:'center',flexShrink:0}}>{item.icon}</span>
+                  <span style={{flex:1,lineHeight:1.2}}>{item.label}</span>
                 </div>
               )
             })}
@@ -112,19 +84,16 @@ export default function Sidebar({ user }: { user: any }) {
       </nav>
 
       {/* User */}
-      <div
-        onClick={logout}
-        style={{ padding: '12px 14px', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer' }}
-        title="Çıkış yap"
-      >
-        <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#000', flexShrink: 0 }}>
+      <div onClick={logout} title="Çıkış yap"
+        style={{padding:'10px 12px',borderTop:'1px solid var(--border)',display:'flex',alignItems:'center',gap:8,cursor:'pointer'}}>
+        <div style={{width:26,height:26,borderRadius:'50%',background:'var(--gold)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,fontWeight:700,color:'#000',flexShrink:0}}>
           {initials}
         </div>
-        <div>
-          <div style={{ fontSize: 12.5, fontWeight: 500, color: 'var(--t2)' }}>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{fontSize:12,fontWeight:500,color:'var(--t2)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
             {user?.user_metadata?.full_name || user?.email?.split('@')[0]}
           </div>
-          <div style={{ fontSize: 10, color: 'var(--t3)' }}>Çıkış için tıkla</div>
+          <div style={{fontSize:9,color:'var(--t3)'}}>Çıkış için tıkla</div>
         </div>
       </div>
     </aside>

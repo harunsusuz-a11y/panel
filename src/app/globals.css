@@ -4,26 +4,17 @@
 @tailwind utilities;
 
 :root {
-  --bg: #0c0e14;
-  --s1: #111318;
-  --s2: #16181f;
-  --s3: #1c1f28;
-  --s4: #242733;
-  --border: rgba(255,255,255,0.06);
-  --border2: rgba(255,255,255,0.1);
-  --gold: #e9a825;
-  --gold-d: rgba(233,168,37,0.12);
-  --text: #dde1f0;
-  --t2: #7b8099;
-  --t3: #3e4258;
-  --green: #22c55e;
-  --red: #f04444;
-  --blue: #5b7cf6;
-  --amber: #f59e0b;
+  --bg:#0c0e14; --s1:#111318; --s2:#16181f; --s3:#1c1f28; --s4:#242733;
+  --border:rgba(255,255,255,0.06); --border2:rgba(255,255,255,0.1);
+  --gold:#e9a825; --gold-d:rgba(233,168,37,0.12);
+  --text:#dde1f0; --t2:#7b8099; --t3:#3e4258;
+  --green:#22c55e; --green-d:rgba(34,197,94,0.1);
+  --red:#f04444; --red-d:rgba(240,68,68,0.1);
+  --blue:#5b7cf6; --blue-d:rgba(91,124,246,0.1);
+  --amber:#f59e0b; --amber-d:rgba(245,158,11,0.1);
 }
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html, body { height: 100%; background: var(--bg); color: var(--text); }
-
-::-webkit-scrollbar { width: 3px; }
-::-webkit-scrollbar-thumb { background: var(--s4); border-radius: 3px; }
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box }
+html,body { height:100%; background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; font-size:13px }
+::-webkit-scrollbar { width:3px; height:3px }
+::-webkit-scrollbar-thumb { background:var(--s4); border-radius:3px }
+a { color:inherit; text-decoration:none }
