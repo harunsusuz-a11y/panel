@@ -61,15 +61,18 @@ function Donut({ segs }: { segs:{v:number;color:string;label:string}[] }) {
   )
 }
 
-/* ── Stat Card ── */
-function StatCard({ label, value, sub, color, trend, Icon }: {
-  label:string; value:string; sub?:string; color:string; trend?:{v:string;up:boolean}; Icon:any
+/* ── Stat Card — ikon style prop ile, color prop değil ── */
+function StatCard({ label, value, sub, iconColor, iconBg, trend, Icon }: {
+  label:string; value:string; sub?:string
+  iconColor:string; iconBg:string
+  trend?:{v:string;up:boolean}; Icon:any
 }) {
   return (
     <div className="stat-card slide-up">
       <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:10}}>
-        <div style={{width:36,height:36,borderRadius:10,background:`${color}18`,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
-          <Icon size={17} color={color} strokeWidth={1.8}/>
+        <div style={{width:36,height:36,borderRadius:10,background:iconBg,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+          {/* style ile renk — CSS var() desteği */}
+          <Icon size={17} style={{color:iconColor}} strokeWidth={1.8}/>
         </div>
         {trend && (
           <div className="stat-trend" style={{color:trend.up?'var(--green)':'var(--red)'}}>
@@ -115,7 +118,7 @@ export default function DashboardPage() {
   const {tasks,projects,clients,transactions,approvals} = data
   const income  = transactions.filter((t:any)=>t.type==='income').reduce((s:number,t:any)=>s+Number(t.amount),0)
   const expense = transactions.filter((t:any)=>t.type==='expense').reduce((s:number,t:any)=>s+Number(t.amount),0)
-  const net = income-expense
+  const net     = income-expense
   const activeProj = projects.filter((p:any)=>p.status==='active')
   const overdue    = tasks.filter((t:any)=>t.status!=='done'&&t.due_date&&new Date(t.due_date)<now)
   const done       = tasks.filter((t:any)=>t.status==='done')
@@ -130,14 +133,17 @@ export default function DashboardPage() {
   })
 
   const taskSegs=[
-    {v:tasks.filter((t:any)=>t.status==='todo').length,        color:'var(--surface-3)', label:'Bekliyor'},
-    {v:tasks.filter((t:any)=>t.status==='in_progress').length, color:'var(--blue)',       label:'Devam'},
-    {v:tasks.filter((t:any)=>t.status==='review').length,      color:'var(--amber)',      label:'İnceleme'},
-    {v:done.length,                                             color:'var(--green)',      label:'Tamamlandı'},
+    {v:tasks.filter((t:any)=>t.status==='todo').length,        color:'#3a3f57', label:'Bekliyor'},
+    {v:tasks.filter((t:any)=>t.status==='in_progress').length, color:'#60a5fa', label:'Devam'},
+    {v:tasks.filter((t:any)=>t.status==='review').length,      color:'#fbbf24', label:'İnceleme'},
+    {v:done.length,                                             color:'#34d399', label:'Tamamlandı'},
   ]
 
   const fmt=(v:number)=>v>=1000?`₺${Math.round(v/1000)}K`:`₺${v}`
-  const PRI_C:Record<string,string>={critical:'var(--red)',high:'var(--amber)',normal:'var(--blue)',low:'var(--text-faint)'}
+
+  const PRI_C: Record<string,string> = {
+    critical:'#f87171', high:'#fbbf24', normal:'#60a5fa', low:'#5d5d6b'
+  }
 
   const overdueTop=[...overdue].sort((a:any,b:any)=>{
     const o={critical:0,high:1,normal:2,low:3}
@@ -168,18 +174,17 @@ export default function DashboardPage() {
           <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:200,color:'var(--text-faint)',fontSize:14}}>Yükleniyor...</div>
         ) : (<>
 
-          {/* ── KPI ── */}
+          {/* ── KPI — iconColor/iconBg olarak gerçek hex renk ── */}
           <div className="db-stat-grid">
-            <StatCard label="Toplam Gelir"   value={fmt(income)}              sub={`Gider: ${fmt(expense)}`}              color="var(--green)"  Icon={TrendingUp}    trend={{v:'+12%',up:true}}/>
-            <StatCard label="Net Kar"         value={fmt(net)}                 sub={net>=0?'Kârlı dönem':'Zarar'}          color={net>=0?'var(--accent)':'var(--red)'} Icon={Wallet}/>
-            <StatCard label="Aktif Proje"     value={String(activeProj.length)} sub={`${clients.filter((c:any)=>c.status==='active').length} müşteri`} color="var(--blue)"   Icon={FolderOpen}/>
-            <StatCard label="Geciken Görev"   value={String(overdue.length)}   sub={overdue.length>0?'Kontrol gerekli':'Temiz'} color={overdue.length>0?'var(--red)':'var(--green)'} Icon={Clock}/>
-            <StatCard label="Onay Bekliyor"   value={String(pending.length)}   sub={`${tasks.length} toplam görev`}        color="var(--amber)"  Icon={CheckCircle2}/>
+            <StatCard label="Toplam Gelir"  value={fmt(income)}              sub={`Gider: ${fmt(expense)}`}   iconColor="#34d399" iconBg="rgba(52,211,153,0.12)"  Icon={TrendingUp}   trend={{v:'+12%',up:true}}/>
+            <StatCard label="Net Kar"        value={fmt(net)}                 sub={net>=0?'Kârlı':'Zarar'}     iconColor={net>=0?"#6366f1":"#f87171"} iconBg={net>=0?"rgba(99,102,241,0.12)":"rgba(248,113,113,0.12)"} Icon={Wallet}/>
+            <StatCard label="Aktif Proje"    value={String(activeProj.length)} sub={`${clients.filter((c:any)=>c.status==='active').length} müşteri`} iconColor="#60a5fa" iconBg="rgba(96,165,250,0.12)" Icon={FolderOpen}/>
+            <StatCard label="Geciken Görev"  value={String(overdue.length)}   sub={overdue.length>0?'Kontrol':'Temiz'} iconColor={overdue.length>0?"#f87171":"#34d399"} iconBg={overdue.length>0?"rgba(248,113,113,0.12)":"rgba(52,211,153,0.12)"} Icon={Clock}/>
+            <StatCard label="Onay Bekliyor"  value={String(pending.length)}   sub={`${tasks.length} toplam`}  iconColor="#fbbf24" iconBg="rgba(251,191,36,0.12)"  Icon={CheckCircle2}/>
           </div>
 
           {/* ── Orta ── */}
           <div className="db-mid">
-            {/* Gelir */}
             <div className="card fade-in">
               <div className="card-h">
                 <span className="card-title">Aylık Gelir Trendi</span>
@@ -204,7 +209,6 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Görev Dağılımı */}
             <div className="card fade-in">
               <div className="card-h">
                 <span className="card-title">Görev Durumu</span>
@@ -228,14 +232,13 @@ export default function DashboardPage() {
 
           {/* ── Alt ── */}
           <div className="db-bot">
-            {/* Projeler */}
             <div className="card fade-in">
               <div className="card-h">
                 <span className="card-title">Aktif Projeler</span>
                 <a href="/dashboard/projeler" style={{display:'flex',alignItems:'center',gap:3,fontSize:12,color:'var(--text-faint)',transition:'color .15s'}}
                   onMouseEnter={e=>(e.currentTarget.style.color='var(--accent)')}
                   onMouseLeave={e=>(e.currentTarget.style.color='var(--text-faint)')}>
-                  Tümü <ArrowRight size={12}/>
+                  Tümü<ArrowRight size={12}/>
                 </a>
               </div>
               {activeProj.length===0
@@ -255,7 +258,6 @@ export default function DashboardPage() {
                 ))}
             </div>
 
-            {/* Gecikmeler */}
             <div className="card fade-in">
               <div className="card-h">
                 <span className="card-title">Gecikmeler</span>
@@ -265,7 +267,7 @@ export default function DashboardPage() {
                 ? <div style={{padding:'28px',textAlign:'center',color:'var(--green)',fontSize:13,fontWeight:500}}>✓ Geciken görev yok</div>
                 : overdueTop.map((t:any) => {
                   const days=Math.floor((now.getTime()-new Date(t.due_date).getTime())/86400000)
-                  const c=PRI_C[t.priority]||'var(--text-faint)'
+                  const c=PRI_C[t.priority]||'#5d5d6b'
                   return (
                     <div key={t.id} className="tr">
                       <div style={{width:6,height:6,borderRadius:'50%',background:c,flexShrink:0}}/>
@@ -279,7 +281,6 @@ export default function DashboardPage() {
                 })}
             </div>
 
-            {/* Bu Hafta */}
             <div className="card fade-in">
               <div className="card-h">
                 <span className="card-title">Bu Hafta Teslim</span>
@@ -292,14 +293,14 @@ export default function DashboardPage() {
                   const urgent=diff<=1
                   return (
                     <div key={t.id} className="tr">
-                      <div style={{width:6,height:6,borderRadius:'50%',background:urgent?'var(--red)':'var(--border-strong)',flexShrink:0}}/>
+                      <div style={{width:6,height:6,borderRadius:'50%',background:urgent?'#f87171':'var(--border-strong)',flexShrink:0}}/>
                       <div style={{flex:1,minWidth:0}}>
                         <div style={{fontSize:13,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{t.title||'Görev'}</div>
                         <div style={{fontSize:11.5,color:'var(--text-faint)',marginTop:2}}>
                           {diff===0?'Bugün':diff===1?'Yarın':`${diff} gün sonra`}
                         </div>
                       </div>
-                      <span style={{fontSize:12,fontWeight:500,color:urgent?'var(--red)':'var(--text-dim)',fontFamily:'JetBrains Mono,monospace',flexShrink:0}}>
+                      <span style={{fontSize:12,fontWeight:500,color:urgent?'#f87171':'var(--text-dim)',fontFamily:'JetBrains Mono,monospace',flexShrink:0}}>
                         {String(t.due_date).slice(5,10)}
                       </span>
                     </div>
