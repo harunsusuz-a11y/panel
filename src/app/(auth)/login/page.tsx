@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { LayoutDashboard, Mail, Lock, ArrowRight } from 'lucide-react'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -9,150 +10,105 @@ export default function LoginPage() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    const supabase = createClient()
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    createClient().auth.getSession().then(({ data: { session } }) => {
       if (session) window.location.replace('/dashboard')
     })
   }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setLoading(true)
-    setError('')
-    try {
-      const supabase = createClient()
-      const { data, error: err } = await supabase.auth.signInWithPassword({ email, password })
-      if (err) { setError('E-posta veya şifre hatalı.'); setLoading(false); return }
-      if (data.session) window.location.replace('/dashboard')
-    } catch { setError('Beklenmedik hata oluştu.'); setLoading(false) }
-  }
-
-  const inp: React.CSSProperties = {
-    width: '100%',
-    background: 'rgba(255,255,255,0.04)',
-    border: '1px solid rgba(255,255,255,0.08)',
-    borderRadius: 9,
-    padding: '11px 14px',
-    fontSize: 13,
-    color: '#e8ecf7',
-    outline: 'none',
-    fontFamily: 'Inter,sans-serif',
-    transition: 'border-color 0.2s',
+    setLoading(true); setError('')
+    const { data, error: err } = await createClient().auth.signInWithPassword({ email, password })
+    if (err) { setError('E-posta veya şifre hatalı.'); setLoading(false) }
+    else if (data.session) window.location.replace('/dashboard')
   }
 
   return (
     <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: '#07090f',
-      fontFamily: 'Inter,sans-serif',
-      position: 'relative',
-      overflow: 'hidden',
+      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: 'var(--bg)', fontFamily: 'Inter,sans-serif', padding: 16, position: 'relative', overflow: 'hidden'
     }}>
-      {/* Background grid */}
+      {/* Subtle grid */}
       <div style={{
-        position: 'absolute', inset: 0,
-        backgroundImage: 'linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)',
-        backgroundSize: '40px 40px',
-        pointerEvents: 'none',
+        position: 'absolute', inset: 0, opacity: 0.4,
+        backgroundImage: 'radial-gradient(circle at 1px 1px, var(--s4) 1px, transparent 0)',
+        backgroundSize: '32px 32px', pointerEvents: 'none'
       }}/>
-      {/* Glow */}
+      {/* Gold glow */}
       <div style={{
-        position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)',
-        width: 600, height: 300,
-        background: 'radial-gradient(ellipse, rgba(240,180,41,0.07) 0%, transparent 70%)',
-        pointerEvents: 'none',
+        position: 'absolute', top: '15%', left: '50%', transform: 'translateX(-50%)',
+        width: 500, height: 250, pointerEvents: 'none',
+        background: 'radial-gradient(ellipse, rgba(232,160,32,0.06) 0%, transparent 70%)',
       }}/>
 
       <div style={{
-        background: 'rgba(13,15,24,0.9)',
-        backdropFilter: 'blur(24px)',
-        WebkitBackdropFilter: 'blur(24px)',
-        border: '1px solid rgba(255,255,255,0.07)',
-        borderRadius: 18,
-        padding: '40px 38px',
-        width: 390,
-        position: 'relative',
-        boxShadow: '0 32px 80px rgba(0,0,0,0.5)',
+        position: 'relative', width: '100%', maxWidth: 380,
+        background: 'var(--s1)', border: '1px solid var(--glass-border)',
+        borderRadius: 14, overflow: 'hidden',
+        boxShadow: '0 24px 64px rgba(0,0,0,0.4)',
       }}>
-        {/* Top accent line */}
-        <div style={{
-          position: 'absolute', top: 0, left: '20%', right: '20%', height: 1,
-          background: 'linear-gradient(90deg, transparent, rgba(240,180,41,0.6), transparent)',
-          borderRadius: 1,
-        }}/>
+        {/* Top accent */}
+        <div style={{ height: 1, background: 'linear-gradient(90deg, transparent, var(--gold), transparent)' }}/>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 36 }}>
-          <div style={{
-            width: 38, height: 38,
-            background: 'linear-gradient(135deg, #f0b429 0%, #e8941a 100%)',
-            borderRadius: 11,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 4px 16px rgba(240,180,41,0.35)',
-          }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="#000">
-              <rect x="3" y="3" width="7" height="11" rx="1.5"/>
-              <rect x="14" y="3" width="7" height="7" rx="1.5"/>
-              <rect x="14" y="14" width="7" height="7" rx="1.5"/>
-            </svg>
-          </div>
-          <div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: '#e8ecf7', letterSpacing: '-0.2px' }}>Agency ERP</div>
-            <div style={{ fontSize: 10, color: '#3a3f57', fontWeight: 500, marginTop: 1 }}>Ajans Yönetim Sistemi</div>
-          </div>
-        </div>
-
-        <h1 style={{ fontSize: 22, fontWeight: 800, color: '#e8ecf7', marginBottom: 6, letterSpacing: '-0.3px' }}>Giriş Yap</h1>
-        <p style={{ fontSize: 13, color: '#7882a0', marginBottom: 28, lineHeight: 1.5 }}>Hesabınıza erişmek için bilgilerinizi girin.</p>
-
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#7882a0', marginBottom: 7 }}>E-posta</label>
-            <input
-              type="email" value={email}
-              onChange={e => setEmail(e.target.value)}
-              required placeholder="emir@ajans.com" style={inp}
-              onFocus={e => (e.target.style.borderColor = 'rgba(240,180,41,0.4)')}
-              onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.08)')}
-            />
-          </div>
-          <div>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#7882a0', marginBottom: 7 }}>Şifre</label>
-            <input
-              type="password" value={password}
-              onChange={e => setPassword(e.target.value)}
-              required placeholder="••••••••" style={inp}
-              onFocus={e => (e.target.style.borderColor = 'rgba(240,180,41,0.4)')}
-              onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.08)')}
-            />
-          </div>
-
-          {error && (
+        <div style={{ padding: '28px 28px 32px' }}>
+          {/* Logo */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 28 }}>
             <div style={{
-              fontSize: 12, color: '#f04444',
-              background: 'rgba(240,68,68,0.1)',
-              border: '1px solid rgba(240,68,68,0.2)',
-              padding: '10px 14px', borderRadius: 8,
-            }}>{error}</div>
-          )}
+              width: 34, height: 34, borderRadius: 9, background: 'var(--gold-g)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 3px 10px rgba(232,160,32,0.3)',
+            }}>
+              <LayoutDashboard size={16} color="#000" strokeWidth={2.5}/>
+            </div>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', letterSpacing: '-.2px' }}>Agency ERP</div>
+              <div style={{ fontSize: 10, color: 'var(--t3)', marginTop: 1 }}>Operasyon Yönetimi</div>
+            </div>
+          </div>
 
-          <button type="submit" disabled={loading} style={{
-            background: 'linear-gradient(135deg, #f0b429 0%, #e8941a 100%)',
-            color: '#000', fontWeight: 700, fontSize: 13.5,
-            padding: '13px', borderRadius: 10, border: 'none',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.7 : 1,
-            fontFamily: 'Inter,sans-serif',
-            marginTop: 4,
-            letterSpacing: '0.01em',
-            boxShadow: '0 4px 16px rgba(240,180,41,0.25)',
-            transition: 'opacity 0.2s, transform 0.1s',
-          }}>
-            {loading ? 'Giriş yapılıyor...' : 'Giriş Yap →'}
-          </button>
-        </form>
+          <h1 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text)', marginBottom: 6, letterSpacing: '-.3px' }}>
+            Giriş Yap
+          </h1>
+          <p style={{ fontSize: 12, color: 'var(--t2)', marginBottom: 24, lineHeight: 1.5 }}>
+            Hesabınıza erişmek için bilgilerinizi girin.
+          </p>
+
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--t2)', display: 'block', marginBottom: 6 }}>E-posta</label>
+              <div style={{ position: 'relative' }}>
+                <Mail size={14} color="var(--t3)" style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)' }}/>
+                <input
+                  type="email" value={email} onChange={e => setEmail(e.target.value)} required
+                  placeholder="emir@ajans.com" className="erp-input"
+                  style={{ paddingLeft: 32 }}
+                />
+              </div>
+            </div>
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--t2)', display: 'block', marginBottom: 6 }}>Şifre</label>
+              <div style={{ position: 'relative' }}>
+                <Lock size={14} color="var(--t3)" style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)' }}/>
+                <input
+                  type="password" value={password} onChange={e => setPassword(e.target.value)} required
+                  placeholder="••••••••" className="erp-input"
+                  style={{ paddingLeft: 32 }}
+                />
+              </div>
+            </div>
+
+            {error && (
+              <div style={{ padding: '9px 12px', borderRadius: 7, background: 'var(--red-d)', color: 'var(--red)', fontSize: 12, fontWeight: 500 }}>
+                {error}
+              </div>
+            )}
+
+            <button type="submit" disabled={loading} className="erp-btn"
+              style={{ width: '100%', justifyContent: 'center', padding: '11px', marginTop: 4, fontSize: 13, gap: 8 }}>
+              {loading ? 'Giriş yapılıyor...' : <><span>Giriş Yap</span><ArrowRight size={15} strokeWidth={2}/></>}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   )
