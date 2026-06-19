@@ -10,7 +10,7 @@ export default function LoginPage() {
   const [error, setError]       = useState('')
 
   useEffect(() => {
-    createClient().auth.getSession().then(({ data: { session } }) => {
+    createClient().auth.getSession().then(({data:{session}}) => {
       if (session) window.location.replace('/dashboard')
     })
   }, [])
@@ -18,77 +18,77 @@ export default function LoginPage() {
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true); setError('')
-    const { data, error: err } = await createClient().auth.signInWithPassword({ email, password })
+    const {data,error:err} = await createClient().auth.signInWithPassword({email,password})
     if (err) { setError('E-posta veya şifre hatalı.'); setLoading(false) }
     else if (data.session) window.location.replace('/dashboard')
   }
 
   return (
     <div style={{
-      minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center',
-      background:'var(--bg)', fontFamily:'Inter,sans-serif', padding:20,
+      minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',
+      background:'var(--bg)',padding:20,position:'relative',
     }}>
-      {/* Subtle dot grid */}
+      {/* Grid bg */}
       <div style={{
-        position:'fixed', inset:0, pointerEvents:'none', opacity:.35,
-        backgroundImage:'radial-gradient(circle, var(--c3) 1px, transparent 0)',
-        backgroundSize:'28px 28px',
+        position:'fixed',inset:0,pointerEvents:'none',
+        backgroundImage:'radial-gradient(circle,rgba(255,255,255,0.04) 1px,transparent 0)',
+        backgroundSize:'30px 30px',
+      }}/>
+      {/* Glow */}
+      <div style={{
+        position:'fixed',top:'20%',left:'50%',transform:'translateX(-50%)',
+        width:500,height:200,pointerEvents:'none',
+        background:'radial-gradient(ellipse,rgba(99,102,241,0.06) 0%,transparent 70%)',
       }}/>
 
       <div style={{
-        position:'relative', width:'100%', maxWidth:340,
-        background:'var(--c1)', border:'1px solid var(--bdr)',
-        borderRadius:8, overflow:'hidden',
-        boxShadow:'0 16px 48px rgba(0,0,0,0.45)',
+        position:'relative',width:'100%',maxWidth:380,
+        background:'var(--surface)',
+        border:'1px solid var(--border-strong)',
+        borderRadius:20,overflow:'hidden',
+        boxShadow:'0 24px 64px rgba(0,0,0,0.5)',
       }}>
-        {/* Top gold line */}
-        <div style={{height:1,background:'linear-gradient(90deg,transparent,var(--gold),transparent)'}}/>
-
-        <div style={{padding:'24px 22px 28px'}}>
+        <div style={{padding:'28px 26px 32px'}}>
           {/* Logo */}
-          <div style={{display:'flex',alignItems:'center',gap:9,marginBottom:24}}>
+          <div style={{display:'flex',alignItems:'center',gap:11,marginBottom:28}}>
             <div style={{
-              width:28, height:28, borderRadius:5,
-              background:'var(--gold)', display:'flex', alignItems:'center', justifyContent:'center',
+              width:34,height:34,borderRadius:9,
+              background:'var(--accent)',
+              display:'flex',alignItems:'center',justifyContent:'center',
             }}>
-              <LayoutDashboard size={14} color="#000" strokeWidth={2}/>
+              <LayoutDashboard size={16} color="#fff" strokeWidth={2}/>
             </div>
             <div>
-              <div style={{fontSize:13,fontWeight:700,color:'var(--text)',letterSpacing:'-.2px',lineHeight:1.2}}>Agency ERP</div>
-              <div style={{fontSize:9,color:'var(--t3)',marginTop:1}}>Operasyon Yönetimi</div>
+              <div style={{fontSize:14,fontWeight:700,color:'var(--text)',letterSpacing:'-.2px',lineHeight:1.2}}>Agency ERP</div>
+              <div style={{fontSize:11,color:'var(--text-faint)',marginTop:2}}>Operasyon Yönetimi</div>
             </div>
           </div>
 
-          <div style={{fontSize:17,fontWeight:700,color:'var(--text)',marginBottom:4,letterSpacing:'-.25px'}}>Giriş Yap</div>
-          <div style={{fontSize:11,color:'var(--t2)',marginBottom:20,lineHeight:1.5}}>Sisteme erişmek için kimlik doğrulamanız gerekiyor.</div>
+          <div className="page-title" style={{fontSize:22,marginBottom:6}}>Giriş Yap</div>
+          <div style={{fontSize:13.5,color:'var(--text-dim)',marginBottom:24,lineHeight:1.5}}>
+            Hesabınıza erişmek için kimlik doğrulamanız gerekiyor.
+          </div>
 
-          <form onSubmit={submit} style={{display:'flex',flexDirection:'column',gap:12}}>
+          <form onSubmit={submit} style={{display:'flex',flexDirection:'column',gap:14}}>
             <div>
-              <label style={{fontSize:10.5,fontWeight:600,color:'var(--t2)',display:'block',marginBottom:5,textTransform:'uppercase',letterSpacing:'.06em'}}>E-posta</label>
-              <input
-                type="email" value={email} onChange={e=>setEmail(e.target.value)} required
-                placeholder="emir@ajans.com" className="inp"
-              />
+              <label style={{fontSize:12,fontWeight:500,color:'var(--text-dim)',display:'block',marginBottom:7}}>E-posta</label>
+              <input type="email" value={email} onChange={e=>setEmail(e.target.value)} required placeholder="emir@ajans.com"/>
             </div>
             <div>
-              <label style={{fontSize:10.5,fontWeight:600,color:'var(--t2)',display:'block',marginBottom:5,textTransform:'uppercase',letterSpacing:'.06em'}}>Şifre</label>
-              <input
-                type="password" value={password} onChange={e=>setPassword(e.target.value)} required
-                placeholder="••••••••" className="inp"
-              />
+              <label style={{fontSize:12,fontWeight:500,color:'var(--text-dim)',display:'block',marginBottom:7}}>Şifre</label>
+              <input type="password" value={password} onChange={e=>setPassword(e.target.value)} required placeholder="••••••••"/>
             </div>
 
             {error && (
               <div style={{
-                padding:'8px 11px', borderRadius:5,
-                background:'var(--red-d)', color:'var(--red)',
-                border:'1px solid rgba(224,82,82,0.15)',
-                fontSize:11.5, fontWeight:500
+                padding:'10px 14px',borderRadius:10,
+                background:'var(--red-soft)',color:'var(--red)',
+                border:'1px solid rgba(248,113,113,0.2)',
+                fontSize:13,fontWeight:500
               }}>{error}</div>
             )}
 
-            <button type="submit" disabled={loading} className="btn"
-              style={{width:'100%',justifyContent:'center',padding:'9px',fontSize:12.5,marginTop:2,fontWeight:600}}>
+            <button type="submit" disabled={loading} className="btn" style={{width:'100%',justifyContent:'center',padding:'11px',marginTop:4,fontSize:14}}>
               {loading ? 'Doğrulanıyor...' : 'Giriş Yap'}
             </button>
           </form>
