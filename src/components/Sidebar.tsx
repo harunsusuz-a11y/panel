@@ -29,21 +29,19 @@ const NAV = [
   ]},
 ]
 
-export default function Sidebar({ user: _user }: { user: any }) {
+export default function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
-  const [userInfo, setUserInfo] = useState<{name:string, email:string} | null>(null)
+  const [name, setName] = useState('')
+  const [initials, setInitials] = useState('?')
 
   useEffect(() => {
     const supabase = createClient()
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
-        setUserInfo({
-          name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Kullanıcı',
-          email: user.email || ''
-        })
-      } else {
-        router.push('/login')
+        const n = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Kullanıcı'
+        setName(n)
+        setInitials(n.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0,2))
       }
     })
   }, [])
@@ -51,11 +49,9 @@ export default function Sidebar({ user: _user }: { user: any }) {
   async function logout() {
     const supabase = createClient()
     await supabase.auth.signOut()
-    router.push('/login')
-    router.refresh()
+    window.location.href = '/login'
   }
 
-  const initials = userInfo?.name?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2) || '??'
   const isActive = (href: string) => href === '/dashboard' ? pathname === href : pathname.startsWith(href)
 
   return (
@@ -83,7 +79,7 @@ export default function Sidebar({ user: _user }: { user: any }) {
                   style={{display:'flex',alignItems:'center',gap:7,padding:'7px 10px',margin:'1px 5px',borderRadius:6,
                     cursor:'pointer',fontSize:12,fontWeight:active?500:400,
                     color:active?'var(--gold)':'var(--t2)',
-                    background:active?'var(--gold-d)':'transparent',
+                    background:active?'rgba(233,168,37,0.12)':'transparent',
                     position:'relative',transition:'all .1s'}}>
                   {active && <div style={{position:'absolute',left:-5,top:'50%',transform:'translateY(-50%)',width:2.5,height:14,background:'var(--gold)',borderRadius:'0 2px 2px 0'}}/>}
                   <span style={{fontSize:14,width:16,textAlign:'center',flexShrink:0}}>{item.icon}</span>
@@ -102,7 +98,7 @@ export default function Sidebar({ user: _user }: { user: any }) {
         </div>
         <div style={{flex:1,minWidth:0}}>
           <div style={{fontSize:12,fontWeight:500,color:'var(--t2)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
-            {userInfo?.name || 'Yükleniyor...'}
+            {name || 'Yükleniyor...'}
           </div>
           <div style={{fontSize:9,color:'var(--t3)'}}>Çıkış için tıkla</div>
         </div>
