@@ -1,78 +1,42 @@
 'use client'
-import { usePathname, useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { LayoutDashboard, CheckSquare, FolderKanban, Users, DollarSign } from 'lucide-react'
 
 const NAV = [
-  { href: '/dashboard', label: 'Ana Sayfa', icon: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="3" width="7" height="11" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-  )},
-  { href: '/dashboard/gorevler', label: 'Görevler', icon: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-  )},
-  { href: '/dashboard/projeler', label: 'Projeler', icon: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-  )},
-  { href: '/dashboard/musteriler', label: 'Müşteriler', icon: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-  )},
-  { href: '/dashboard/finans', label: 'Finans', icon: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-  )},
+  { href: '/dashboard',            label: 'Ana Sayfa',  Icon: LayoutDashboard },
+  { href: '/dashboard/gorevler',   label: 'Görevler',   Icon: CheckSquare },
+  { href: '/dashboard/projeler',   label: 'Projeler',   Icon: FolderKanban },
+  { href: '/dashboard/musteriler', label: 'Müşteriler', Icon: Users },
+  { href: '/dashboard/finans',     label: 'Finans',     Icon: DollarSign },
 ]
 
 export default function BottomNav() {
   const pathname = usePathname()
-  const router = useRouter()
-  const isActive = (href: string) => href === '/dashboard' ? pathname === href : pathname.startsWith(href)
+  const isActive = (href: string) =>
+    href === '/dashboard' ? pathname === href : pathname.startsWith(href)
 
   return (
-    <nav style={{
-      width: '100%',
-      height: 56,
-      background: 'rgba(13,15,24,0.97)',
-      backdropFilter: 'blur(20px)',
-      WebkitBackdropFilter: 'blur(20px)',
-      borderTop: '1px solid var(--glass-border)',
-      display: 'flex',
-      alignItems: 'center',
-    }}>
-      {NAV.map(item => {
-        const active = isActive(item.href)
-        return (
-          <button
-            key={item.href}
-            onClick={() => router.push(item.href)}
-            style={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 3,
-              height: '100%',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              color: active ? 'var(--gold)' : 'var(--t2)',
-              padding: 0,
-              transition: 'color 0.15s',
-            }}
-          >
-            <span style={{ opacity: active ? 1 : 0.5 }}>{item.icon}</span>
-            <span style={{ fontSize: 9.5, fontWeight: active ? 700 : 400, letterSpacing: '0.01em' }}>{item.label}</span>
-            {active && (
-              <div style={{
-                position: 'absolute',
-                bottom: 0,
-                width: 28,
-                height: 2,
-                background: 'var(--gold)',
-                borderRadius: '2px 2px 0 0',
-                boxShadow: '0 0 8px var(--gold)',
-              }}/>
-            )}
-          </button>
-        )
-      })}
-    </nav>
+    <>
+      <style>{`
+        .bnav{width:100%;height:54px;background:rgba(13,17,23,0.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--glass-border);display:flex;align-items:stretch}
+        .bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--t2);font-size:9px;font-weight:400;text-decoration:none;position:relative;transition:color 0.1s}
+        .bnav-item.act{color:var(--gold);font-weight:600}
+        .bnav-item.act::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:20px;height:2px;background:var(--gold);border-radius:2px 2px 0 0}
+        .bnav-icon{opacity:0.45;display:flex}
+        .bnav-item.act .bnav-icon{opacity:1}
+      `}</style>
+      <nav className="bnav">
+        {NAV.map(({ href, label, Icon }) => {
+          const active = isActive(href)
+          return (
+            <Link key={href} href={href} className={`bnav-item${active ? ' act' : ''}`}>
+              <span className="bnav-icon"><Icon size={18} strokeWidth={1.8}/></span>
+              <span>{label}</span>
+            </Link>
+          )
+        })}
+      </nav>
+    </>
   )
 }
