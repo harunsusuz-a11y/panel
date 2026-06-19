@@ -1,6 +1,7 @@
 'use client'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { useEffect, useState } from 'react'
 
 const NAV = [
   { group: 'Ana', items: [
@@ -28,9 +29,24 @@ const NAV = [
   ]},
 ]
 
-export default function Sidebar({ user }: { user: any }) {
+export default function Sidebar({ user: _user }: { user: any }) {
   const pathname = usePathname()
   const router = useRouter()
+  const [userInfo, setUserInfo] = useState<{name:string, email:string} | null>(null)
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        setUserInfo({
+          name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Kullanıcı',
+          email: user.email || ''
+        })
+      } else {
+        router.push('/login')
+      }
+    })
+  }, [])
 
   async function logout() {
     const supabase = createClient()
@@ -39,14 +55,11 @@ export default function Sidebar({ user }: { user: any }) {
     router.refresh()
   }
 
-  const initials = (user?.user_metadata?.full_name || user?.email || 'U')
-    .split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0,2)
-
+  const initials = userInfo?.name?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2) || '??'
   const isActive = (href: string) => href === '/dashboard' ? pathname === href : pathname.startsWith(href)
 
   return (
     <aside style={{width:220,background:'var(--s1)',borderRight:'1px solid var(--border)',display:'flex',flexDirection:'column',height:'100vh',flexShrink:0}}>
-      {/* Logo */}
       <div style={{padding:'16px 14px',borderBottom:'1px solid var(--border)',display:'flex',alignItems:'center',gap:9}}>
         <div style={{width:28,height:28,background:'var(--gold)',borderRadius:7,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="#000"><rect x="3" y="3" width="7" height="11" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -57,7 +70,6 @@ export default function Sidebar({ user }: { user: any }) {
         </div>
       </div>
 
-      {/* Nav */}
       <nav style={{flex:1,overflowY:'auto',padding:'4px 0 12px'}}>
         {NAV.map(section => (
           <div key={section.group}>
@@ -83,7 +95,6 @@ export default function Sidebar({ user }: { user: any }) {
         ))}
       </nav>
 
-      {/* User */}
       <div onClick={logout} title="Çıkış yap"
         style={{padding:'10px 12px',borderTop:'1px solid var(--border)',display:'flex',alignItems:'center',gap:8,cursor:'pointer'}}>
         <div style={{width:26,height:26,borderRadius:'50%',background:'var(--gold)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,fontWeight:700,color:'#000',flexShrink:0}}>
@@ -91,7 +102,7 @@ export default function Sidebar({ user }: { user: any }) {
         </div>
         <div style={{flex:1,minWidth:0}}>
           <div style={{fontSize:12,fontWeight:500,color:'var(--t2)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
-            {user?.user_metadata?.full_name || user?.email?.split('@')[0]}
+            {userInfo?.name || 'Yükleniyor...'}
           </div>
           <div style={{fontSize:9,color:'var(--t3)'}}>Çıkış için tıkla</div>
         </div>
