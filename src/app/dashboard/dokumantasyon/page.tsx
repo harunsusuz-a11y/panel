@@ -154,7 +154,7 @@ const PAGES = [
     features: [
       'Proje aşamaları (Bekliyor → Devam → Onay Bekliyor → Tamamlandı)',
       'Her aşamaya "Müşteri Onayı Gerekiyor" işareti eklenebilir',
-      'Dosya yükleme — müşteriye görünür/görünmez seçeneği',
+      'Dosya yükleme — işi yapan kişi kendi aşamasını tamamlayınca dosyayı yükler, müşteriye görünür/görünmez seçeneği vardır',
       '"Portal Linki" butonu ile müşteriye özel erişim linki oluşturulur',
       'Proje ilerleme yüzdesi aşama tamamlanınca otomatik hesaplanır',
     ],
@@ -311,7 +311,7 @@ const WORKFLOWS = [
       { who: 'Emir', action: 'Projeyi sisteme ekler, müşteri atar, deadline girer' },
       { who: 'Mert', action: 'Aşamaları tanımlar, görevi ilgili kişiye atar' },
       { who: 'Aslı/Gizem/Yasin', action: 'Görevleri tamamlar, kanban\'da ilerletir' },
-      { who: 'Mert', action: 'Aşama tamamlanınca Projeler → Dosya Yükle ile dosyayı ekler' },
+      { who: 'Aslı / Gizem / Yasin', action: 'Kendi aşamasını tamamlayınca Projeler → Dosyalar sekmesine dosyayı yükler' },
       { who: 'Emir', action: 'Final onay verir' },
       { who: 'Mert', action: '"Portal Linki" oluşturur, müşteri dosyaları indirir' },
     ]

@@ -69,7 +69,7 @@ export default function ProjelerPage() {
     const sb = createClient()
     const [st, fi] = await Promise.all([
       sb.from('project_stages').select('*').eq('project_id',p.id).order('order_index'),
-      sb.from('project_files').select('*').eq('project_id',p.id).order('created_at',{ascending:false}),
+      sb.from('project_files').select('*, uploader:profiles!project_files_uploaded_by_fkey(full_name)').eq('project_id',p.id).order('created_at',{ascending:false}),
     ])
     setStages(st.data||[]); setFiles(fi.data||[])
   }
@@ -339,7 +339,7 @@ export default function ProjelerPage() {
                         </div>
                         <div style={{flex:1,minWidth:0}}>
                           <div style={{fontSize:13,fontWeight:500,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{f.name}</div>
-                          <div style={{fontSize:11,color:'var(--tx3)',marginTop:2}}>{fmtSize(f.file_size)} · {new Date(f.created_at).toLocaleDateString('tr-TR')}</div>
+                          <div style={{fontSize:11,color:'var(--tx3)',marginTop:2}}>{fmtSize(f.file_size)} · {new Date(f.created_at).toLocaleDateString('tr-TR')}{f.uploader?.full_name ? ' · ' + f.uploader.full_name.split(' ')[0] + ' yükledi' : ''}</div>
                         </div>
                         <a href={f.file_path} download target="_blank" rel="noreferrer" className="btn-ghost" style={{display:'flex',alignItems:'center',gap:5,fontSize:12}}>
                           <Download size={12}/>İndir
