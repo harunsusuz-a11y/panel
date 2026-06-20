@@ -7,7 +7,7 @@ import { CheckCircle2 } from 'lucide-react'
 const PRI_C: Record<string,string> = { critical:'var(--red)', high:'var(--amber)', normal:'var(--blue)', low:'var(--tx3)' }
 const PRI_L: Record<string,string> = { critical:'Kritik', high:'Yüksek', normal:'Normal', low:'Düşük' }
 
-export default function GecikmelerPage() {
+export default function PerformansPage() {
   const [tasks, setTasks] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -37,7 +37,7 @@ export default function GecikmelerPage() {
 
   return (
     <div style={{display:'flex',flexDirection:'column',height:'100%',overflow:'hidden'}}>
-      <TopBar title="Gecikmeler" subtitle={`${tasks.length} geciken görev`} />
+      <TopBar title="Performans" subtitle={`${tasks.length} geciken görev`} />
       <div style={{flex:1,overflowY:'auto',padding:'18px 20px 80px'}}>
         {loading ? <p style={{color:'var(--tx3)',fontSize:13}}>Yükleniyor...</p>
         : tasks.length===0 ? (
