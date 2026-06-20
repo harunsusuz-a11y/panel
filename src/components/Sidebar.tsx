@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Users, FolderOpen, CheckSquare, CalendarDays,
   FileText, Activity, AlertCircle, ShieldCheck,
   Receipt, BarChart2, TrendingUp, UserCog, Workflow,
-  SlidersHorizontal, LogOut
+  SlidersHorizontal, LogOut, BookOpen
 } from 'lucide-react'
 
 // Daydream erişim matrisi
@@ -36,6 +36,7 @@ const NAV_ALL = [
     { href: '/dashboard/kullanicilar',   label: 'Kullanıcılar', Icon: UserCog,         roles: ['admin'] },
     { href: '/dashboard/otomasyonlar',   label: 'Otomasyonlar', Icon: Workflow,        roles: ['admin','manager'] },
     { href: '/dashboard/ayarlar',        label: 'Ayarlar',      Icon: SlidersHorizontal, roles: ['admin','manager','member'] },
+    { href: '/dashboard/dokumantasyon',  label: 'Kılavuz',      Icon: BookOpen,           roles: ['admin','manager','member'] },
   ]},
 ]
 
