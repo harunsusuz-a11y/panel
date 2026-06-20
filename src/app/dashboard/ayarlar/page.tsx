@@ -1,17 +1,156 @@
 'use client'
+import React from 'react'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
-import { User, Lock, MessageSquare, Mail, Building2, Send, CheckCircle2 } from 'lucide-react'
+import { User, Lock, MessageSquare, Mail, Building2, Send, CheckCircle2, Bell, BellOff } from 'lucide-react'
 
 const TABS = [
   { k:'profile',  l:'Profil',     Icon:User          },
   { k:'security', l:'Güvenlik',   Icon:Lock          },
   { k:'netgsm',   l:'Netgsm SMS', Icon:MessageSquare },
+  { k:'bildirim', l:'Bildirimler', Icon:Bell          },
   { k:'smtp',     l:'E-posta',    Icon:Mail          },
   { k:'company',  l:'Şirket',     Icon:Building2     },
 ] as const
-type Tab = typeof TABS[number]['k']
+type Tab = 'profile' | 'security' | 'netgsm' | 'smtp' | 'company' | 'bildirim'
+
+
+function NotificationSettings() {
+  const [perm,    setPerm]    = React.useState<string>('default')
+  const [subbed,  setSubbed]  = React.useState(false)
+  const [testing, setTesting] = React.useState(false)
+  const [msg,     setMsg]     = React.useState('')
+
+  React.useEffect(() => {
+    if (!('Notification' in window)) { setPerm('unsupported'); return }
+    setPerm(Notification.permission)
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+      navigator.serviceWorker.ready.then(reg => {
+        reg.pushManager.getSubscription().then(sub => setSubbed(!!sub))
+      }).catch(() => {})
+    }
+  }, [])
+
+  async function enable() {
+    const p = await Notification.requestPermission()
+    setPerm(p)
+    if (p !== 'granted') { setMsg('Tarayıcıdan izin reddedildi.'); return }
+    try {
+      const reg = await navigator.serviceWorker.ready
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+          ? urlB64(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) : undefined
+      })
+      const res = await fetch('/api/push/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subscription: sub.toJSON() })
+      })
+      if (res.ok) { setSubbed(true); setMsg('✓ Bildirimler aktif!') }
+    } catch (e: any) { setMsg('Hata: ' + e.message) }
+  }
+
+  async function disable() {
+    try {
+      const reg = await navigator.serviceWorker.ready
+      const sub = await reg.pushManager.getSubscription()
+      if (sub) {
+        await fetch('/api/push/subscribe', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ endpoint: sub.endpoint })
+        })
+        await sub.unsubscribe()
+      }
+      setSubbed(false); setMsg('Bildirimler kapatıldı.')
+    } catch (e: any) { setMsg('Hata: ' + e.message) }
+  }
+
+  async function testNotif() {
+    setTesting(true)
+    if ('serviceWorker' in navigator) {
+      const reg = await navigator.serviceWorker.ready.catch(() => null)
+      if (reg) {
+        await reg.showNotification('Daydream Production', {
+          body: 'Test bildirimi — sistem çalışıyor ✓',
+          icon: '/icons/icon-192.png',
+          vibrate: [200, 100, 200],
+        }).catch(() => {})
+      }
+    }
+    setTesting(false); setMsg('Test bildirimi gönderildi!')
+  }
+
+  const notSupported = perm === 'unsupported' || !('serviceWorker' in (typeof navigator !== 'undefined' ? navigator : {}))
+
+  return (
+    <>
+      <div style={{background:'var(--s2)',borderRadius:12,padding:'18px',border:'1px solid var(--bdr)'}}>
+        <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:14}}>
+          <div style={{width:40,height:40,borderRadius:10,background:perm==='granted'&&subbed?'var(--green2)':'var(--s3)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+            {perm==='granted'&&subbed
+              ? <CheckCircle2 size={18} style={{color:'var(--green)'}} strokeWidth={2}/>
+              : <BellOff size={18} style={{color:'var(--tx3)'}} strokeWidth={1.8}/>
+            }
+          </div>
+          <div>
+            <p style={{fontSize:14,fontWeight:700}}>Push Bildirimleri</p>
+            <p style={{fontSize:12,color:'var(--tx3)',marginTop:2}}>
+              {notSupported ? 'Bu tarayıcı desteklemiyor'
+                : perm === 'denied' ? '⚠ Tarayıcıda engellendi — Ayarlardan açın'
+                : subbed ? '✓ Aktif — Bildirimler geliyor'
+                : 'Kapalı — Etkinleştirin'}
+            </p>
+          </div>
+        </div>
+
+        {!notSupported && perm !== 'denied' && (
+          <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+            {!subbed
+              ? <button className="btn" onClick={enable} style={{flex:1,justifyContent:'center',padding:'9px'}}>
+                  <Bell size={14} strokeWidth={2}/>Bildirimleri Aç
+                </button>
+              : <>
+                  <button className="btn" onClick={testNotif} disabled={testing} style={{flex:1,justifyContent:'center',padding:'9px'}}>
+                    Test Bildirimi Gönder
+                  </button>
+                  <button className="btn-ghost" onClick={disable} style={{padding:'9px 14px'}}>
+                    Kapat
+                  </button>
+                </>
+            }
+          </div>
+        )}
+        {msg && <p style={{fontSize:12.5,color:'var(--green)',marginTop:10,fontWeight:600}}>{msg}</p>}
+      </div>
+
+      <div style={{background:'var(--s2)',borderRadius:12,padding:'16px',border:'1px solid var(--bdr)'}}>
+        <p style={{fontSize:13,fontWeight:700,marginBottom:10}}>Telefona Uygulama Olarak Ekle</p>
+        <div style={{display:'flex',flexDirection:'column',gap:8}}>
+          <div style={{background:'var(--s3)',borderRadius:8,padding:'10px 12px'}}>
+            <p style={{fontSize:12,fontWeight:600,color:'var(--ac)',marginBottom:4}}>iPhone / Safari</p>
+            <p style={{fontSize:12,color:'var(--tx2)',lineHeight:1.6}}>Paylaş ↑ butonuna tıkla → <strong>"Ana Ekrana Ekle"</strong> seç</p>
+          </div>
+          <div style={{background:'var(--s3)',borderRadius:8,padding:'10px 12px'}}>
+            <p style={{fontSize:12,fontWeight:600,color:'var(--green)',marginBottom:4}}>Android / Chrome</p>
+            <p style={{fontSize:12,color:'var(--tx2)',lineHeight:1.6}}>⋮ menüsü → <strong>"Ana ekrana ekle"</strong> veya tarayıcı üstünde çıkan banner'a tıkla</p>
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}
+
+function urlB64(base64String: string): ArrayBuffer {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4)
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
+  const rawData = window.atob(base64)
+  const outputArray = new Uint8Array(rawData.length)
+  for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i)
+  return outputArray.buffer
+}
 
 export default function AyarlarPage() {
   const [user,    setUser]    = useState<any>(null)

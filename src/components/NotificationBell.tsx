@@ -37,7 +37,27 @@ export default function NotificationBell() {
       // Realtime
       channelRef.current = sb.channel(`notif-${user.id}`)
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
-          () => load(user.id))
+          async (payload: any) => {
+            load(user.id)
+            // Push notification gönder (sayfa arka planda olabilir)
+            if (Notification.permission === 'granted' && payload.new) {
+              const n = payload.new
+              // Service worker üzerinden push (eğer kayıtlıysa)
+              if ('serviceWorker' in navigator) {
+                const reg = await navigator.serviceWorker.ready.catch(() => null)
+                if (reg) {
+                  reg.showNotification(n.title || 'Daydream', {
+                    body: n.body || '',
+                    icon: '/icons/icon-192.png',
+                    badge: '/icons/icon-192.png',
+                    vibrate: [200, 100, 200],
+                    tag: n.id,
+                    data: { url: '/dashboard/onay' }
+                  }).catch(() => {})
+                }
+              }
+            }
+          })
         .subscribe()
     })
     // Close on outside click
