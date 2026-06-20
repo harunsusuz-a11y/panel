@@ -79,11 +79,14 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--ac);cursor:poin
 .row:hover{background:rgba(255,255,255,0.02)}
 
 /* ── Input / Select / Textarea ── */
-.inp{width:100%;background:var(--s2);border:1px solid var(--bdr);border-radius:8px;color:var(--tx);padding:9px 12px;font-size:13px;outline:none;transition:border-color .15s}
-.inp:focus{border-color:var(--ac)}
+.inp{width:100%;background:var(--s2)!important;border:1px solid var(--bdr);border-radius:8px;color:var(--tx)!important;padding:9px 12px;font-size:13px;outline:none;transition:border-color .15s;-webkit-text-fill-color:var(--tx)!important}
+.inp:focus{border-color:var(--ac);background:var(--s2)!important;color:var(--tx)!important}
+.inp:focus-visible{outline:none}
 .inp::placeholder{color:var(--tx3)}
+.inp:-webkit-autofill,.inp:-webkit-autofill:hover,.inp:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px var(--s2) inset!important;-webkit-text-fill-color:var(--tx)!important;border-color:var(--ac)!important;caret-color:var(--tx)!important}
 textarea.inp{resize:vertical}
-select.inp{cursor:pointer}
+select.inp{cursor:pointer;background:var(--s2)!important;color:var(--tx)!important}
+input.inp[type="text"],input.inp[type="email"],input.inp[type="password"],input.inp[type="number"],input.inp[type="tel"],input.inp[type="url"]{background:var(--s2)!important;color:var(--tx)!important}
 .label{display:block;font-size:11.5px;font-weight:500;color:var(--tx2);margin-bottom:6px}
 
 /* ── Progress ── */

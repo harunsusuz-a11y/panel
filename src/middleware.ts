@@ -23,6 +23,20 @@ const MANAGER_PLUS = [
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
+  // Login sayfasına oturum açık kullanıcı gelirse dashboard'a yönlendir
+  if (pathname === '/login' || pathname === '/') {
+    try {
+      const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        { cookies: { getAll() { return request.cookies.getAll() }, setAll() {} } }
+      )
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) return NextResponse.redirect(new URL('/dashboard', request.url))
+    } catch {}
+    return NextResponse.next()
+  }
+
   // Sadece dashboard sayfaları kontrol et
   if (!pathname.startsWith('/dashboard')) {
     return NextResponse.next()
@@ -86,5 +100,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*'],
+  matcher: ['/', '/login', '/dashboard/:path*'],
 }
