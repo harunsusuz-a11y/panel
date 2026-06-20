@@ -64,7 +64,7 @@ export default function OtomasyonlarPage() {
 
   async function testSms() {
     if (!testPhone.trim()) { showToast('Hata: Telefon girin'); return }
-    if (!settings.netgsm_username) { showToast('Hata: Ayarlar > Netgsm bölümünden bilgileri girin'); return }
+    if (!settings.netgsm_username) { showToast('Hata: Ayarlar → Netgsm bölümünden bilgileri girin'); return }
     setTesting(true)
     try {
       const url=`https://api.netgsm.com.tr/sms/send/get/?usercode=${settings.netgsm_username}&password=${settings.netgsm_password}&gsmno=${testPhone.replace(/\s/g,'')}&message=Agency ERP test!&msgheader=${settings.netgsm_header||'AJANSPANEL'}&dil=TR`
@@ -98,7 +98,7 @@ export default function OtomasyonlarPage() {
             </div>
             <div style={{flex:1}}>
               <p style={{fontSize:13,fontWeight:600,marginBottom:2}}>Netgsm SMS</p>
-              <p style={{fontSize:12,color:'var(--tx2)'}}>{netgsmOk?`Bağlı — ${settings.netgsm_header||'AJANSPANEL'}`:'Bağlı değil — Ayarlar > Netgsm SMS bölümünden API bilgilerini girin'}</p>
+              <p style={{fontSize:12,color:'var(--tx2)'}}>{netgsmOk?`Bağlı — ${settings.netgsm_header||'AJANSPANEL'}`:'Bağlı değil — Ayarlar → Netgsm SMS bölümünden API bilgilerini girin'}</p>
             </div>
             <span className={`badge ${netgsmOk?'badge-green':'badge-amber'}`}>{netgsmOk?'Aktif':'Kurulum Gerekli'}</span>
           </div>
@@ -162,7 +162,7 @@ export default function OtomasyonlarPage() {
               </div>
               {!netgsmOk&&(form.action==='sms'||form.action==='both')&&(
                 <div style={{padding:'10px 12px',borderRadius:8,background:'var(--amber2)',color:'var(--amber)',border:'1px solid rgba(240,168,67,.2)',fontSize:12}}>
-                  ⚠ SMS için Ayarlar > Netgsm SMS bölümünden bilgileri girin.
+                  ⚠ SMS için Ayarlar → Netgsm SMS bölümünden bilgileri girin.
                 </div>
               )}
               <button className="btn" onClick={add} style={{width:'100%',justifyContent:'center',padding:'10px',marginTop:4}}>Kural Oluştur</button>

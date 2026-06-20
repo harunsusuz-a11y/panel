@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
-import { Plus, X } from 'lucide-react'
+import { Plus, X, Building2 } from 'lucide-react'
 
 const COLS = [
   { id: 'todo',        label: 'Bekliyor',  color: 'var(--tx3)' },
@@ -20,38 +20,84 @@ const PRI: Record<string, any> = {
 export default function GorevlerPage() {
   const [tasks,    setTasks]    = useState<any[]>([])
   const [projects, setProjects] = useState<any[]>([])
+  const [clients,  setClients]  = useState<any[]>([])
   const [profiles, setProfiles] = useState<any[]>([])
   const [loading,  setLoading]  = useState(true)
   const [modal,    setModal]    = useState(false)
   const [detail,   setDetail]   = useState<any>(null)
   const [adding,   setAdding]   = useState(false)
   const [toast,    setToast]    = useState('')
-  const [form, setForm] = useState({ title: '', project_id: '', assigned_to: '', priority: 'normal', due_date: '', description: '' })
+  const [form, setForm] = useState({
+    title: '', client_id: '', project_id: '', assigned_to: '',
+    priority: 'normal', due_date: '', description: ''
+  })
 
   const showToast = (m: string) => { setToast(m); setTimeout(() => setToast(''), 3500) }
 
+  // Filter projects by selected client
+  const filteredProjects = form.client_id
+    ? projects.filter(p => p.client_id === form.client_id)
+    : projects
+
   async function load() {
     const sb = createClient()
-    const [t, p, pr] = await Promise.all([
-      sb.from('tasks').select('id,title,status,priority,due_date,assigned_to,project_id').order('created_at', { ascending: false }),
-      sb.from('projects').select('id,name').eq('status', 'active'),
+    const [t, p, c, pr] = await Promise.all([
+      sb.from('tasks').select('id,title,status,priority,due_date,assigned_to,project_id,client_id').order('created_at', { ascending: false }),
+      sb.from('projects').select('id,name,client_id').order('name'),
+      sb.from('clients').select('id,name').order('name'),
       sb.from('profiles').select('id,full_name,department').not('full_name', 'is', null),
     ])
     const pm: Record<string, any> = {}; (p.data || []).forEach((x: any) => { pm[x.id] = x })
+    const cm: Record<string, any> = {}; (c.data || []).forEach((x: any) => { cm[x.id] = x })
     const prm: Record<string, any> = {}; (pr.data || []).forEach((x: any) => { prm[x.id] = x })
-    setTasks((t.data || []).map((x: any) => ({ ...x, project: pm[x.project_id], assignee: prm[x.assigned_to] })))
-    setProjects(p.data || []); setProfiles((pr.data || []).filter((p: any) => p.full_name)); setLoading(false)
+    setTasks((t.data || []).map((x: any) => ({
+      ...x,
+      project: pm[x.project_id],
+      client: cm[x.client_id] || (x.project_id && pm[x.project_id] ? cm[pm[x.project_id].client_id] : null),
+      assignee: prm[x.assigned_to]
+    })))
+    setProjects(p.data || [])
+    setClients(c.data || [])
+    setProfiles((pr.data || []).filter((p: any) => p.full_name))
+    setLoading(false)
   }
   useEffect(() => { load() }, [])
+
+  // When project changes, auto-set client
+  function handleProjectChange(pid: string) {
+    const proj = projects.find(p => p.id === pid)
+    setForm(f => ({ ...f, project_id: pid, client_id: proj?.client_id || f.client_id }))
+  }
+
+  // When client changes, clear project if not matching
+  function handleClientChange(cid: string) {
+    setForm(f => {
+      const projStillValid = projects.find(p => p.id === f.project_id && p.client_id === cid)
+      return { ...f, client_id: cid, project_id: projStillValid ? f.project_id : '' }
+    })
+  }
 
   async function add() {
     if (!form.title.trim()) { showToast('Hata: Başlık zorunlu'); return }
     setAdding(true)
     const sb = createClient(); const { data: { user } } = await sb.auth.getUser()
-    const { error } = await sb.from('tasks').insert({ title: form.title.trim(), status: 'todo', priority: form.priority, created_by: user?.id, project_id: form.project_id || null, assigned_to: form.assigned_to || null, due_date: form.due_date || null, description: form.description || null })
+    const { error } = await sb.from('tasks').insert({
+      title: form.title.trim(), status: 'todo', priority: form.priority,
+      created_by: user?.id,
+      project_id: form.project_id || null,
+      client_id: form.client_id || null,
+      assigned_to: form.assigned_to || null,
+      due_date: form.due_date || null,
+      description: form.description || null
+    })
     setAdding(false)
     if (error) showToast('Hata: ' + error.message)
-    else { showToast('Görev oluşturuldu!'); setModal(false); setForm({ title: '', project_id: '', assigned_to: '', priority: 'normal', due_date: '', description: '' }); load() }
+    else {
+      showToast('Görev oluşturuldu!')
+      setModal(false)
+      setForm({ title: '', client_id: '', project_id: '', assigned_to: '', priority: 'normal', due_date: '', description: '' })
+      load()
+    }
   }
 
   async function moveTask(id: string, status: string) {
@@ -75,7 +121,7 @@ export default function GorevlerPage() {
       <style>{`
         .kb-wrap{flex:1;overflow-x:auto;overflow-y:hidden;padding:14px;display:flex;gap:10px}
         .kb-col{width:230px;flex-shrink:0;display:flex;flex-direction:column;gap:7px}
-        @media(max-width:768px){.kb-col{width:190px}.overlay{align-items:flex-end!important;padding:0!important}.modal{border-radius:16px 16px 0 0!important;max-width:100%!important;border-bottom:none!important}}
+        @media(max-width:768px){.kb-col{width:190px}}
       `}</style>
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
         <TopBar title="Görev Yönetimi" subtitle="Kanban" action={
@@ -106,6 +152,11 @@ export default function GorevlerPage() {
                           <p style={{ fontSize: 12.5, fontWeight: 500, lineHeight: 1.4, marginBottom: 8 }}>{t.title}</p>
                           <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 8 }}>
                             <span className="badge" style={{ background: p.bg, color: p.c }}>{p.label}</span>
+                            {t.client && (
+                              <span className="badge" style={{ background: 'var(--s3)', color: 'var(--tx2)', display: 'flex', alignItems: 'center', gap: 3 }}>
+                                <Building2 size={9} strokeWidth={2} />{t.client.name}
+                              </span>
+                            )}
                             {t.project && <span className="badge badge-muted">{t.project.name}</span>}
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -129,28 +180,61 @@ export default function GorevlerPage() {
       {modal && (
         <div className="overlay" onClick={e => { if (e.target === e.currentTarget) setModal(false) }}>
           <div className="modal">
-            <p className="modal-title">Yeni Görev</p>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <p className="modal-title" style={{ margin: 0 }}>Yeni Görev</p>
+              <button onClick={() => setModal(false)} style={{ background: 'none', border: 'none', color: 'var(--tx3)', cursor: 'pointer' }}><X size={15} /></button>
+            </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div><label className="label">Başlık *</label><input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Görev açıklaması..." className="inp" autoFocus onKeyDown={e => e.key === 'Enter' && add()} /></div>
-              <div className="modal-grid">
-                <div><label className="label">Proje</label>
-                  <select value={form.project_id} onChange={e => setForm(f => ({ ...f, project_id: e.target.value }))} className="inp">
-                    <option value="">— Seçin —</option>{projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                  </select>
-                </div>
-                <div><label className="label">Sorumlu</label>
-                  <select value={form.assigned_to} onChange={e => setForm(f => ({ ...f, assigned_to: e.target.value }))} className="inp">
-                    <option value="">— Seçin —</option>{profiles.map(p => <option key={p.id} value={p.id}>{p.full_name}</option>)}
-                  </select>
-                </div>
-                <div><label className="label">Öncelik</label>
-                  <select value={form.priority} onChange={e => setForm(f => ({ ...f, priority: e.target.value }))} className="inp">
-                    <option value="critical">Kritik</option><option value="high">Yüksek</option><option value="normal">Normal</option><option value="low">Düşük</option>
-                  </select>
-                </div>
-                <div><label className="label">Deadline</label><input type="date" value={form.due_date} onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} className="inp" min={new Date().toISOString().slice(0, 10)} /></div>
+              <div>
+                <label className="label">Başlık *</label>
+                <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Görev açıklaması..." className="inp" autoFocus />
               </div>
-              <div><label className="label">Açıklama</label><textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} className="inp" rows={2} /></div>
+
+              {/* FİRMA DROPDOWN */}
+              <div>
+                <label className="label"><Building2 size={11} style={{ display: 'inline', marginRight: 4 }} />Firma (Müşteri)</label>
+                <select value={form.client_id} onChange={e => handleClientChange(e.target.value)} className="inp">
+                  <option value="">— Firma Seçin —</option>
+                  {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </div>
+
+              <div className="modal-grid">
+                <div>
+                  <label className="label">Proje</label>
+                  <select value={form.project_id} onChange={e => handleProjectChange(e.target.value)} className="inp">
+                    <option value="">— Seçin —</option>
+                    {filteredProjects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                  </select>
+                  {form.client_id && filteredProjects.length === 0 && (
+                    <p style={{ fontSize: 11, color: 'var(--amber)', marginTop: 4 }}>Bu firmaya ait aktif proje yok</p>
+                  )}
+                </div>
+                <div>
+                  <label className="label">Sorumlu</label>
+                  <select value={form.assigned_to} onChange={e => setForm(f => ({ ...f, assigned_to: e.target.value }))} className="inp">
+                    <option value="">— Seçin —</option>
+                    {profiles.map(p => <option key={p.id} value={p.id}>{p.full_name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="label">Öncelik</label>
+                  <select value={form.priority} onChange={e => setForm(f => ({ ...f, priority: e.target.value }))} className="inp">
+                    <option value="critical">Kritik</option>
+                    <option value="high">Yüksek</option>
+                    <option value="normal">Normal</option>
+                    <option value="low">Düşük</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="label">Deadline</label>
+                  <input type="date" value={form.due_date} onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} className="inp" min={new Date().toISOString().slice(0, 10)} />
+                </div>
+              </div>
+              <div>
+                <label className="label">Açıklama</label>
+                <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} className="inp" rows={2} />
+              </div>
               <button className="btn" onClick={add} disabled={adding || !form.title.trim()} style={{ width: '100%', justifyContent: 'center', padding: '10px', marginTop: 4 }}>
                 {adding ? 'Oluşturuluyor...' : 'Görev Oluştur'}
               </button>
@@ -162,9 +246,19 @@ export default function GorevlerPage() {
       {detail && (
         <div className="overlay" onClick={e => { if (e.target === e.currentTarget) setDetail(null) }}>
           <div className="modal">
-            <p className="modal-title" style={{ marginBottom: 10 }}>{detail.title}</p>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 14 }}>
+              <p className="modal-title" style={{ flex: 1, margin: 0 }}>{detail.title}</p>
+              <button onClick={() => setDetail(null)} style={{ background: 'none', border: 'none', color: 'var(--tx3)', cursor: 'pointer', flexShrink: 0 }}><X size={15} /></button>
+            </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginBottom: 16 }}>
-              {[{ l: 'Proje', v: detail.project?.name || '—' }, { l: 'Sorumlu', v: detail.assignee?.full_name || '—' }, { l: 'Öncelik', v: PRI[detail.priority]?.label || detail.priority }, { l: 'Durum', v: COLS.find(c => c.id === detail.status)?.label || detail.status }, { l: 'Deadline', v: detail.due_date || '—' }].map(f => (
+              {[
+                { l: 'Firma',    v: detail.client?.name || '—' },
+                { l: 'Proje',    v: detail.project?.name || '—' },
+                { l: 'Sorumlu', v: detail.assignee?.full_name || '—' },
+                { l: 'Öncelik', v: PRI[detail.priority]?.label || detail.priority },
+                { l: 'Durum',   v: COLS.find(c => c.id === detail.status)?.label || detail.status },
+                { l: 'Deadline',v: detail.due_date || '—' },
+              ].map(f => (
                 <div key={f.l} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 11px', background: 'var(--s2)', borderRadius: 7 }}>
                   <span style={{ fontSize: 12, color: 'var(--tx3)' }}>{f.l}</span>
                   <span style={{ fontSize: 12.5, fontWeight: 600 }}>{f.v}</span>

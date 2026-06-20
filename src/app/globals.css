@@ -144,3 +144,29 @@ select.inp{cursor:pointer}
   .modal{border-radius:16px 16px 0 0!important;max-width:100%!important;max-height:90vh!important;border-bottom:none!important}
   .modal-grid{grid-template-columns:1fr!important}
 }
+
+/* ── Enhanced Animations ── */
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+@keyframes popIn{0%{opacity:0;transform:scale(.94) translateY(4px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes slideRight{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+@keyframes glow{0%,100%{box-shadow:0 0 12px rgba(124,106,247,.3)}50%{box-shadow:0 0 24px rgba(124,106,247,.6)}}
+
+.anim-pop{animation:popIn .22s cubic-bezier(.22,1,.36,1) both}
+.anim-slide-r{animation:slideRight .2s ease both}
+
+/* KPI cards staggered entrance */
+.kpi{animation:popIn .3s cubic-bezier(.22,1,.36,1) both}
+
+/* Cards */
+.card.anim-fade{animation:popIn .28s cubic-bezier(.22,1,.36,1) both}
+
+/* Sidebar active glow */
+.sb-item.active{box-shadow:inset 0 0 0 1px rgba(124,106,247,.15)}
+
+/* Mobile: topbar padding for hamburger */
+@media(max-width:768px){
+  .topbar{padding-left:56px}
+}
+
+/* ── Bottom Nav REMOVED - using drawer instead ── */
+.bnav{display:none!important}

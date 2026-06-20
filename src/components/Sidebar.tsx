@@ -72,8 +72,8 @@ export default function Sidebar() {
           <LayoutDashboard size={14} color="#fff" strokeWidth={2} />
         </div>
         <div>
-          <p style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--tx)', letterSpacing: '-.2px', lineHeight: 1.2 }}>Agency ERP</p>
-          <p style={{ fontSize: 9.5, color: 'var(--tx3)', marginTop: 2 }}>Operasyon Paneli</p>
+          <p style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--tx)', letterSpacing: '-.2px', lineHeight: 1.2 }}>Daydream Production</p>
+          <p style={{ fontSize: 9.5, color: 'var(--tx3)', marginTop: 2 }}>Agency ERP</p>
         </div>
       </div>
 

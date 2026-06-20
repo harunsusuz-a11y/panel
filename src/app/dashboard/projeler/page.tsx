@@ -11,7 +11,7 @@ const STATUS: Record<string,{l:string;cls:string}> = {
   cancelled: {l:'İptal',         cls:'badge badge-red'},
 }
 const STAGE_S: Record<string,{l:string;color:string}> = {
-  pending:          {l:'Bekliyor',      color:'var(--text-faint)'},
+  pending:          {l:'Bekliyor',      color:'var(--tx3)'},
   in_progress:      {l:'Devam',         color:'var(--blue)'},
   waiting_approval: {l:'Onay Bekliyor', color:'var(--amber)'},
   approved:         {l:'Onaylandı',     color:'var(--green)'},
@@ -172,12 +172,12 @@ export default function ProjelerPage() {
     <>
       <style>{`
         .prj-wrap{flex:1;display:flex;overflow:hidden;}
-        .prj-list{width:260px;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;}
+        .prj-list{width:260px;border-right:1px solid var(--bdr);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;}
         .prj-detail{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-        .prj-tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
-        .prj-tab{padding:11px 16px;font-size:13px;font-weight:500;border:none;background:none;cursor:pointer;color:var(--text-dim);border-bottom:2px solid transparent;transition:color .12s;}
-        .prj-tab:hover{color:var(--text);}
-        .prj-tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600;}
+        .prj-tabs{display:flex;border-bottom:1px solid var(--bdr);background:var(--s1);flex-shrink:0;}
+        .prj-tab{padding:11px 16px;font-size:13px;font-weight:500;border:none;background:none;cursor:pointer;color:var(--tx2);border-bottom:2px solid transparent;transition:color .12s;}
+        .prj-tab:hover{color:var(--tx);}
+        .prj-tab.active{color:var(--ac);border-bottom-color:var(--ac);font-weight:600;}
         @media(max-width:768px){
           .prj-wrap{flex-direction:column;}
           .prj-list{width:100%;border-right:none;max-height:240px;}
@@ -188,34 +188,34 @@ export default function ProjelerPage() {
         <TopBar title="Projeler" subtitle={`${projects.length} proje`} action={
           <button onClick={()=>setModal(true)} className="btn"><Plus size={14} strokeWidth={2}/>Yeni Proje</button>
         }/>
-        {toast && <div className={`toast ${toast.startsWith('Hata')?'err':'ok'}`}>{toast}</div>}
+        {toast && <div className={`toast ${toast.startsWith('Hata')?'toast-err':'toast-ok'}`}>{toast}</div>}
 
         <div className="prj-wrap">
           {/* Liste */}
           <div className="prj-list">
             <div style={{flex:1,overflowY:'auto'}}>
-              {loading ? <div style={{padding:20,color:'var(--text-faint)',fontSize:13}}>Yükleniyor...</div>
-              : projects.length===0 ? <div style={{padding:20,color:'var(--text-faint)',fontSize:13,textAlign:'center'}}>Proje yok.<br/>+ Yeni Proje ile başlayın.</div>
+              {loading ? <div style={{padding:20,color:'var(--tx3)',fontSize:13}}>Yükleniyor...</div>
+              : projects.length===0 ? <div style={{padding:20,color:'var(--tx3)',fontSize:13,textAlign:'center'}}>Proje yok.<br/>+ Yeni Proje ile başlayın.</div>
               : projects.map(p => {
                 const s = STATUS[p.status]||STATUS.active
                 return (
                   <div key={p.id} onClick={()=>loadProject(p)}
-                    style={{padding:'12px 14px',borderBottom:'1px solid var(--border)',cursor:'pointer',
-                      background:sel?.id===p.id?'var(--accent-soft)':'transparent',
-                      borderLeft:sel?.id===p.id?'3px solid var(--accent)':'3px solid transparent',
+                    style={{padding:'12px 14px',borderBottom:'1px solid var(--bdr)',cursor:'pointer',
+                      background:sel?.id===p.id?'var(--ac2)':'transparent',
+                      borderLeft:sel?.id===p.id?'3px solid var(--ac)':'3px solid transparent',
                       transition:'background .1s'}}>
                     <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:4}}>
                       <span style={{fontSize:13,fontWeight:600,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',flex:1,
-                        color:sel?.id===p.id?'var(--accent)':'var(--text)'}}>{p.name}</span>
+                        color:sel?.id===p.id?'var(--ac)':'var(--tx)'}}>{p.name}</span>
                       <span className={s.cls} style={{marginLeft:6,flexShrink:0}}>{s.l}</span>
                     </div>
-                    <div style={{fontSize:12,color:'var(--text-faint)',marginBottom:6}}>
+                    <div style={{fontSize:12,color:'var(--tx3)',marginBottom:6}}>
                       {p.client?.name || '— Müşteri atanmadı'}
                     </div>
                     <div className="pb-track">
-                      <div className="pb-fill" style={{width:`${p.progress||0}%`,background:p.progress>70?'var(--green)':p.progress>40?'var(--accent)':'var(--red)'}}/>
+                      <div className="pb-fill" style={{width:`${p.progress||0}%`,background:p.progress>70?'var(--green)':p.progress>40?'var(--ac)':'var(--red)'}}/>
                     </div>
-                    <div style={{fontSize:11,color:'var(--text-faint)',marginTop:3}}>{p.progress||0}% tamamlandı</div>
+                    <div style={{fontSize:11,color:'var(--tx3)',marginTop:3}}>{p.progress||0}% tamamlandı</div>
                   </div>
                 )
               })}
@@ -232,12 +232,12 @@ export default function ProjelerPage() {
                   </button>
                 ))}
                 <div style={{flex:1}}/>
-                <button onClick={generatePortalLink} style={{margin:'6px 12px',background:'none',border:'1px solid var(--border)',borderRadius:8,color:'var(--text-dim)',fontSize:12,cursor:'pointer',padding:'5px 10px',display:'flex',alignItems:'center',gap:5}}>
+                <button onClick={generatePortalLink} style={{margin:'6px 12px',background:'none',border:'1px solid var(--bdr)',borderRadius:8,color:'var(--tx2)',fontSize:12,cursor:'pointer',padding:'5px 10px',display:'flex',alignItems:'center',gap:5}}>
                   <Link2 size={12}/>Portal Link
                 </button>
               </div>
               {portalLink && (
-                <div style={{padding:'8px 16px',background:'var(--blue-soft)',borderBottom:'1px solid var(--border)',fontSize:12,color:'var(--blue)',fontFamily:'JetBrains Mono',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
+                <div style={{padding:'8px 16px',background:'var(--blue2)',borderBottom:'1px solid var(--bdr)',fontSize:12,color:'var(--blue)',fontFamily:'JetBrains Mono',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
                   📋 Kopyalandı: {portalLink}
                 </div>
               )}
@@ -254,29 +254,29 @@ export default function ProjelerPage() {
                         {l:'Deadline',     v:sel.deadline||'—'},
                         {l:'Bütçe',        v:sel.budget?`₺${Number(sel.budget).toLocaleString('tr-TR')}`:'—'},
                       ].map(f=>(
-                        <div key={f.l} style={{background:'var(--surface-2)',borderRadius:10,padding:'11px 14px',border:'1px solid var(--border)'}}>
-                          <div style={{fontSize:11,color:'var(--text-faint)',marginBottom:4}}>{f.l}</div>
+                        <div key={f.l} style={{background:'var(--s2)',borderRadius:10,padding:'11px 14px',border:'1px solid var(--bdr)'}}>
+                          <div style={{fontSize:11,color:'var(--tx3)',marginBottom:4}}>{f.l}</div>
                           <div style={{fontSize:13.5,fontWeight:500}}>{f.v}</div>
                         </div>
                       ))}
                     </div>
                     <div>
-                      <div style={{fontSize:12,color:'var(--text-dim)',marginBottom:8}}>İlerleme: {sel.progress||0}%</div>
+                      <div style={{fontSize:12,color:'var(--tx2)',marginBottom:8}}>İlerleme: {sel.progress||0}%</div>
                       <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
                         {[0,10,25,50,75,90,100].map(v=>(
                           <button key={v} onClick={()=>updateProgress(sel.id,v)}
                             style={{padding:'5px 12px',borderRadius:8,border:'none',fontSize:12,fontWeight:600,cursor:'pointer',
-                              background:sel.progress===v?'var(--accent)':'var(--surface-2)',
-                              color:sel.progress===v?'#fff':'var(--text-dim)'}}>
+                              background:sel.progress===v?'var(--ac)':'var(--s2)',
+                              color:sel.progress===v?'#fff':'var(--tx2)'}}>
                             {v}%
                           </button>
                         ))}
                       </div>
                     </div>
                     {sel.description && (
-                      <div style={{background:'var(--surface-2)',borderRadius:10,padding:'12px 14px',border:'1px solid var(--border)'}}>
-                        <div style={{fontSize:11,color:'var(--text-faint)',marginBottom:4}}>Açıklama</div>
-                        <div style={{fontSize:13,lineHeight:1.6,color:'var(--text-dim)'}}>{sel.description}</div>
+                      <div style={{background:'var(--s2)',borderRadius:10,padding:'12px 14px',border:'1px solid var(--bdr)'}}>
+                        <div style={{fontSize:11,color:'var(--tx3)',marginBottom:4}}>Açıklama</div>
+                        <div style={{fontSize:13,lineHeight:1.6,color:'var(--tx2)'}}>{sel.description}</div>
                       </div>
                     )}
                   </div>
@@ -288,13 +288,13 @@ export default function ProjelerPage() {
                       <Plus size={14} strokeWidth={2}/>Aşama Ekle
                     </button>
                     {stages.length===0 ? (
-                      <div style={{padding:'30px 0',textAlign:'center',color:'var(--text-faint)',fontSize:13}}>
+                      <div style={{padding:'30px 0',textAlign:'center',color:'var(--tx3)',fontSize:13}}>
                         Henüz aşama tanımlanmamış.
                       </div>
                     ) : stages.map((s,i) => {
                       const sm = STAGE_S[s.status]||STAGE_S.pending
                       return (
-                        <div key={s.id} style={{background:'var(--surface-2)',border:'1px solid var(--border)',borderRadius:10,padding:'14px',marginBottom:8}}>
+                        <div key={s.id} style={{background:'var(--s2)',border:'1px solid var(--bdr)',borderRadius:10,padding:'14px',marginBottom:8}}>
                           <div style={{display:'flex',alignItems:'flex-start',gap:10}}>
                             <div style={{width:22,height:22,borderRadius:'50%',background:`${sm.color}18`,color:sm.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,fontWeight:800,flexShrink:0,border:`1px solid ${sm.color}30`}}>{i+1}</div>
                             <div style={{flex:1,minWidth:0}}>
@@ -303,16 +303,16 @@ export default function ProjelerPage() {
                                 <span className="badge" style={{background:`${sm.color}18`,color:sm.color}}>{sm.l}</span>
                                 {s.requires_approval && <span style={{fontSize:11,color:'var(--amber)'}}>🔐 Onay</span>}
                               </div>
-                              {s.description && <div style={{fontSize:12,color:'var(--text-faint)',marginBottom:8,lineHeight:1.5}}>{s.description}</div>}
-                              {s.due_date && <div style={{fontSize:11,color:'var(--text-faint)',marginBottom:8}}>📅 {s.due_date}</div>}
+                              {s.description && <div style={{fontSize:12,color:'var(--tx3)',marginBottom:8,lineHeight:1.5}}>{s.description}</div>}
+                              {s.due_date && <div style={{fontSize:11,color:'var(--tx3)',marginBottom:8}}>📅 {s.due_date}</div>}
                               <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
                                 {Object.entries(STAGE_S).filter(([k])=>k!==s.status).map(([k,v])=>(
                                   <button key={k} onClick={()=>updateStageStatus(s.id,k)}
-                                    style={{fontSize:11,padding:'4px 10px',borderRadius:6,border:'1px solid var(--border)',background:'var(--surface)',color:v.color,cursor:'pointer'}}>
+                                    style={{fontSize:11,padding:'4px 10px',borderRadius:6,border:'1px solid var(--bdr)',background:'var(--s1)',color:v.color,cursor:'pointer'}}>
                                     → {v.l}
                                   </button>
                                 ))}
-                                <button onClick={()=>deleteStage(s.id)} style={{fontSize:11,padding:'4px 10px',borderRadius:6,border:'none',background:'var(--red-soft)',color:'var(--red)',cursor:'pointer',marginLeft:'auto'}}>
+                                <button onClick={()=>deleteStage(s.id)} style={{fontSize:11,padding:'4px 10px',borderRadius:6,border:'none',background:'var(--red2)',color:'var(--red)',cursor:'pointer',marginLeft:'auto'}}>
                                   Sil
                                 </button>
                               </div>
@@ -328,18 +328,18 @@ export default function ProjelerPage() {
                   <div>
                     <label style={{display:'inline-flex',alignItems:'center',gap:6,marginBottom:14,cursor:uploading?'not-allowed':'pointer',opacity:uploading?0.6:1}} className="btn">
                       <Upload size={14} strokeWidth={2}/>{uploading?'Yükleniyor...':'Dosya Yükle'}
-                      <input type="file" style={{display:'none'}} onChange={uploadFile} disabled={uploading}/>
+                      <input type="file" style={{display:'none'}} onChange={uploadFile} disabled={uploading} className="inp"/>
                     </label>
                     {files.length===0 ? (
-                      <div style={{padding:'30px 0',textAlign:'center',color:'var(--text-faint)',fontSize:13}}>Henüz dosya yüklenmemiş.</div>
+                      <div style={{padding:'30px 0',textAlign:'center',color:'var(--tx3)',fontSize:13}}>Henüz dosya yüklenmemiş.</div>
                     ) : files.map(f=>(
-                      <div key={f.id} style={{display:'flex',alignItems:'center',gap:12,background:'var(--surface-2)',borderRadius:10,padding:'12px 14px',marginBottom:8,border:'1px solid var(--border)'}}>
+                      <div key={f.id} style={{display:'flex',alignItems:'center',gap:12,background:'var(--s2)',borderRadius:10,padding:'12px 14px',marginBottom:8,border:'1px solid var(--bdr)'}}>
                         <div style={{fontSize:20,flexShrink:0}}>
                           {f.mime_type?.includes('image')?'🖼':f.mime_type?.includes('pdf')?'📄':f.mime_type?.includes('sheet')?'📊':'📎'}
                         </div>
                         <div style={{flex:1,minWidth:0}}>
                           <div style={{fontSize:13,fontWeight:500,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{f.name}</div>
-                          <div style={{fontSize:11,color:'var(--text-faint)',marginTop:2}}>{fmtSize(f.file_size)} · {new Date(f.created_at).toLocaleDateString('tr-TR')}</div>
+                          <div style={{fontSize:11,color:'var(--tx3)',marginTop:2}}>{fmtSize(f.file_size)} · {new Date(f.created_at).toLocaleDateString('tr-TR')}</div>
                         </div>
                         <a href={f.file_path} download target="_blank" rel="noreferrer" className="btn-ghost" style={{display:'flex',alignItems:'center',gap:5,fontSize:12}}>
                           <Download size={12}/>İndir
@@ -354,7 +354,7 @@ export default function ProjelerPage() {
               </div>
             </div>
           ) : (
-            <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',color:'var(--text-faint)',fontSize:13,flexDirection:'column',gap:8}}>
+            <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',color:'var(--tx3)',fontSize:13,flexDirection:'column',gap:8}}>
               <FolderOpen size={32} strokeWidth={1.5} style={{opacity:.3}}/>
               Proje seçin veya yeni proje oluşturun
             </div>
@@ -364,48 +364,48 @@ export default function ProjelerPage() {
 
       {/* Yeni Proje Modal */}
       {modal && (
-        <div className="modal-overlay" onClick={e=>{if(e.target===e.currentTarget)setModal(false)}}>
-          <div className="modal-content">
+        <div className="overlay" onClick={e=>{if(e.target===e.currentTarget)setModal(false)}}>
+          <div className="modal">
             <div className="modal-title">Yeni Proje</div>
             <div style={{display:'flex',flexDirection:'column',gap:14}}>
               <div>
-                <label className="modal-label">Proje Adı *</label>
+                <label className="label">Proje Adı *</label>
                 <input value={form.name} onChange={e=>setForm(p=>({...p,name:e.target.value}))} placeholder="Proje adı..." autoFocus/>
               </div>
               <div>
-                <label className="modal-label">Müşteri</label>
-                <select value={form.client_id} onChange={e=>setForm(p=>({...p,client_id:e.target.value}))}>
+                <label className="label">Müşteri</label>
+                <select value={form.client_id} onChange={e=>setForm(p=>({...p,client_id:e.target.value}))} className="inp">
                   <option value="">— Seçin —</option>
                   {clients.map(c=><option key={c.id} value={c.id}>{c.name}{c.status!=='active'?' (Pasif)':''}</option>)}
                 </select>
               </div>
               <div className="modal-grid">
                 <div>
-                  <label className="modal-label">Öncelik</label>
-                  <select value={form.priority} onChange={e=>setForm(p=>({...p,priority:e.target.value}))}>
+                  <label className="label">Öncelik</label>
+                  <select value={form.priority} onChange={e=>setForm(p=>({...p,priority:e.target.value}))} className="inp">
                     <option value="low">Düşük</option><option value="normal">Normal</option>
                     <option value="high">Yüksek</option><option value="critical">Kritik</option>
                   </select>
                 </div>
                 <div>
-                  <label className="modal-label">Durum</label>
-                  <select value={form.status} onChange={e=>setForm(p=>({...p,status:e.target.value}))}>
+                  <label className="label">Durum</label>
+                  <select value={form.status} onChange={e=>setForm(p=>({...p,status:e.target.value}))} className="inp">
                     <option value="active">Aktif</option><option value="paused">Duraklatıldı</option>
                     <option value="completed">Tamamlandı</option><option value="cancelled">İptal</option>
                   </select>
                 </div>
                 <div>
-                  <label className="modal-label">Deadline</label>
+                  <label className="label">Deadline</label>
                   <input type="date" value={form.deadline} onChange={e=>setForm(p=>({...p,deadline:e.target.value}))}/>
                 </div>
                 <div>
-                  <label className="modal-label">Bütçe (₺)</label>
+                  <label className="label">Bütçe (₺)</label>
                   <input type="number" value={form.budget} onChange={e=>setForm(p=>({...p,budget:e.target.value}))} placeholder="0"/>
                 </div>
               </div>
               <div>
-                <label className="modal-label">Açıklama</label>
-                <textarea value={form.description} onChange={e=>setForm(p=>({...p,description:e.target.value}))} rows={3} placeholder="Proje detayları..."/>
+                <label className="label">Açıklama</label>
+                <textarea value={form.description} onChange={e=>setForm(p=>({...p,description:e.target.value}))} rows={3} className="inp" placeholder="Proje detayları..."/>
               </div>
               <button onClick={addProject} className="btn" style={{width:'100%',justifyContent:'center',padding:'11px',fontSize:14}}>
                 Proje Oluştur
@@ -417,31 +417,31 @@ export default function ProjelerPage() {
 
       {/* Aşama Modal */}
       {stageModal && (
-        <div className="modal-overlay" onClick={e=>{if(e.target===e.currentTarget)setStageModal(false)}}>
-          <div className="modal-content" style={{maxWidth:440}}>
+        <div className="overlay" onClick={e=>{if(e.target===e.currentTarget)setStageModal(false)}}>
+          <div className="modal" style={{maxWidth:440}}>
             <div className="modal-title">Aşama Ekle</div>
             <div style={{display:'flex',flexDirection:'column',gap:12}}>
               <div>
-                <label className="modal-label">Başlık *</label>
+                <label className="label">Başlık *</label>
                 <input value={stageForm.title} onChange={e=>setStageForm(p=>({...p,title:e.target.value}))} placeholder="Tasarım teslimi, Revizyon..." autoFocus/>
               </div>
               <div>
-                <label className="modal-label">Açıklama</label>
-                <textarea value={stageForm.description} onChange={e=>setStageForm(p=>({...p,description:e.target.value}))} rows={2}/>
+                <label className="label">Açıklama</label>
+                <textarea value={stageForm.description} onChange={e=>setStageForm(p=>({...p,description:e.target.value}))} className="inp" rows={2}/>
               </div>
               <div className="modal-grid">
                 <div>
-                  <label className="modal-label">Deadline</label>
+                  <label className="label">Deadline</label>
                   <input type="date" value={stageForm.due_date} onChange={e=>setStageForm(p=>({...p,due_date:e.target.value}))}/>
                 </div>
                 <div>
-                  <label className="modal-label">Sıra No</label>
+                  <label className="label">Sıra No</label>
                   <input type="number" value={stageForm.order_index} onChange={e=>setStageForm(p=>({...p,order_index:Number(e.target.value)}))}/>
                 </div>
               </div>
               <label style={{display:'flex',alignItems:'center',gap:8,cursor:'pointer'}}>
-                <input type="checkbox" checked={stageForm.requires_approval} onChange={e=>setStageForm(p=>({...p,requires_approval:e.target.checked}))} style={{width:16,height:16,accentColor:'var(--accent)'}}/>
-                <span style={{fontSize:13,color:'var(--text-dim)'}}>Müşteri onayı gerekiyor</span>
+                <input type="checkbox" checked={stageForm.requires_approval} onChange={e=>setStageForm(p=>({...p,requires_approval:e.target.checked}))} style={{width:16,height:16,accentColor:'var(--ac)'}}/>
+                <span style={{fontSize:13,color:'var(--tx2)'}}>Müşteri onayı gerekiyor</span>
               </label>
               <button onClick={addStage} className="btn" style={{width:'100%',justifyContent:'center',padding:'10px'}}>Aşama Ekle</button>
             </div>
