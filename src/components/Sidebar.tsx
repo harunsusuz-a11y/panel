@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import {
   LayoutDashboard, Users, FolderOpen, CheckSquare, CalendarDays,
   FileText, Activity, AlertCircle, ShieldCheck,
-  Receipt, BarChart2, TrendingUp, UserCog, Workflow, Link2,
+  Receipt, BarChart2, TrendingUp, UserCog, Workflow,
   SlidersHorizontal, LogOut
 } from 'lucide-react'
 
@@ -32,7 +32,6 @@ const NAV = [
   { g:'Sistem', items:[
     { href:'/dashboard/kullanicilar',   label:'Kullanıcılar',   Icon:UserCog },
     { href:'/dashboard/otomasyonlar',   label:'Otomasyonlar',   Icon:Workflow },
-    { href:'/dashboard/entegrasyonlar', label:'Entegrasyonlar', Icon:Link2 },
     { href:'/dashboard/ayarlar',        label:'Ayarlar',        Icon:SlidersHorizontal },
   ]},
 ]
