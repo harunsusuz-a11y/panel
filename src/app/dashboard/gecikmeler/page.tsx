@@ -82,7 +82,7 @@ function TaskRow({t,onDone}:{t:any;onDone:(id:string)=>void}) {
         <div style={{display:'flex',gap:8,alignItems:'center'}}>
           <span className="badge" style={{background:`${c}18`,color:c}}>{PRI_L[t.priority]}</span>
           {t.assignee&&<span style={{fontSize:11.5,color:'var(--tx3)'}}>{t.assignee.full_name}</span>}
-          <span style={{fontSize:11.5,color:'var(--tx3)',fontFamily:'JetBrains Mono,monospace'}}>{t.due_date}</span>
+          <span style={{fontSize:11.5,color:'var(--tx3)',fontFamily:'JetBrains Mono,monospace'}}>{fmtDeadline(t.due_date)}</span>
         </div>
       </div>
       <span style={{fontSize:13,fontWeight:700,color:c,fontFamily:'JetBrains Mono,monospace',flexShrink:0}}>+{days}g</span>

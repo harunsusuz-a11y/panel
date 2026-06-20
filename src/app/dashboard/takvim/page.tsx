@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
-import { Eye, EyeOff, User, Building2 } from 'lucide-react'
+import { Eye, EyeOff, User, Building2, FileText } from 'lucide-react'
 
 const MONTHS = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık']
 const DAYS = ['Pzt','Sal','Çar','Per','Cum','Cmt','Paz']
@@ -20,7 +20,9 @@ export default function TakvimPage() {
   const [myId,    setMyId]    = useState('')
   const [myRole,  setMyRole]  = useState('')
   const [myName,  setMyName]  = useState('')
-  const [filterMe, setFilterMe] = useState(false) // manager/admin için toggle
+  const [filterMe, setFilterMe] = useState(false)
+  const [contents, setContents] = useState<any[]>([])
+  const [showContents, setShowContents] = useState(true)
 
   useEffect(() => {
     const sb = createClient()
@@ -30,6 +32,12 @@ export default function TakvimPage() {
       const { data: prof } = await sb.from('profiles').select('role,full_name').eq('id', user.id).single()
       setMyRole(prof?.role || 'member')
       setMyName(prof?.full_name?.split(' ')[0] || '')
+
+      // İçerikleri çek (publish_date olanlar)
+      const { data: ctData } = await sb.from('contents').select('id,title,publish_date,status,client_id').not('publish_date','is',null)
+      const { data: ctClients } = await sb.from('clients').select('id,name')
+      const ctcm: Record<string,any> = {}; (ctClients||[]).forEach((x:any) => { ctcm[x.id] = x })
+      setContents((ctData||[]).map((x:any) => ({...x, client: ctcm[x.client_id]})))
 
       // Görevleri çek
       let q = sb.from('tasks')
@@ -85,6 +93,11 @@ export default function TakvimPage() {
     const ds = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
     return visibleTasks.filter(t => t.due_date?.startsWith(ds))
   }
+  const contentsOnDay = (d:number) => {
+    if (!showContents) return []
+    const ds = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
+    return contents.filter(ct => ct.publish_date?.startsWith(ds))
+  }
 
   const prevM = () => { if(month===0){setYear(y=>y-1);setMonth(11)}else setMonth(m=>m-1) }
   const nextM = () => { if(month===11){setYear(y=>y+1);setMonth(0)}else setMonth(m=>m+1) }
@@ -109,6 +122,10 @@ export default function TakvimPage() {
               {overdueCount > 0 && (
                 <span className="badge badge-red">{overdueCount} gecikmiş</span>
               )}
+              <button onClick={() => setShowContents(f => !f)}
+                style={{display:'flex',alignItems:'center',gap:5,padding:'4px 10px',borderRadius:7,border:`1px solid ${showContents?'var(--amber)':'var(--bdr)'}`,background:showContents?'var(--amber2)':'var(--s2)',cursor:'pointer',fontSize:11,color:showContents?'var(--amber)':'var(--tx3)',fontWeight:600}}>
+                <FileText size={11} strokeWidth={2}/>İçerik
+              </button>
               {/* Manager/admin: kendi görevlerini toggle edebilir */}
               {isManagerPlus && (
                 <button
@@ -179,6 +196,11 @@ export default function TakvimPage() {
                             color:isToday?'#fff':isSel?'var(--ac)':hasOverdue?'var(--red)':'var(--tx)',
                             marginBottom:2
                           }}>{d}</div>
+                          {contentsOnDay(d!).slice(0,1).map(ct=>(
+                            <div key={ct.id} style={{fontSize:9,padding:'2px 4px',borderRadius:3,background:'rgba(240,168,67,.2)',color:'var(--amber)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',marginBottom:1}}>
+                              📅 {ct.title}
+                            </div>
+                          ))}
                           {dt.slice(0,2).map(t=>(
                             <div key={t.id} style={{
                               fontSize:9,padding:'2px 4px',borderRadius:3,

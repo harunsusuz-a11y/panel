@@ -25,11 +25,12 @@ export default function ProjelerPage() {
   const [sel,       setSel]       = useState<any>(null)
   const [stages,    setStages]    = useState<any[]>([])
   const [files,     setFiles]     = useState<any[]>([])
-  const [tab,       setTab]       = useState<'detail'|'stages'|'files'>('detail')
+  const [tab,       setTab]       = useState<'detail'|'stages'|'files'|'tasks'>('detail')
   const [loading,   setLoading]   = useState(true)
   const [modal,     setModal]     = useState(false)
   const [stageModal,setStageModal]= useState(false)
   const [uploading, setUploading] = useState(false)
+  const [stageTasks, setStageTasks] = useState<any[]>([])
   const [toast,     setToast]     = useState('')
   const [portalLink,setPortalLink]= useState('')
 
@@ -227,9 +228,9 @@ export default function ProjelerPage() {
           {sel ? (
             <div className="prj-detail">
               <div className="prj-tabs">
-                {(['detail','stages','files'] as const).map((k,i) => (
+                {(['detail','stages','tasks','files'] as const).map((k,i) => (
                   <button key={k} className={`prj-tab${tab===k?' active':''}`} onClick={()=>setTab(k)}>
-                    {k==='detail'?'Detay':k==='stages'?`Aşamalar (${stages.length})`:`Dosyalar (${files.length})`}
+                    {k==='detail'?'Detay':k==='stages'?`Aşamalar (${stages.length})`:k==='tasks'?`Görevler (${stageTasks.length})`:`Dosyalar (${files.length})`}
                   </button>
                 ))}
                 <div style={{flex:1}}/>
@@ -325,6 +326,26 @@ export default function ProjelerPage() {
                   </div>
                 )}
 
+
+                {tab==='tasks' && (
+                  <div style={{padding:'12px 14px'}}>
+                    {stageTasks.length===0
+                      ? <p style={{color:'var(--tx3)',fontSize:13,textAlign:'center',padding:'24px 0'}}>Bu projeye atanmış görev yok</p>
+                      : stageTasks.map((t:any) => {
+                        const ST: Record<string,{l:string;c:string}> = {todo:{l:'Bekliyor',c:'var(--tx3)'},in_progress:{l:'Devam',c:'var(--blue)'},review:{l:'Kontrol',c:'var(--amber)'},done:{l:'Tamam',c:'var(--green)'}}
+                        const s = ST[t.status]||ST.todo
+                        return (
+                          <div key={t.id} style={{display:'flex',alignItems:'center',gap:10,padding:'9px 12px',background:'var(--s2)',borderRadius:8,marginBottom:7,border:'1px solid var(--bdr)'}}>
+                            <div style={{width:7,height:7,borderRadius:'50%',background:s.c,flexShrink:0}}/>
+                            <p style={{flex:1,fontSize:12.5,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{t.title}</p>
+                            {t.assignee&&<span style={{fontSize:11,color:'var(--tx3)',flexShrink:0}}>{t.assignee.full_name.split(' ')[0]}</span>}
+                            <span style={{fontSize:11,fontWeight:600,color:s.c,flexShrink:0}}>{s.l}</span>
+                          </div>
+                        )
+                      })
+                    }
+                  </div>
+                )}
                 {tab==='files' && (
                   <div>
                     <label style={{display:'inline-flex',alignItems:'center',gap:6,marginBottom:14,cursor:uploading?'not-allowed':'pointer',opacity:uploading?0.6:1}} className="btn">

@@ -1,5 +1,6 @@
 'use client'
 import { ReactNode } from 'react'
+import NotificationBell from './NotificationBell'
 
 export default function TopBar({ title, subtitle, action }: {
   title: string; subtitle?: string; action?: ReactNode
@@ -10,7 +11,10 @@ export default function TopBar({ title, subtitle, action }: {
         <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--tx)', letterSpacing: '-.15px', flexShrink: 0 }}>{title}</span>
         {subtitle && <span style={{ fontSize: 12, color: 'var(--tx3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{subtitle}</span>}
       </div>
-      {action && <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>{action}</div>}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+        {action && <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>{action}</div>}
+        <NotificationBell />
+      </div>
     </div>
   )
 }

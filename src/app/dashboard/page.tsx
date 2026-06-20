@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
-import { fmtDeadline } from '@/lib/utils'
+import { fmtDeadline, fmtRelative } from '@/lib/utils'
 import {
   TrendingUp, Wallet, FolderOpen, Clock, ClipboardCheck,
   ArrowUpRight, ArrowDownRight, ArrowRight, CheckCircle2,
@@ -104,6 +104,7 @@ function KPI({ label, value, sub, color, iconBg, Icon, trend, delay = 0, onClick
 export default function DashboardPage() {
   const router = useRouter()
   const [data, setData] = useState<any>({ tasks: [], projects: [], clients: [], transactions: [], approvals: [] })
+  const [activities, setActivities] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [now, setNow] = useState(new Date())
   const [userName, setUserName] = useState('')
@@ -119,14 +120,16 @@ export default function DashboardPage() {
       if (!user) return
       sb.from('profiles').select('full_name').eq('id', user.id).single().then(({ data }) => setUserName(data?.full_name?.split(' ')[0] || ''))
     })
-    const [t, p, c, tr, ap] = await Promise.all([
+    const [t, p, c, tr, ap, ap2] = await Promise.all([
       sb.from('tasks').select('id,title,status,priority,due_date,assigned_to,client_id'),
       sb.from('projects').select('id,name,status,progress,deadline,client_id'),
       sb.from('clients').select('id,name,status'),
       sb.from('transactions').select('type,amount,date'),
       sb.from('approvals').select('id,status,client_status'),
+      sb.from('activities').select('*, user:profiles!activities_user_id_fkey(full_name)').order('created_at',{ascending:false}).limit(8),
     ])
     setData({ tasks: t.data || [], projects: p.data || [], clients: c.data || [], transactions: tr.data || [], approvals: ap.data || [] })
+    setActivities(ap2?.data || [])
     setLoading(false)
     setLastUpdate(new Date())
   }
@@ -415,6 +418,33 @@ export default function DashboardPage() {
                   })}
               </div>
             </div>
+
+            {/* ── AKTİVİTE FEED ── */}
+            {activities.length > 0 && (
+              <div className="card anim-fade" style={{ marginTop: 14 }}>
+                <div className="card-h">
+                  <span className="card-title">Son İşlemler</span>
+                  <button onClick={() => router.push('/dashboard/performans')} style={{ fontSize: 11.5, color: 'var(--tx3)', background: 'none', border: 'none', cursor: 'pointer' }}>Tümü →</button>
+                </div>
+                {activities.map((a: any) => {
+                  const init = (a.user?.full_name || '?').split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase()
+                  const ACTION: Record<string,string> = { created:'oluşturdu', updated:'güncelledi', deleted:'sildi', approval_approved:'onayladı', approval_rejected:'reddetti' }
+                  const ENTITY: Record<string,string> = { tasks:'görev', projects:'proje', clients:'müşteri', contents:'içerik', approvals:'onay', transactions:'işlem' }
+                  const action = a.action?.startsWith('status_changed') ? `durumu güncelledi` : a.action?.startsWith('progress') ? 'ilerlemeyi güncelledi' : ACTION[a.action] || a.action
+                  return (
+                    <div key={a.id} className="row">
+                      <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'var(--ac2)', color: 'var(--ac)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 800, flexShrink: 0 }}>{init}</div>
+                      <p style={{ flex: 1, fontSize: 12.5, color: 'var(--tx2)', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <strong style={{ color: 'var(--tx)' }}>{a.user?.full_name?.split(' ')[0] || '?'}</strong>
+                        {' '}{ENTITY[a.entity_type] || a.entity_type} {action}
+                        {a.entity_title && <span style={{ color: 'var(--tx3)' }}> — {a.entity_title}</span>}
+                      </p>
+                      <span style={{ fontSize: 10.5, color: 'var(--tx3)', fontFamily: 'JetBrains Mono,monospace', flexShrink: 0 }}>{fmtRelative(a.created_at)}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </>)}
         </div>
       </div>

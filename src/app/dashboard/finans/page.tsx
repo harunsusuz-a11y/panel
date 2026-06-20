@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
 import { ArrowUpRight } from 'lucide-react'
+import { fmtDeadline } from '@/lib/utils'
 
 function Bar({ bars }: { bars: { l: string; v: number; hi?: boolean }[] }) {
   const [m, setM] = useState(false)
@@ -94,7 +95,7 @@ export default function FinansPage() {
                 <div style={{ width: 32, height: 32, borderRadius: 8, background: r.type === 'income' ? 'var(--green2)' : 'var(--red2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, flexShrink: 0 }}>{r.type === 'income' ? '↑' : '↓'}</div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontSize: 13, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.description}</p>
-                  <p style={{ fontSize: 11.5, color: 'var(--tx3)', marginTop: 2 }}>{r.category || '—'} · {r.date}</p>
+                  <p style={{ fontSize: 11.5, color: 'var(--tx3)', marginTop: 2 }}>{r.category || '—'} · {fmtDeadline(r.date)}</p>
                 </div>
                 <span style={{ fontSize: 14, fontWeight: 700, color: r.type === 'income' ? 'var(--green)' : 'var(--red)', fontFamily: 'JetBrains Mono,monospace', flexShrink: 0 }}>
                   {r.type === 'income' ? '+' : '−'}₺{Number(r.amount).toLocaleString('tr-TR')}

@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState } from 'react'
+import GlobalSearch from './GlobalSearch'
 import {
   LayoutDashboard, Users, FolderOpen, CheckSquare, CalendarDays,
   FileText, Activity, AlertCircle, ShieldCheck,
@@ -87,6 +88,11 @@ export default function Sidebar() {
           <p style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--tx)', letterSpacing: '-.2px', lineHeight: 1.2 }}>Daydream Production</p>
           <p style={{ fontSize: 9.5, color: 'var(--tx3)', marginTop: 2 }}>Agency ERP</p>
         </div>
+      </div>
+
+      {/* Global Search */}
+      <div style={{ padding: '8px 10px', borderBottom: '1px solid var(--bdr)' }}>
+        <GlobalSearch />
       </div>
 
       {/* Rol badge */}

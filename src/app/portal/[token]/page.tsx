@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { Download, FolderOpen, Clock, CheckCircle2, AlertCircle } from 'lucide-react'
+import ClientActions from './ClientActions'
 
 const STAGE_S: Record<string,{l:string;color:string}> = {
   pending:          {l:'Bekliyor',      color:'#50506a'},
@@ -22,6 +23,7 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
   const sb = await createClient()
 
   // Token doğrula
+  // Client decision güncelleme için action parametresi kontrol
   const { data: tokenRow, error: tokenErr } = await sb
     .from('client_portal_tokens')
     .select('*, client:clients(id,name,email,phone), project:projects(*)')
@@ -147,6 +149,9 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
               })}
             </div>
           )}
+
+          {/* Müşteri Onay Butonu */}
+          <ClientActions token={token} currentDecision={tokenRow.client_decision || 'pending'} />
 
           {/* Dosyalar */}
           <div className="card">
