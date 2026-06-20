@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
 import { CheckCircle2 } from 'lucide-react'
+import { fmtDeadline, fmtDateTime } from '@/lib/utils'
 
 const PRI_C: Record<string,string> = { critical:'var(--red)', high:'var(--amber)', normal:'var(--blue)', low:'var(--tx3)' }
 const PRI_L: Record<string,string> = { critical:'Kritik', high:'Yüksek', normal:'Normal', low:'Düşük' }

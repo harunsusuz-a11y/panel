@@ -166,7 +166,7 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
                 </div>
                 <div style={{flex:1,minWidth:0}}>
                   <p style={{fontSize:13,fontWeight:500,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{f.name}</p>
-                  <p style={{fontSize:11.5,color:'#50506a',marginTop:2}}>{fmtSize(f.file_size)} · {new Date(f.created_at).toLocaleDateString('tr-TR')}</p>
+                  <p style={{fontSize:11.5,color:'#50506a',marginTop:2}}>{fmtSize(f.file_size)} · {new Date(f.created_at).toLocaleDateString('tr-TR', {day:'numeric',month:'short',year:'numeric'}) + ' ' + new Date(f.created_at).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})}</p>
                 </div>
                 <a href={f.file_path} download={f.name} target="_blank" rel="noreferrer" className="dl-btn">
                   <Download size={13} strokeWidth={2} />İndir

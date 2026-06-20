@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
 import { CheckCircle2, XCircle, Clock, Send, Link2, FileText, FolderOpen, Receipt, MoreHorizontal, ChevronRight } from 'lucide-react'
+import { fmtDateTime } from '@/lib/utils'
 
 // İç onay statüsü
 const APPROVAL_ST: Record<string,any> = {
@@ -198,7 +199,7 @@ export default function OnayPage() {
                           </div>
                         </div>
                         <span style={{ fontSize: 10.5, color: 'var(--tx3)', fontFamily: 'JetBrains Mono,monospace', flexShrink: 0 }}>
-                          {new Date(item.created_at).toLocaleDateString('tr-TR')}
+                          {fmtDateTime(item.created_at)}
                         </span>
                       </div>
                     </div>
@@ -225,7 +226,7 @@ export default function OnayPage() {
                   <div>
                     <p style={{ fontSize: 12.5, fontWeight: 600 }}>Talep Oluşturuldu</p>
                     <p style={{ fontSize: 11.5, color: 'var(--tx3)', marginTop: 2 }}>
-                      {sel.requester?.full_name || '—'} · {new Date(sel.created_at).toLocaleDateString('tr-TR')}
+                      {sel.requester?.full_name || '—'} · {fmtDateTime(sel.created_at)}
                     </p>
                     {sel.notes && <p style={{ fontSize: 11.5, color: 'var(--tx2)', marginTop: 4, lineHeight: 1.5 }}>{sel.notes}</p>}
                   </div>
@@ -307,7 +308,8 @@ export default function OnayPage() {
                 {[
                   { l: 'Tür',     v: TYPE_L[sel.type] || sel.type },
                   { l: 'Müşteri', v: sel.client?.name || '— Atanmamış' },
-                  { l: 'Tarih',   v: new Date(sel.created_at).toLocaleDateString('tr-TR') },
+                  { l: 'Oluşturuldu', v: fmtDateTime(sel.created_at) },
+                  { l: 'Çözüldü', v: sel.resolved_at ? fmtDateTime(sel.resolved_at) : '—' },
                 ].map(f => (
                   <div key={f.l} style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 10px', background: 'var(--s2)', borderRadius: 7 }}>
                     <span style={{ fontSize: 12, color: 'var(--tx3)' }}>{f.l}</span>

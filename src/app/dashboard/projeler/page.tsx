@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
 import { FolderOpen, Plus, Link2, ChevronRight, Trash2, Upload, Download } from 'lucide-react'
+import { fmtDateTime, fmtDeadline } from '@/lib/utils'
 
 const STATUS: Record<string,{l:string;cls:string}> = {
   active:    {l:'Aktif',         cls:'badge badge-green'},
@@ -251,7 +252,7 @@ export default function ProjelerPage() {
                         {l:'Müşteri',      v:sel.client?.name||'— Atanmadı'},
                         {l:'Durum',        v:STATUS[sel.status]?.l||sel.status},
                         {l:'Öncelik',      v:sel.priority||'Normal'},
-                        {l:'Deadline',     v:sel.deadline||'—'},
+                        {l:'Deadline',     v:fmtDeadline(sel.deadline)},
                         {l:'Bütçe',        v:sel.budget?`₺${Number(sel.budget).toLocaleString('tr-TR')}`:'—'},
                       ].map(f=>(
                         <div key={f.l} style={{background:'var(--s2)',borderRadius:10,padding:'11px 14px',border:'1px solid var(--bdr)'}}>
@@ -304,7 +305,7 @@ export default function ProjelerPage() {
                                 {s.requires_approval && <span style={{fontSize:11,color:'var(--amber)'}}>🔐 Onay</span>}
                               </div>
                               {s.description && <div style={{fontSize:12,color:'var(--tx3)',marginBottom:8,lineHeight:1.5}}>{s.description}</div>}
-                              {s.due_date && <div style={{fontSize:11,color:'var(--tx3)',marginBottom:8}}>📅 {s.due_date}</div>}
+                              {s.due_date && <div style={{fontSize:11,color:'var(--tx3)',marginBottom:8}}>📅 {fmtDeadline(s.due_date)}</div>}
                               <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
                                 {Object.entries(STAGE_S).filter(([k])=>k!==s.status).map(([k,v])=>(
                                   <button key={k} onClick={()=>updateStageStatus(s.id,k)}
@@ -339,7 +340,7 @@ export default function ProjelerPage() {
                         </div>
                         <div style={{flex:1,minWidth:0}}>
                           <div style={{fontSize:13,fontWeight:500,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{f.name}</div>
-                          <div style={{fontSize:11,color:'var(--tx3)',marginTop:2}}>{fmtSize(f.file_size)} · {new Date(f.created_at).toLocaleDateString('tr-TR')}{f.uploader?.full_name ? ' · ' + f.uploader.full_name.split(' ')[0] + ' yükledi' : ''}</div>
+                          <div style={{fontSize:11,color:'var(--tx3)',marginTop:2}}>{fmtSize(f.file_size)} · {fmtDateTime(f.created_at)}{f.uploader?.full_name ? ' · ' + f.uploader.full_name.split(' ')[0] + ' yükledi' : ''}</div>
                         </div>
                         <a href={f.file_path} download target="_blank" rel="noreferrer" className="btn-ghost" style={{display:'flex',alignItems:'center',gap:5,fontSize:12}}>
                           <Download size={12}/>İndir

@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
+import { fmtRelative, fmtDateTime } from '@/lib/utils'
 import {
   TrendingUp, Users, FolderOpen, CheckCircle2, AlertCircle,
   Clock, ArrowUpRight, Building2, ChevronRight, Activity
@@ -331,9 +332,8 @@ export default function PerformansPage() {
               ) : (
                 <div style={{ maxHeight: 400, overflowY: 'auto' }}>
                   {activities.map(a => {
-                    const t = new Date(a.created_at)
-                    const diffMin = Math.floor((now.getTime() - t.getTime()) / 60000)
-                    const timeStr = diffMin < 1 ? 'Az önce' : diffMin < 60 ? `${diffMin}dk önce` : diffMin < 1440 ? `${Math.floor(diffMin/60)}sa önce` : t.toLocaleDateString('tr-TR')
+                    const timeStr = fmtRelative(a.created_at)
+                    const fullTime = fmtDateTime(a.created_at)
                     const init = (a.user?.full_name || '?').split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase()
                     return (
                       <div key={a.id} className="act-row">
@@ -352,7 +352,7 @@ export default function PerformansPage() {
                             )}
                           </p>
                         </div>
-                        <span style={{ fontSize: 10.5, color: 'var(--tx3)', fontFamily: 'JetBrains Mono,monospace', flexShrink: 0, whiteSpace: 'nowrap' }}>{timeStr}</span>
+                        <span title={fullTime} style={{ fontSize: 10.5, color: 'var(--tx3)', fontFamily: 'JetBrains Mono,monospace', flexShrink: 0, whiteSpace: 'nowrap', cursor: 'default' }}>{timeStr}</span>
                       </div>
                     )
                   })}

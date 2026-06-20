@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
+import { fmtDeadline } from '@/lib/utils'
 import {
   TrendingUp, Wallet, FolderOpen, Clock, ClipboardCheck,
   ArrowUpRight, ArrowDownRight, ArrowRight, CheckCircle2,
@@ -372,7 +373,7 @@ export default function DashboardPage() {
                         <div style={{ width: 6, height: 6, borderRadius: '50%', background: c, flexShrink: 0 }} />
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <p style={{ fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.title || 'Görev'}</p>
-                          <p style={{ fontSize: 11.5, color: 'var(--tx3)', marginTop: 2 }}>{t.due_date}</p>
+                          <p style={{ fontSize: 11.5, color: 'var(--tx3)', marginTop: 2 }}>{fmtDeadline(t.due_date)}</p>
                         </div>
                         <span style={{ fontSize: 12, fontWeight: 600, color: c, fontFamily: 'JetBrains Mono,monospace', flexShrink: 0 }}>+{days}g</span>
                       </div>
@@ -407,7 +408,7 @@ export default function DashboardPage() {
                           </p>
                         </div>
                         <span style={{ fontSize: 12, fontWeight: 500, color: urgent ? 'var(--red)' : 'var(--tx2)', fontFamily: 'JetBrains Mono,monospace', flexShrink: 0 }}>
-                          {String(t.due_date).slice(5, 10)}
+                          {fmtDeadline(t.due_date)}
                         </span>
                       </div>
                     )

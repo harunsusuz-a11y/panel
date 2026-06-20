@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
 import { Plus, X, Building2 } from 'lucide-react'
+import { fmtDateTime, fmtDeadline } from '@/lib/utils'
 
 const COLS = [
   { id: 'todo',        label: 'Bekliyor',  color: 'var(--tx3)' },
@@ -163,7 +164,7 @@ export default function GorevlerPage() {
                             <div style={{ width: 22, height: 22, borderRadius: '50%', background: 'var(--ac2)', color: 'var(--ac)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8.5, fontWeight: 800, border: '1px solid rgba(124,106,247,.2)' }}>
                               {t.assignee ? t.assignee.full_name.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase() : '—'}
                             </div>
-                            {t.due_date && <span style={{ fontSize: 10, fontWeight: 600, fontFamily: 'JetBrains Mono,monospace', color: overdue ? 'var(--red)' : 'var(--tx3)' }}>{overdue ? '⚠ ' : ''}{t.due_date}</span>}
+                            {t.due_date && <span style={{ fontSize: 10, fontWeight: 600, fontFamily: 'JetBrains Mono,monospace', color: overdue ? 'var(--red)' : 'var(--tx3)' }}>{overdue ? '⚠ ' : ''}{fmtDeadline(t.due_date)}</span>}
                           </div>
                         </div>
                       )
@@ -253,11 +254,12 @@ export default function GorevlerPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginBottom: 16 }}>
               {[
                 { l: 'Firma',    v: detail.client?.name || '—' },
+                { l: 'Tamamlandı', v: detail.completed_at ? fmtDateTime(detail.completed_at) : '—' },
                 { l: 'Proje',    v: detail.project?.name || '—' },
                 { l: 'Sorumlu', v: detail.assignee?.full_name || '—' },
                 { l: 'Öncelik', v: PRI[detail.priority]?.label || detail.priority },
                 { l: 'Durum',   v: COLS.find(c => c.id === detail.status)?.label || detail.status },
-                { l: 'Deadline',v: detail.due_date || '—' },
+                { l: 'Deadline',v: fmtDeadline(detail.due_date) },
               ].map(f => (
                 <div key={f.l} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 11px', background: 'var(--s2)', borderRadius: 7 }}>
                   <span style={{ fontSize: 12, color: 'var(--tx3)' }}>{f.l}</span>

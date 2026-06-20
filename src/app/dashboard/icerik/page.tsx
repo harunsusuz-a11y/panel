@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
 import { Plus, X, Building2, Calendar, User, ChevronRight } from 'lucide-react'
+import { fmtDeadline, fmtDateTime } from '@/lib/utils'
 
 const ST: Record<string,any> = {
   draft:    { l:'Taslak',        cls:'badge-muted',  color:'var(--tx3)',   owner:'Aslı/Gizem' },
@@ -162,7 +163,7 @@ export default function IcerikPage() {
                       )}
                       {item.publish_date&&(
                         <div style={{display:'flex',alignItems:'center',gap:5,fontSize:11.5,color:overdue?'var(--red)':'var(--tx3)'}}>
-                          <Calendar size={10} strokeWidth={2}/>{item.publish_date}{overdue?' ⚠':''}
+                          <Calendar size={10} strokeWidth={2}/>{fmtDeadline(item.publish_date)}{overdue?' ⚠':''}
                         </div>
                       )}
                     </div>
@@ -199,7 +200,7 @@ export default function IcerikPage() {
                   {l:'Müşteri',   v:sel.client?.name||'—'},
                   {l:'Tür',       v:TYPE[sel.type]||sel.type},
                   {l:'Sorumlu',   v:sel.assignee?.full_name||'—'},
-                  {l:'Yayın Tar.',v:sel.publish_date||'—'},
+                  {l:'Yayın Tar.',v:fmtDeadline(sel.publish_date)},
                   {l:'Akış Adımı',v:ST[sel.status]?.owner||'—'},
                 ].map(f=>(
                   <div key={f.l} style={{display:'flex',justifyContent:'space-between',padding:'7px 10px',background:'var(--s2)',borderRadius:7}}>
