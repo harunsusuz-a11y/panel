@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
 import { Plus, X, Building2, FolderOpen, CheckSquare, Receipt, TrendingUp, Phone, Mail, FileText } from 'lucide-react'
+import PhoneInput from '@/components/PhoneInput'
 import { fmtDateTime, fmtDeadline } from '@/lib/utils'
 
 export default function MusterilerPage() {
@@ -273,7 +274,7 @@ export default function MusterilerPage() {
               <div><label className="label">Müşteri Adı *</label><input value={form.name} onChange={e=>setForm(p=>({...p,name:e.target.value}))} className="inp" autoFocus/></div>
               <div className="modal-grid">
                 <div><label className="label">E-posta</label><input value={form.email} onChange={e=>setForm(p=>({...p,email:e.target.value}))} className="inp"/></div>
-                <div><label className="label">Telefon</label><input value={form.phone} onChange={e=>setForm(p=>({...p,phone:e.target.value}))} className="inp"/></div>
+                <div><label className="label">Telefon</label><PhoneInput value={form.phone} onChange={v=>setForm(p=>({...p,phone:v}))} /></div>
                 <div><label className="label">Şirket</label><input value={form.company} onChange={e=>setForm(p=>({...p,company:e.target.value}))} className="inp"/></div>
                 <div><label className="label">Durum</label>
                   <select value={form.status} onChange={e=>setForm(p=>({...p,status:e.target.value}))} className="inp">

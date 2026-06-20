@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
 import { User, Lock, MessageSquare, Mail, Building2, Send, CheckCircle2, Bell, BellOff } from 'lucide-react'
+import PhoneInput from '@/components/PhoneInput'
 
 const ALL_TABS = [
   { k:'profile',  l:'Profil',     Icon:User,          roles:['admin','manager','member'] },

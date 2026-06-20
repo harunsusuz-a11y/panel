@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
 import { UserCog, Plus, X, Shield, Check, Clock, Activity, LogIn, AlertCircle } from 'lucide-react'
+import PhoneInput from '@/components/PhoneInput'
 import { fmtDateTime, fmtRelative } from '@/lib/utils'
 
 const ROLES = [
@@ -234,7 +235,7 @@ export default function KullanicilarPage() {
                       <input value={form.full_name} onChange={e => setForm(p => ({ ...p, full_name: e.target.value }))} className="inp" disabled={!isAdmin && sel.id !== myId} />
                     </div>
                     <div><label className="label">Telefon</label>
-                      <input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} className="inp" placeholder="05XX XXX XX XX" />
+                      <PhoneInput value={form.phone} onChange={v => setForm(p => ({ ...p, phone: v }))} />
                     </div>
                     <div><label className="label">Rol</label>
                       <select value={form.role} onChange={e => setForm(p => ({ ...p, role: e.target.value }))} className="inp" disabled={!isAdmin || sel.id === myId}>
