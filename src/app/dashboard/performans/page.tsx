@@ -41,6 +41,7 @@ export default function PerformansPage() {
   const [contents,  setContents]  = useState<any[]>([])
   const [activities,setActivities]= useState<any[]>([])
   const [sessions,  setSessions]  = useState<any[]>([])
+  const [timeLogs,  setTimeLogs]  = useState<any[]>([])
   const [loading,   setLoading]   = useState(true)
   const [selClient, setSelClient] = useState<string>('all')
   const [myRole,    setMyRole]    = useState('')
@@ -53,7 +54,7 @@ export default function PerformansPage() {
       const { data: p } = await sb.from('profiles').select('role').eq('id', me.user.id).single()
       setMyRole(p?.role || '')
     }
-    const [pr, t, p, c, ct, ac, sess] = await Promise.all([
+    const [pr, t, p, c, ct, ac, sess, tl] = await Promise.all([
       sb.from('profiles').select('*').not('full_name', 'is', null),
       sb.from('tasks').select('*'),
       sb.from('projects').select('*').order('created_at', { ascending: false }),
@@ -62,6 +63,7 @@ export default function PerformansPage() {
       sb.from('activities').select('*, user:profiles!activities_user_id_fkey(full_name,role)')
         .order('created_at', { ascending: false }).limit(50),
       sb.from('user_sessions').select('*'),
+      sb.from('time_logs').select('user_id, duration_min, started_at, ended_at').not('ended_at','is',null),
     ])
     setProfiles(pr.data || [])
     setTasks(t.data || [])
@@ -70,6 +72,7 @@ export default function PerformansPage() {
     setContents(ct.data || [])
     setActivities(ac.data || [])
     setSessions(sess.data || [])
+    setTimeLogs(tl.data || [])
     setLoading(false)
   }
 
@@ -95,6 +98,7 @@ export default function PerformansPage() {
     const overdue= my.filter(t => t.status !== 'done' && t.due_date && new Date(t.due_date) < now).length
     const inProg = my.filter(t => t.status === 'in_progress').length
     const score  = total === 0 ? 0 : Math.max(0, Math.min(100, Math.round((done / total) * 100 - overdue * 10)))
+    const hours  = Math.round(timeLogs.filter((l: any) => l.user_id === p.id).reduce((s: number, l: any) => s + (l.duration_min || 0), 0) / 60)
     const color  = score >= 80 ? 'var(--green)' : score >= 60 ? 'var(--ac)' : score >= 40 ? 'var(--amber)' : 'var(--red)'
     const fn     = p.full_name || ''
     const firstName = fn.split(' ')[0]
@@ -244,6 +248,7 @@ export default function PerformansPage() {
                         { l: 'Tamamlanan', v: p.done,   c: 'var(--green)' },
                         { l: 'Devam',      v: p.inProg, c: 'var(--ac)'    },
                         { l: 'Geciken',    v: p.overdue,c: p.overdue > 0 ? 'var(--red)' : 'var(--tx3)' },
+                        { l: 'Saat',       v: p.hours,  c: 'var(--blue)'  },
                       ].map(s => (
                         <div key={s.l} style={{ flex: 1, textAlign: 'center', padding: '6px 4px', background: 'var(--s3)', borderRadius: 6, margin: '0 2px' }}>
                           <p style={{ fontSize: 15, fontWeight: 700, fontFamily: 'JetBrains Mono,monospace', color: s.c, lineHeight: 1 }}>{s.v}</p>

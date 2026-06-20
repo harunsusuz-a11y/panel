@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
-import { Plus, X, Building2, Clock, MessageSquare, Play, Square, Send } from 'lucide-react'
+import { Plus, X, Building2, Clock, MessageSquare, Send, Zap } from 'lucide-react'
 import { fmtDeadline, fmtDateTime, fmtRelative } from '@/lib/utils'
 
 const COLS = [
@@ -33,19 +33,11 @@ export default function GorevlerPage() {
   const [comments, setComments] = useState<any[]>([])
   const [timeLogs, setTimeLogs] = useState<any[]>([])
   const [newComment, setNewComment] = useState('')
-  const [timer,    setTimer]    = useState<{ running: boolean; start: Date | null; activeLogId: string | null }>({ running: false, start: null, activeLogId: null })
-  const [elapsed,  setElapsed]  = useState(0)
 
   const [form, setForm] = useState({ title: '', client_id: '', project_id: '', assigned_to: '', priority: 'normal', due_date: '', description: '' })
 
   const showToast = (m: string) => { setToast(m); setTimeout(() => setToast(''), 3500) }
   const filteredProjects = form.client_id ? projects.filter(p => p.client_id === form.client_id) : projects
-
-  useEffect(() => {
-    if (!timer.running || !timer.start) return
-    const id = setInterval(() => setElapsed(Math.floor((Date.now() - timer.start!.getTime()) / 1000)), 1000)
-    return () => clearInterval(id)
-  }, [timer.running, timer.start])
 
   async function load() {
     const sb = createClient()
@@ -126,24 +118,8 @@ export default function GorevlerPage() {
     if (data) { setComments(cs => [...cs, data]); setNewComment('') }
   }
 
-  async function startTimer() {
-    if (!detail) return
-    const sb = createClient(); const { data: { user } } = await sb.auth.getUser()
-    const { data } = await sb.from('time_logs').insert({ task_id: detail.id, user_id: user?.id, started_at: new Date().toISOString() }).select().single()
-    if (data) { setTimer({ running: true, start: new Date(), activeLogId: data.id }); setElapsed(0) }
-  }
-
-  async function stopTimer() {
-    if (!timer.activeLogId) return
-    const endedAt = new Date().toISOString()
-    await createClient().from('time_logs').update({ ended_at: endedAt }).eq('id', timer.activeLogId)
-    setTimer({ running: false, start: null, activeLogId: null })
-    if (detail) loadDetail(detail) // reload logs
-  }
-
   const totalMinutes = timeLogs.reduce((s, l) => s + (l.duration_min || 0), 0)
   const fmtMin = (m: number) => m < 60 ? `${m}dk` : `${Math.floor(m / 60)}sa ${m % 60}dk`
-  const fmtElapsed = (s: number) => `${Math.floor(s / 3600).toString().padStart(2,'0')}:${Math.floor((s % 3600) / 60).toString().padStart(2,'0')}:${(s % 60).toString().padStart(2,'0')}`
   const isOverdue = (t: any) => t.status !== 'done' && t.due_date && new Date(t.due_date) < new Date()
 
   return (
@@ -341,41 +317,64 @@ export default function GorevlerPage() {
                 </div>
               )}
 
-              {/* ── Süre Takibi ── */}
+              {/* ── Süre Takibi — Otomatik ── */}
               {detailTab === 'time' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  {/* Timer */}
-                  <div style={{ background: timer.running ? 'var(--green2)' : 'var(--s2)', border: `1px solid ${timer.running ? 'rgba(34,211,160,.25)' : 'var(--bdr)'}`, borderRadius: 12, padding: '16px', textAlign: 'center', transition: 'all .3s' }}>
-                    <p style={{ fontSize: 32, fontWeight: 700, fontFamily: 'JetBrains Mono,monospace', color: timer.running ? 'var(--green)' : 'var(--tx)', letterSpacing: '-.5px', marginBottom: 12, lineHeight: 1 }}>
-                      {fmtElapsed(elapsed)}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {/* Özet */}
+                  <div style={{ background: 'var(--s2)', border: '1px solid var(--bdr)', borderRadius: 12, padding: '14px 16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                      <Zap size={14} style={{ color: 'var(--ac)' }} strokeWidth={2} />
+                      <span style={{ fontSize: 13, fontWeight: 700 }}>Otomatik Süre Takibi</span>
+                      <span style={{ fontSize: 10, color: 'var(--blue)', background: 'var(--blue2)', padding: '2px 7px', borderRadius: 5, fontWeight: 600, marginLeft: 'auto' }}>Otomatik</span>
+                    </div>
+                    <p style={{ fontSize: 11.5, color: 'var(--tx3)', lineHeight: 1.6, marginBottom: 12 }}>
+                      Görev <strong style={{ color: 'var(--blue)' }}>"Devam"</strong>a alındığında süre otomatik başlar,
+                      başka statüye geçince durur.
                     </p>
-                    <p style={{ fontSize: 11, color: 'var(--tx3)', marginBottom: 12 }}>
-                      Toplam: <strong style={{ color: 'var(--tx)' }}>{fmtMin(totalMinutes)}</strong>
-                    </p>
-                    <button onClick={timer.running ? stopTimer : startTimer}
-                      className={timer.running ? 'btn-danger' : 'btn'}
-                      style={{ display: 'flex', alignItems: 'center', gap: 7, margin: '0 auto', padding: '9px 20px' }}>
-                      {timer.running ? <><Square size={13} strokeWidth={2.5} />Durdur</> : <><Play size={13} strokeWidth={2.5} />Süre Başlat</>}
-                    </button>
+                    <div style={{ display: 'flex', gap: 10 }}>
+                      <div style={{ flex: 1, background: 'var(--s3)', borderRadius: 9, padding: '10px', textAlign: 'center' }}>
+                        <p style={{ fontSize: 22, fontWeight: 700, fontFamily: 'JetBrains Mono,monospace', color: 'var(--ac)', lineHeight: 1 }}>{fmtMin(totalMinutes)}</p>
+                        <p style={{ fontSize: 10, color: 'var(--tx3)', marginTop: 4, textTransform: 'uppercase', letterSpacing: '.04em' }}>Toplam Süre</p>
+                      </div>
+                      <div style={{ flex: 1, background: 'var(--s3)', borderRadius: 9, padding: '10px', textAlign: 'center' }}>
+                        <p style={{ fontSize: 22, fontWeight: 700, fontFamily: 'JetBrains Mono,monospace', color: timeLogs.some(l => !l.ended_at) ? 'var(--green)' : 'var(--tx3)', lineHeight: 1 }}>{timeLogs.length}</p>
+                        <p style={{ fontSize: 10, color: 'var(--tx3)', marginTop: 4, textTransform: 'uppercase', letterSpacing: '.04em' }}>Oturum</p>
+                      </div>
+                    </div>
+                    {timeLogs.some(l => !l.ended_at) && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 10, padding: '7px 10px', background: 'var(--green2)', borderRadius: 8, border: '1px solid rgba(34,211,160,.2)' }}>
+                        <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--green)', display: 'inline-block', animation: 'pulse 2s ease infinite' }} />
+                        <span style={{ fontSize: 12, color: 'var(--green)', fontWeight: 600 }}>Şu an aktif — devam ediyor</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Log listesi */}
                   {timeLogs.length === 0 ? (
-                    <p style={{ color: 'var(--tx3)', fontSize: 13, textAlign: 'center', padding: '10px 0' }}>Henüz süre kaydı yok</p>
-                  ) : timeLogs.map(log => (
-                    <div key={log.id} style={{ background: 'var(--s2)', borderRadius: 9, padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <div style={{ width: 28, height: 28, borderRadius: 7, background: 'var(--blue2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <Clock size={13} style={{ color: 'var(--blue)' }} strokeWidth={2} />
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontSize: 12.5, fontWeight: 600 }}>{log.user?.full_name || '—'}</p>
-                        <p style={{ fontSize: 11, color: 'var(--tx3)', marginTop: 2 }}>{fmtDateTime(log.started_at)}</p>
-                      </div>
-                      <span style={{ fontSize: 13, fontWeight: 700, fontFamily: 'JetBrains Mono,monospace', color: log.duration_min ? 'var(--blue)' : 'var(--amber)', flexShrink: 0 }}>
-                        {log.duration_min ? fmtMin(log.duration_min) : 'Devam...'}
-                      </span>
+                    <div style={{ padding: '20px', textAlign: 'center', color: 'var(--tx3)', fontSize: 13 }}>
+                      <Clock size={22} strokeWidth={1.5} style={{ opacity: .3, display: 'block', margin: '0 auto 8px' }} />
+                      Görev henüz "Devam"a alınmadı
                     </div>
-                  ))}
+                  ) : timeLogs.map(log => {
+                    const isActive = !log.ended_at
+                    return (
+                      <div key={log.id} style={{ background: isActive ? 'var(--green2)' : 'var(--s2)', border: `1px solid ${isActive ? 'rgba(34,211,160,.2)' : 'var(--bdr)'}`, borderRadius: 9, padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div style={{ width: 28, height: 28, borderRadius: 7, background: isActive ? 'rgba(34,211,160,.2)' : 'var(--s3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <Clock size={13} style={{ color: isActive ? 'var(--green)' : 'var(--blue)' }} strokeWidth={2} />
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p style={{ fontSize: 12.5, fontWeight: 600 }}>{log.user?.full_name || 'Otomatik'}</p>
+                          <p style={{ fontSize: 11, color: 'var(--tx3)', marginTop: 2 }}>
+                            {fmtDateTime(log.started_at)}
+                            {log.ended_at && <span> → {fmtDateTime(log.ended_at)}</span>}
+                          </p>
+                        </div>
+                        <span style={{ fontSize: 13, fontWeight: 700, fontFamily: 'JetBrains Mono,monospace', color: isActive ? 'var(--green)' : 'var(--blue)', flexShrink: 0 }}>
+                          {isActive ? '▶ Devam' : fmtMin(log.duration_min || 0)}
+                        </span>
+                      </div>
+                    )
+                  })}
                 </div>
               )}
             </div>
