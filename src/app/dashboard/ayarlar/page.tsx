@@ -5,13 +5,13 @@ import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
 import { User, Lock, MessageSquare, Mail, Building2, Send, CheckCircle2, Bell, BellOff } from 'lucide-react'
 
-const TABS = [
-  { k:'profile',  l:'Profil',     Icon:User          },
-  { k:'security', l:'Güvenlik',   Icon:Lock          },
-  { k:'netgsm',   l:'Netgsm SMS', Icon:MessageSquare },
-  { k:'bildirim', l:'Bildirimler', Icon:Bell          },
-  { k:'smtp',     l:'E-posta',    Icon:Mail          },
-  { k:'company',  l:'Şirket',     Icon:Building2     },
+const ALL_TABS = [
+  { k:'profile',  l:'Profil',     Icon:User,          roles:['admin','manager','member'] },
+  { k:'security', l:'Güvenlik',   Icon:Lock,          roles:['admin','manager','member'] },
+  { k:'bildirim', l:'Bildirimler',Icon:Bell,          roles:['admin','manager','member'] },
+  { k:'netgsm',   l:'Netgsm SMS', Icon:MessageSquare, roles:['admin','manager'] },
+  { k:'smtp',     l:'E-posta',    Icon:Mail,          roles:['admin','manager'] },
+  { k:'company',  l:'Şirket',     Icon:Building2,     roles:['admin','manager'] },
 ] as const
 type Tab = 'profile' | 'security' | 'netgsm' | 'smtp' | 'company' | 'bildirim'
 
@@ -361,7 +361,7 @@ export default function AyarlarPage() {
 
         {/* Tab bar */}
         <div className="st">
-          {TABS.map(({k,l,Icon})=>(
+          {ALL_TABS.filter(t => t.roles.includes(profile?.role||'member')).map(({k,l,Icon})=>(
             <button key={k} className={`sta${tab===k?' on':''}`} onClick={()=>setTab(k)}>
               <Icon size={13} className="si" strokeWidth={1.8}/>{l}
               {k==='netgsm'&&(
@@ -410,12 +410,10 @@ export default function AyarlarPage() {
               <button className="btn" onClick={saveProfile} disabled={saving} style={{alignSelf:'flex-start',padding:'8px 20px'}}>
                 {saving?'Kaydediliyor...':'Kaydet'}
               </button>
-            </div>
-          )}
 
-          {/* ── Bildirim Hızlı Test ── */}
-          {tab==='profile' && (
-            <QuickNotifTest />
+              {/* Bildirim Test - her kullanıcı görür */}
+              <QuickNotifTest />
+            </div>
           )}
 
           {/* ── Güvenlik ── */}
