@@ -10,40 +10,44 @@ import {
   SlidersHorizontal, LogOut, Menu, X
 } from 'lucide-react'
 
-const NAV = [
-  { g:'Genel', items:[{ href:'/dashboard', label:'Dashboard', Icon:LayoutDashboard }]},
-  { g:'İş Yönetimi', items:[
-    { href:'/dashboard/musteriler',     label:'Müşteriler',     Icon:Users },
-    { href:'/dashboard/projeler',       label:'Projeler',       Icon:FolderOpen },
-    { href:'/dashboard/gorevler',       label:'Görevler',       Icon:CheckSquare },
-    { href:'/dashboard/takvim',         label:'Takvim',         Icon:CalendarDays },
+const NAV_ALL = [
+  { g: 'Genel', items: [
+    { href: '/dashboard',                label: 'Dashboard',    Icon: LayoutDashboard, roles: ['admin','manager','member'] },
   ]},
-  { g:'Operasyon', items:[
-    { href:'/dashboard/icerik',         label:'İçerik',         Icon:FileText },
-    { href:'/dashboard/operasyon',      label:'Operasyon',      Icon:Activity },
-    { href:'/dashboard/gecikmeler',     label:'Gecikmeler',     Icon:AlertCircle },
-    { href:'/dashboard/onay',           label:'Onay',           Icon:ShieldCheck },
+  { g: 'İş Yönetimi', items: [
+    { href: '/dashboard/musteriler',     label: 'Müşteriler',   Icon: Users,           roles: ['admin','manager'] },
+    { href: '/dashboard/projeler',       label: 'Projeler',     Icon: FolderOpen,      roles: ['admin','manager','member'] },
+    { href: '/dashboard/gorevler',       label: 'Görevler',     Icon: CheckSquare,     roles: ['admin','manager','member'] },
+    { href: '/dashboard/takvim',         label: 'Takvim',       Icon: CalendarDays,    roles: ['admin','manager','member'] },
   ]},
-  { g:'Finans', items:[
-    { href:'/dashboard/muhasebe',       label:'Muhasebe',       Icon:Receipt },
-    { href:'/dashboard/finans',         label:'Finans',         Icon:BarChart2 },
-    { href:'/dashboard/performans',     label:'Performans',     Icon:TrendingUp },
+  { g: 'Operasyon', items: [
+    { href: '/dashboard/icerik',         label: 'İçerik',       Icon: FileText,        roles: ['admin','manager','member'] },
+    { href: '/dashboard/operasyon',      label: 'Operasyon',    Icon: Activity,        roles: ['admin','manager'] },
+    { href: '/dashboard/gecikmeler',     label: 'Gecikmeler',   Icon: AlertCircle,     roles: ['admin','manager'] },
+    { href: '/dashboard/onay',           label: 'Onay',         Icon: ShieldCheck,     roles: ['admin','manager','member'] },
   ]},
-  { g:'Sistem', items:[
-    { href:'/dashboard/kullanicilar',   label:'Kullanıcılar',   Icon:UserCog },
-    { href:'/dashboard/otomasyonlar',   label:'Otomasyonlar',   Icon:Workflow },
-    { href:'/dashboard/ayarlar',        label:'Ayarlar',        Icon:SlidersHorizontal },
+  { g: 'Finans', items: [
+    { href: '/dashboard/muhasebe',       label: 'Muhasebe',     Icon: Receipt,         roles: ['admin','manager'] },
+    { href: '/dashboard/finans',         label: 'Finans',       Icon: BarChart2,       roles: ['admin','manager'] },
+    { href: '/dashboard/performans',     label: 'Performans',   Icon: TrendingUp,      roles: ['admin','manager'] },
+  ]},
+  { g: 'Sistem', items: [
+    { href: '/dashboard/kullanicilar',   label: 'Kullanıcılar', Icon: UserCog,         roles: ['admin'] },
+    { href: '/dashboard/otomasyonlar',   label: 'Otomasyonlar', Icon: Workflow,        roles: ['admin','manager'] },
+    { href: '/dashboard/ayarlar',        label: 'Ayarlar',      Icon: SlidersHorizontal, roles: ['admin','manager','member'] },
   ]},
 ]
 
-const ROLE: Record<string,string> = { admin:'Yönetici', manager:'Müdür', member:'Üye' }
+const ROLE_L: Record<string, string> = {
+  admin: 'Yönetici', manager: 'Operasyon Müdürü', member: 'Ekip'
+}
 
 export default function MobileMenu() {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [init, setInit] = useState('?')
-  const [role, setRole] = useState('')
+  const [role, setRole] = useState('member')
 
   useEffect(() => {
     const sb = createClient()
@@ -51,23 +55,20 @@ export default function MobileMenu() {
       if (!user) return
       sb.from('profiles').select('full_name,role').eq('id', user.id).single().then(({ data }) => {
         const n = data?.full_name || user.email?.split('@')[0] || ''
-        setName(n)
-        setInit(n.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2))
-        setRole(ROLE[data?.role] || data?.role || '')
+        setName(n); setInit(n.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2))
+        setRole(data?.role || 'member')
       })
     })
   }, [])
 
-  // Close on route change
   useEffect(() => { setOpen(false) }, [pathname])
 
-  const active = (href: string) =>
-    href === '/dashboard' ? pathname === href : pathname.startsWith(href)
+  const active = (href: string) => href === '/dashboard' ? pathname === href : pathname.startsWith(href)
+  async function logout() { await createClient().auth.signOut(); window.location.href = '/login' }
 
-  async function logout() {
-    await createClient().auth.signOut()
-    window.location.href = '/login'
-  }
+  const filteredNav = NAV_ALL.map(sec => ({
+    ...sec, items: sec.items.filter(item => item.roles.includes(role))
+  })).filter(sec => sec.items.length > 0)
 
   return (
     <>
@@ -93,17 +94,12 @@ export default function MobileMenu() {
         .mm-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--ac),#5b4de0);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
       `}</style>
 
-      {/* Hamburger trigger */}
       <button className="mm-trigger" onClick={() => setOpen(true)}>
         <Menu size={16} color="var(--tx2)" strokeWidth={2} />
       </button>
 
-      {/* Backdrop */}
-      {open && (
-        <div className="mm-backdrop" onClick={() => setOpen(false)} />
-      )}
+      {open && <div className="mm-backdrop" onClick={() => setOpen(false)} />}
 
-      {/* Drawer */}
       {open && (
         <div className="mm-drawer">
           <div className="mm-logo">
@@ -113,16 +109,14 @@ export default function MobileMenu() {
               </div>
               <div>
                 <p style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--tx)', lineHeight: 1.2 }}>Daydream Production</p>
-                <p style={{ fontSize: 9, color: 'var(--tx3)', marginTop: 1 }}>Operasyon Paneli</p>
+                <p style={{ fontSize: 9, color: 'var(--tx3)', marginTop: 1 }}>{ROLE_L[role]}</p>
               </div>
             </div>
-            <div className="mm-close" onClick={() => setOpen(false)}>
-              <X size={13} strokeWidth={2} />
-            </div>
+            <div className="mm-close" onClick={() => setOpen(false)}><X size={13} strokeWidth={2} /></div>
           </div>
 
           <nav className="mm-nav">
-            {NAV.map(sec => (
+            {filteredNav.map(sec => (
               <div key={sec.g}>
                 <p className="mm-group">{sec.g}</p>
                 {sec.items.map(({ href, label, Icon }) => (
@@ -138,10 +132,8 @@ export default function MobileMenu() {
           <div className="mm-user" onClick={logout}>
             <div className="mm-av">{init}</div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {name || '...'}
-              </p>
-              <p style={{ fontSize: 10, color: 'var(--tx3)', marginTop: 1 }}>{role}</p>
+              <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name || '...'}</p>
+              <p style={{ fontSize: 10, color: 'var(--tx3)', marginTop: 1 }}>{ROLE_L[role]}</p>
             </div>
             <LogOut size={12} style={{ color: 'var(--tx3)', flexShrink: 0 }} strokeWidth={1.8} />
           </div>
