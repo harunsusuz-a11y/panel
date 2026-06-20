@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState } from 'react'
+import DaydreamLogo from './DaydreamLogo'
 import {
   LayoutDashboard, Users, FolderOpen, CheckSquare, CalendarDays,
   FileText, Activity, AlertCircle, ShieldCheck,
@@ -105,9 +106,7 @@ export default function MobileMenu() {
         <div className="mm-drawer">
           <div className="mm-logo">
             <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-              <div style={{ width: 28, height: 28, borderRadius: 7, background: 'linear-gradient(135deg,var(--ac),#5b4de0)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <LayoutDashboard size={13} color="#fff" strokeWidth={2} />
-              </div>
+              <DaydreamLogo size={28} />
               <div>
                 <p style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--tx)', lineHeight: 1.2 }}>Daydream Production</p>
                 <p style={{ fontSize: 9, color: 'var(--tx3)', marginTop: 1 }}>{ROLE_L[role]}</p>

@@ -263,17 +263,12 @@ export default function ProjelerPage() {
                       ))}
                     </div>
                     <div>
-                      <div style={{fontSize:12,color:'var(--tx2)',marginBottom:8}}>İlerleme: {sel.progress||0}%</div>
-                      <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
-                        {[0,10,25,50,75,90,100].map(v=>(
-                          <button key={v} onClick={()=>updateProgress(sel.id,v)}
-                            style={{padding:'5px 12px',borderRadius:8,border:'none',fontSize:12,fontWeight:600,cursor:'pointer',
-                              background:sel.progress===v?'var(--ac)':'var(--s2)',
-                              color:sel.progress===v?'#fff':'var(--tx2)'}}>
-                            {v}%
-                          </button>
-                        ))}
+                      <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8}}>
+                        <div style={{fontSize:12,color:'var(--tx2)'}}>İlerleme: <strong style={{color:sel.progress>70?'var(--green)':sel.progress>40?'var(--ac)':'var(--red)'}}>{sel.progress||0}%</strong></div>
+                        <span style={{fontSize:10,color:'var(--blue)',background:'var(--blue2)',padding:'2px 8px',borderRadius:5,fontWeight:600}}>⚡ Otomatik</span>
                       </div>
+                      <div className="prog"><div className="prog-fill" style={{width:`${sel.progress||0}%`,background:sel.progress>70?'var(--green)':sel.progress>40?'var(--ac)':'var(--red)'}}/></div>
+                      <div style={{fontSize:11,color:'var(--tx3)',marginTop:5}}>Görevler tamamlandıkça otomatik güncellenir</div>
                     </div>
                     {sel.description && (
                       <div style={{background:'var(--s2)',borderRadius:10,padding:'12px 14px',border:'1px solid var(--bdr)'}}>

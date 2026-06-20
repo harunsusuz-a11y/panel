@@ -52,7 +52,7 @@ export default function GorevlerPage() {
     const { data: { user } } = await sb.auth.getUser()
     if (user) setMyId(user.id)
     const [t, p, c, pr] = await Promise.all([
-      sb.from('tasks').select('id,title,status,priority,due_date,assigned_to,project_id,client_id,completed_at,description').order('created_at', { ascending: false }),
+      sb.from('tasks').select('id,title,status,priority,due_date,assigned_to,project_id,client_id,completed_at,description,created_at').order('created_at', { ascending: false }),
       sb.from('projects').select('id,name,client_id').order('name'),
       sb.from('clients').select('id,name').order('name'),
       sb.from('profiles').select('id,full_name,department').not('full_name', 'is', null),
@@ -290,8 +290,9 @@ export default function GorevlerPage() {
                     { l: 'Sorumlu',    v: detail.assignee?.full_name || '—' },
                     { l: 'Öncelik',    v: PRI[detail.priority]?.label || detail.priority },
                     { l: 'Durum',      v: COLS.find(c => c.id === detail.status)?.label || detail.status },
-                    { l: 'Deadline',   v: fmtDeadline(detail.due_date) },
-                    { l: 'Tamamlandı', v: detail.completed_at ? fmtDateTime(detail.completed_at) : '—' },
+                    { l: 'Deadline',    v: fmtDeadline(detail.due_date) },
+                    { l: 'Oluşturuldu', v: detail.created_at ? fmtDateTime(detail.created_at) : '—' },
+                    { l: 'Tamamlandı',  v: detail.completed_at ? fmtDateTime(detail.completed_at) : '—' },
                   ].map(f => (
                     <div key={f.l} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 11px', background: 'var(--s2)', borderRadius: 7 }}>
                       <span style={{ fontSize: 12, color: 'var(--tx3)' }}>{f.l}</span>

@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState } from 'react'
 import GlobalSearch from './GlobalSearch'
+import DaydreamLogo from './DaydreamLogo'
 import {
   LayoutDashboard, Users, FolderOpen, CheckSquare, CalendarDays,
   FileText, Activity, AlertCircle, ShieldCheck,
@@ -81,9 +82,7 @@ export default function Sidebar() {
   return (
     <aside className="sb">
       <div className="sb-logo">
-        <div className="sb-mark">
-          <LayoutDashboard size={14} color="#fff" strokeWidth={2} />
-        </div>
+        <DaydreamLogo size={34} />
         <div>
           <p style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--tx)', letterSpacing: '-.2px', lineHeight: 1.2 }}>Daydream Production</p>
           <p style={{ fontSize: 9.5, color: 'var(--tx3)', marginTop: 2 }}>Agency ERP</p>
