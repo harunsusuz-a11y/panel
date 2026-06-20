@@ -40,6 +40,7 @@ export default function PerformansPage() {
   const [clients,   setClients]   = useState<any[]>([])
   const [contents,  setContents]  = useState<any[]>([])
   const [activities,setActivities]= useState<any[]>([])
+  const [sessions,  setSessions]  = useState<any[]>([])
   const [loading,   setLoading]   = useState(true)
   const [selClient, setSelClient] = useState<string>('all')
   const [myRole,    setMyRole]    = useState('')
@@ -52,7 +53,7 @@ export default function PerformansPage() {
       const { data: p } = await sb.from('profiles').select('role').eq('id', me.user.id).single()
       setMyRole(p?.role || '')
     }
-    const [pr, t, p, c, ct, ac] = await Promise.all([
+    const [pr, t, p, c, ct, ac, sess] = await Promise.all([
       sb.from('profiles').select('*').not('full_name', 'is', null),
       sb.from('tasks').select('*'),
       sb.from('projects').select('*').order('created_at', { ascending: false }),
@@ -60,6 +61,7 @@ export default function PerformansPage() {
       sb.from('contents').select('*').order('created_at', { ascending: false }),
       sb.from('activities').select('*, user:profiles!activities_user_id_fkey(full_name,role)')
         .order('created_at', { ascending: false }).limit(50),
+      sb.from('user_sessions').select('*'),
     ])
     setProfiles(pr.data || [])
     setTasks(t.data || [])
@@ -67,6 +69,7 @@ export default function PerformansPage() {
     setClients(c.data || [])
     setContents(ct.data || [])
     setActivities(ac.data || [])
+    setSessions(sess.data || [])
     setLoading(false)
   }
 
@@ -315,6 +318,47 @@ export default function PerformansPage() {
                         </p>
                       </div>
                       <span className="badge" style={{ background: st.bg, color: st.c, flexShrink: 0 }}>{st.l}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+
+            {/* ── EKİP GİRİŞ DURUMU ── */}
+            <div className="card" style={{ marginBottom: 14 }}>
+              <div className="card-h">
+                <span className="card-title">Ekip Giriş Durumu</span>
+                <span className="card-meta">Kim sisteme girdi?</span>
+              </div>
+              <div>
+                {sessions.filter((s:any) => s.full_name).map((s:any) => {
+                  const statusMap: Record<string,{l:string;c:string;bg:string}> = {
+                    online:    {l:'Online',        c:'var(--green)', bg:'var(--green2)'},
+                    today:     {l:'Bugün',          c:'var(--blue)',  bg:'var(--blue2)'},
+                    this_week: {l:'Bu Hafta',       c:'var(--amber)', bg:'var(--amber2)'},
+                    inactive:  {l:'Pasif',          c:'var(--tx3)',   bg:'var(--s3)'},
+                    never:     {l:'Hiç Giriş Yok',  c:'var(--red)',   bg:'var(--red2)'},
+                  }
+                  const ss = statusMap[s.session_status || 'never']
+                  return (
+                    <div key={s.id} style={{display:'flex',alignItems:'center',gap:12,padding:'10px 16px',borderBottom:'1px solid var(--bdr)'}}>
+                      <div style={{position:'relative',flexShrink:0}}>
+                        <div style={{width:32,height:32,borderRadius:'50%',background:'var(--s3)',color:'var(--tx2)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:800}}>
+                          {(s.full_name||'?').split(' ').map((w:string)=>w[0]).join('').slice(0,2).toUpperCase()}
+                        </div>
+                        <div style={{position:'absolute',bottom:0,right:0,width:9,height:9,borderRadius:'50%',background:ss.c,border:'2px solid var(--s1)'}}/>
+                      </div>
+                      <div style={{flex:1,minWidth:0}}>
+                        <p style={{fontSize:13,fontWeight:600,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{s.full_name}</p>
+                        <p style={{fontSize:11,color:'var(--tx3)',marginTop:2}}>{s.email}</p>
+                      </div>
+                      <div style={{textAlign:'right',flexShrink:0}}>
+                        <span className="badge" style={{background:ss.bg,color:ss.c,fontSize:10,display:'block',marginBottom:3}}>{ss.l}</span>
+                        <p style={{fontSize:10.5,color:'var(--tx3)',fontFamily:'JetBrains Mono,monospace'}}>
+                          {s.last_sign_in_at ? fmtRelative(s.last_sign_in_at) : '—'}
+                        </p>
+                      </div>
                     </div>
                   )
                 })}
