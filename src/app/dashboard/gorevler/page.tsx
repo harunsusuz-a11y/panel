@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
+import InfoBox from '@/components/InfoBox'
 import { Plus, X, Building2, Clock, MessageSquare, Send, Zap } from 'lucide-react'
 import { fmtDeadline, fmtDateTime, fmtRelative } from '@/lib/utils'
 

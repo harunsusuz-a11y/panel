@@ -36,7 +36,7 @@ html,body{color-scheme:dark;height:100%;background:var(--bg);color:var(--tx);fon
 a{color:inherit;text-decoration:none}
 button{font-family:inherit;cursor:pointer}
 input,select,textarea{font-family:inherit;color-scheme:dark}
-input[type="date"],input[type="time"],input[type="datetime-local"],input[type="number"]{background:var(--s2);color:var(--tx);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;outline:none;font-family:inherit}
+input[type="date"],input[type="time"],input[type="datetime-local"],input[type="number"]{background:var(--s3)!important;color:var(--tx)!important;border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;outline:none;font-family:inherit;-webkit-text-fill-color:var(--tx)!important}
 input[type="date"]:focus,input[type="time"]:focus,input[type="number"]:focus{border-color:var(--ac)}
 input[type="date"]::-webkit-calendar-picker-indicator,input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.6);cursor:pointer}
 input[type="checkbox"]{width:15px;height:15px;accent-color:var(--ac);cursor:pointer}
@@ -79,14 +79,16 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--ac);cursor:poin
 .row:hover{background:rgba(255,255,255,0.02)}
 
 /* ── Input / Select / Textarea ── */
-.inp{width:100%;background:var(--s2)!important;border:1px solid var(--bdr);border-radius:8px;color:var(--tx)!important;padding:9px 12px;font-size:13px;outline:none;transition:border-color .15s;-webkit-text-fill-color:var(--tx)!important}
-.inp:focus{border-color:var(--ac);background:var(--s2)!important;color:var(--tx)!important}
+.inp{width:100%;background:var(--s3)!important;border:1px solid var(--bdr);border-radius:8px;color:var(--tx)!important;padding:9px 12px;font-size:13px;outline:none;transition:border-color .15s,background .15s;-webkit-text-fill-color:var(--tx)!important;box-sizing:border-box}
+.inp:hover{border-color:var(--bdr2)}
+.inp:focus{border-color:var(--ac)!important;background:var(--s2)!important;color:var(--tx)!important;-webkit-text-fill-color:var(--tx)!important;box-shadow:0 0 0 3px rgba(124,106,247,.12)}
 .inp:focus-visible{outline:none}
-.inp::placeholder{color:var(--tx3)}
-.inp:-webkit-autofill,.inp:-webkit-autofill:hover,.inp:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px var(--s2) inset!important;-webkit-text-fill-color:var(--tx)!important;border-color:var(--ac)!important;caret-color:var(--tx)!important}
-textarea.inp{resize:vertical}
-select.inp{cursor:pointer;background:var(--s2)!important;color:var(--tx)!important}
-input.inp[type="text"],input.inp[type="email"],input.inp[type="password"],input.inp[type="number"],input.inp[type="tel"],input.inp[type="url"]{background:var(--s2)!important;color:var(--tx)!important}
+.inp::placeholder{color:var(--tx3)!important;opacity:1}
+.inp:disabled{opacity:.5;cursor:not-allowed}
+.inp:-webkit-autofill,.inp:-webkit-autofill:hover,.inp:-webkit-autofill:focus,.inp:-webkit-autofill:active{-webkit-box-shadow:0 0 0 1000px var(--s3) inset!important;-webkit-text-fill-color:var(--tx)!important;border-color:var(--bdr)!important;caret-color:var(--tx)!important;transition:background-color 5000s ease-in-out 0s}
+textarea.inp{resize:vertical;min-height:80px}
+select.inp{cursor:pointer;background:var(--s3)!important;color:var(--tx)!important;appearance:auto}
+select.inp:focus{background:var(--s2)!important}
 .label{display:block;font-size:11.5px;font-weight:500;color:var(--tx2);margin-bottom:6px}
 
 /* ── Progress ── */

@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
+import InfoBox from '@/components/InfoBox'
 import { 
   CheckCircle2, Clock, AlertCircle, Send, ChevronRight,
   User, Building2, ArrowRight, RefreshCw, FileText,
@@ -17,7 +18,7 @@ const PIPELINE = [
   { id: 'uygulama', label: 'Uygulama/Export',  owner: 'Yasin',  color: 'var(--blue)' },
   { id: 'mert',     label: 'Gönderim Hazır',   owner: 'Mert',   color: 'var(--ac)'   },
   { id: 'final',    label: 'Emir Onayı',       owner: 'Emir',   color: 'var(--amber)'},
-  { id: 'musteri',  label: 'Müşteriye Gitti',  owner: 'Müşteri',color: 'var(--green)'},
+  { id: 'musteri',  label: 'Teslim Edildi ✓',   owner: 'Müşteriye',color: 'var(--green)'},
 ]
 
 const STATUS_MAP: Record<string, string> = {
@@ -185,6 +186,18 @@ export default function OperasyonPage() {
         />
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '16px 18px 80px' }}>
+          <InfoBox
+            title="Operasyon Sayfası Nasıl Çalışır?"
+            storageKey="operasyon"
+            color="var(--blue)"
+            items={[
+              "Bu sayfa Mert'in trafik kontrol merkezidir — işlerin doğru kişiye, doğru zamanda gitmesini takip eder.",
+              "Pipeline: Her sütun Daydream iş akışındaki bir aşamayı gösterir. Sayı o aşamadaki aktif iş sayısıdır.",
+              "'Müşteriye Gitti' = Tamamlanan görevler (done statüsü). Müşteriye teslim edilmiş işler.",
+              "Ekip İş Yükü: Her kişinin taşıdığı aktif iş sayısı. Bar uzadıkça yük artar.",
+              "Gün Sonu Checklist: Günü kapatmadan önce tamamlanması gereken 6 madde.",
+            ]}
+          />
           {loading ? (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 200, flexDirection: 'column', gap: 10, color: 'var(--tx3)' }}>
               <div style={{ width: 24, height: 24, borderRadius: 6, background: 'var(--ac)', animation: 'pulse 2s ease infinite' }} />
@@ -257,7 +270,7 @@ export default function OperasyonPage() {
                     }).length
                     return (
                       <div key={step.id} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <div className={`pipe-step${count > 0 ? ' active' : ''}`}>
+                        <div className={`pipe-step${count > 0 ? ' active' : ''}`} title={`${step.label}: ${count} iş — ${step.owner} sorumluluğunda`}>
                           <div style={{ fontSize: 18, fontWeight: 700, fontFamily: 'JetBrains Mono,monospace', color: count > 0 ? step.color : 'var(--tx3)', lineHeight: 1, marginBottom: 3 }}>{count}</div>
                           <div style={{ fontSize: 10.5, fontWeight: 600, color: count > 0 ? 'var(--tx)' : 'var(--tx3)' }}>{step.label}</div>
                           <div style={{ fontSize: 9.5, color: count > 0 ? step.color : 'var(--tx3)', marginTop: 2 }}>{step.owner}</div>
