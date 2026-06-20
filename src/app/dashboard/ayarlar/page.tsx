@@ -16,6 +16,49 @@ const TABS = [
 type Tab = 'profile' | 'security' | 'netgsm' | 'smtp' | 'company' | 'bildirim'
 
 
+function QuickNotifTest() {
+  const [status, setStatus] = React.useState<'idle'|'sending'|'done'>('idle')
+
+  async function send() {
+    setStatus('sending')
+    try {
+      const sb = createClient()
+      const { data: { user } } = await sb.auth.getUser()
+      if (user) {
+        await sb.from('notifications').insert({
+          user_id: user.id, type: 'task_assigned',
+          title: '🔔 Test Bildirimi',
+          body: 'Bildirim sistemi çalışıyor — çan ikonunu kontrol et!',
+          entity_type: 'tasks',
+        })
+      }
+      // Local push da dene
+      if (Notification.permission === 'granted' && 'serviceWorker' in navigator) {
+        const reg = await navigator.serviceWorker.ready.catch(()=>null)
+        reg?.showNotification('Daydream ✓', { body: 'Bildirimler aktif!', icon: '/icons/icon-192.png', vibrate:[200,100,200] }).catch(()=>{})
+      }
+      setStatus('done')
+      setTimeout(() => setStatus('idle'), 4000)
+    } catch { setStatus('idle') }
+  }
+
+  return (
+    <div style={{background:'var(--s2)',borderRadius:10,padding:'12px 14px',border:'1px solid var(--bdr)',display:'flex',alignItems:'center',gap:12}}>
+      <div style={{flex:1}}>
+        <p style={{fontSize:13,fontWeight:600,marginBottom:2}}>🔔 Bildirim Testi</p>
+        <p style={{fontSize:11.5,color:'var(--tx3)'}}>
+          {status==='done' ? '✓ Gönderildi — çan ikonunu kontrol et!' : 'Bildirimlerin çalışıp çalışmadığını test et'}
+        </p>
+      </div>
+      <button onClick={send} disabled={status!=='idle'}
+        className={status==='done'?'btn-ghost':'btn'}
+        style={{fontSize:12,padding:'7px 14px',flexShrink:0,opacity:status==='sending'?.6:1}}>
+        {status==='sending'?'Gönderiliyor...':status==='done'?'✓ Tamam':'Test Et'}
+      </button>
+    </div>
+  )
+}
+
 function InstallButton() {
   const [canInstall, setCanInstall] = React.useState(false)
   const [installed, setInstalled]   = React.useState(false)
@@ -115,17 +158,34 @@ function NotificationSettings() {
 
   async function testNotif() {
     setTesting(true)
-    if ('serviceWorker' in navigator) {
+    // 1. Local bildirim (tarayıcı)
+    if ('serviceWorker' in navigator && Notification.permission === 'granted') {
       const reg = await navigator.serviceWorker.ready.catch(() => null)
       if (reg) {
-        await reg.showNotification('Daydream Production', {
-          body: 'Test bildirimi — sistem çalışıyor ✓',
+        await reg.showNotification('Daydream Production ✓', {
+          body: 'Bildirim sistemi çalışıyor! Görev atandığında, onay geldiğinde burada göreceksin.',
           icon: '/icons/icon-192.png',
           vibrate: [200, 100, 200],
+          tag: 'test-notif',
         }).catch(() => {})
       }
     }
-    setTesting(false); setMsg('Test bildirimi gönderildi!')
+    // 2. Supabase notifications tablosuna kaydet (in-app + ses)
+    try {
+      const sb = createClient()
+      const { data: { user } } = await sb.auth.getUser()
+      if (user) {
+        await sb.from('notifications').insert({
+          user_id: user.id,
+          type: 'task_assigned',
+          title: '🔔 Test Bildirimi',
+          body: 'Bildirimler çalışıyor! Görev atandığında, onay geldiğinde bildirim alacaksın.',
+          entity_type: 'tasks',
+        })
+      }
+    } catch {}
+    setTesting(false)
+    setMsg('✓ Test bildirimi gönderildi! Çan ikonunu kontrol et.')
   }
 
   const notSupported = perm === 'unsupported' || !('serviceWorker' in (typeof navigator !== 'undefined' ? navigator : {}))
@@ -351,6 +411,11 @@ export default function AyarlarPage() {
                 {saving?'Kaydediliyor...':'Kaydet'}
               </button>
             </div>
+          )}
+
+          {/* ── Bildirim Hızlı Test ── */}
+          {tab==='profile' && (
+            <QuickNotifTest />
           )}
 
           {/* ── Güvenlik ── */}

@@ -453,7 +453,7 @@ export default function ProjelerPage() {
                 </div>
                 <div>
                   <label className="label">Sıra No</label>
-                  <input type="number" value={stageForm.order_index} onChange={e=>setStageForm(p=>({...p,order_index:Number(e.target.value)}))}/>
+                  <input type="number" value={stageForm.order_index} onChange={e=>setStageForm(p=>({...p,order_index:Number(e.target.value)}))} className="inp" min="0"/>
                 </div>
               </div>
               <label style={{display:'flex',alignItems:'center',gap:8,cursor:'pointer'}}>
