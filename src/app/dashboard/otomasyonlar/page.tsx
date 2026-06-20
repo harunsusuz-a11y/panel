@@ -38,7 +38,7 @@ export default function OtomasyonlarPage() {
   const [testMsg,  setTestMsg]  = useState('Daydream Agency ERP test mesajı!')
   const [form, setForm] = useState({
     name:'', trigger_event:'task_overdue', action:'sms',
-    target_phone:'', message_template:'', trigger_hours:24
+    message_template:'', trigger_hours:24
   })
 
   const showToast = (m:string) => { setToast(m); setTimeout(()=>setToast(''),4000) }
@@ -75,7 +75,7 @@ export default function OtomasyonlarPage() {
       name: form.name.trim(),
       trigger_event: form.trigger_event,
       action: form.action,
-      target_phone: form.target_phone||null,
+
       message_template: form.message_template || DEFAULT_MSGS[form.trigger_event],
       trigger_hours: form.trigger_hours,
       active: true, run_count: 0
@@ -85,7 +85,7 @@ export default function OtomasyonlarPage() {
       showToast('✓ Otomasyon oluşturuldu!')
       setModal(false)
       load()
-      setForm({name:'',trigger_event:'task_overdue',action:'sms',target_phone:'',message_template:'',trigger_hours:24})
+      setForm({name:'',trigger_event:'task_overdue',action:'sms',message_template:'',trigger_hours:24})
     }
   }
 
@@ -173,7 +173,6 @@ export default function OtomasyonlarPage() {
                       <div style={{paddingLeft:15,display:'flex',flexDirection:'column',gap:4,marginBottom:10}}>
                         <p style={{fontSize:12,color:'var(--tx2)'}}>⚡ {tl(r.trigger_event)}</p>
                         <p style={{fontSize:12,color:'var(--tx2)'}}>→ {al(r.action)}</p>
-                        {r.target_phone&&<p style={{fontSize:12,color:'var(--tx3)'}}>📱 {r.target_phone}</p>}
                         {r.message_template&&<p style={{fontSize:11.5,color:'var(--tx3)',fontStyle:'italic',background:'var(--s2)',padding:'5px 8px',borderRadius:6,marginTop:2}}>"{r.message_template.slice(0,60)}{r.message_template.length>60?'...':''}"</p>}
                       </div>
                       <div style={{display:'flex',gap:7}}>
@@ -238,8 +237,8 @@ export default function OtomasyonlarPage() {
                 </select>
               </div>
               {(form.action==='sms'||form.action==='both')&&(
-                <div><label className="label">Hedef Telefon (boş = görevin sorumlusu)</label>
-                  <input value={form.target_phone} onChange={e=>setForm(f=>({...f,target_phone:e.target.value}))} placeholder="05XX XXX XX XX" className="inp"/>
+                <div style={{background:'var(--blue2)',borderRadius:8,padding:'10px 12px',border:'1px solid rgba(78,168,240,.15)',fontSize:12,color:'var(--blue)',lineHeight:1.6}}>
+                  📱 SMS, sorumlu kişinin profilindeki telefon numarasına otomatik gönderilir. Ayarlar → Profil bölümünden telefon numaraları girilmelidir.
                 </div>
               )}
               <div>
