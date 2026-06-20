@@ -16,6 +16,51 @@ const TABS = [
 type Tab = 'profile' | 'security' | 'netgsm' | 'smtp' | 'company' | 'bildirim'
 
 
+function InstallButton() {
+  const [canInstall, setCanInstall] = React.useState(false)
+  const [installed, setInstalled]   = React.useState(false)
+
+  React.useEffect(() => {
+    // Zaten yüklü mü?
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setInstalled(true); return
+    }
+    // Prompt hazır mı?
+    const check = () => setCanInstall(!!(window as any).__pwaInstallPrompt)
+    check()
+    window.addEventListener('beforeinstallprompt', check)
+    window.addEventListener('appinstalled', () => setInstalled(true))
+    return () => { window.removeEventListener('beforeinstallprompt', check) }
+  }, [])
+
+  async function install() {
+    const prompt = (window as any).__pwaInstallPrompt
+    if (!prompt) return
+    prompt.prompt()
+    const { outcome } = await prompt.userChoice
+    if (outcome === 'accepted') setInstalled(true)
+  }
+
+  if (installed) return (
+    <div style={{display:'flex',alignItems:'center',gap:8,padding:'10px 14px',background:'var(--green2)',borderRadius:9,border:'1px solid rgba(34,211,160,.2)'}}>
+      <CheckCircle2 size={16} style={{color:'var(--green)'}} strokeWidth={2}/>
+      <span style={{fontSize:13,fontWeight:600,color:'var(--green)'}}>Uygulama kurulu ✓</span>
+    </div>
+  )
+
+  if (!canInstall) return (
+    <div style={{fontSize:12,color:'var(--tx3)',padding:'8px 0'}}>
+      Chrome/Edge adres çubuğundaki ⊕ ikonunu kullanın
+    </div>
+  )
+
+  return (
+    <button className="btn" onClick={install} style={{width:'100%',justifyContent:'center',padding:'10px',fontSize:13}}>
+      ⊕ Uygulamayı Kur (Chrome/Edge)
+    </button>
+  )
+}
+
 function NotificationSettings() {
   const [perm,    setPerm]    = React.useState<string>('default')
   const [subbed,  setSubbed]  = React.useState(false)
@@ -127,14 +172,19 @@ function NotificationSettings() {
       </div>
 
       <div style={{background:'var(--s2)',borderRadius:12,padding:'16px',border:'1px solid var(--bdr)'}}>
-        <p style={{fontSize:13,fontWeight:700,marginBottom:10}}>Telefona Uygulama Olarak Ekle</p>
-        <div style={{display:'flex',flexDirection:'column',gap:8}}>
+        <p style={{fontSize:13,fontWeight:700,marginBottom:10}}>Uygulama Olarak Kur</p>
+        <InstallButton />
+        <div style={{display:'flex',flexDirection:'column',gap:8,marginTop:12}}>
           <div style={{background:'var(--s3)',borderRadius:8,padding:'10px 12px'}}>
-            <p style={{fontSize:12,fontWeight:600,color:'var(--ac)',marginBottom:4}}>iPhone / Safari</p>
+            <p style={{fontSize:12,fontWeight:600,color:'var(--amber)',marginBottom:4}}>💻 Bilgisayar (Chrome/Edge)</p>
+            <p style={{fontSize:12,color:'var(--tx2)',lineHeight:1.6}}>Adres çubuğunun sağındaki <strong>⊕ Yükle</strong> ikonuna tıkla ya da yukarıdaki butonu kullan</p>
+          </div>
+          <div style={{background:'var(--s3)',borderRadius:8,padding:'10px 12px'}}>
+            <p style={{fontSize:12,fontWeight:600,color:'var(--ac)',marginBottom:4}}>📱 iPhone / Safari</p>
             <p style={{fontSize:12,color:'var(--tx2)',lineHeight:1.6}}>Paylaş ↑ butonuna tıkla → <strong>"Ana Ekrana Ekle"</strong> seç</p>
           </div>
           <div style={{background:'var(--s3)',borderRadius:8,padding:'10px 12px'}}>
-            <p style={{fontSize:12,fontWeight:600,color:'var(--green)',marginBottom:4}}>Android / Chrome</p>
+            <p style={{fontSize:12,fontWeight:600,color:'var(--green)',marginBottom:4}}>📱 Android / Chrome</p>
             <p style={{fontSize:12,color:'var(--tx2)',lineHeight:1.6}}>⋮ menüsü → <strong>"Ana ekrana ekle"</strong> veya tarayıcı üstünde çıkan banner'a tıkla</p>
           </div>
         </div>

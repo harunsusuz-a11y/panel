@@ -1,26 +1,66 @@
 {
+  "id": "/dashboard",
   "name": "Daydream Production",
   "short_name": "Daydream",
-  "description": "Agency Operasyon Paneli",
+  "description": "Daydream Production Agency Operasyon Paneli",
   "start_url": "/dashboard",
+  "scope": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
   "background_color": "#0c0c10",
   "theme_color": "#7c6af7",
-  "orientation": "portrait-primary",
+  "orientation": "any",
+  "lang": "tr",
+  "dir": "ltr",
+  "categories": ["business", "productivity"],
   "icons": [
     {
       "src": "/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
-  "categories": ["business", "productivity"],
-  "lang": "tr"
+  "screenshots": [
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Daydream Production Dashboard"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Görevler",
+      "short_name": "Görevler",
+      "url": "/dashboard/gorevler",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Operasyon",
+      "short_name": "Operasyon",
+      "url": "/dashboard/operasyon",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Onay",
+      "short_name": "Onay",
+      "url": "/dashboard/onay",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "prefer_related_applications": false
 }

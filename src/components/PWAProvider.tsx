@@ -37,6 +37,13 @@ export default function PWAProvider() {
   const prevCount = useRef(0)
 
   useEffect(() => {
+    // Masaüstü install prompt'unu yakala ve sakla
+    const handler = (e: Event) => {
+      e.preventDefault()
+      ;(window as any).__pwaInstallPrompt = e
+    }
+    window.addEventListener('beforeinstallprompt', handler)
+
     // 1. Service Worker kaydet
     if (!('serviceWorker' in navigator)) return
 
@@ -69,6 +76,8 @@ export default function PWAProvider() {
         })
       })
       .catch(err => console.warn('SW registration failed:', err))
+
+    return () => { window.removeEventListener('beforeinstallprompt', handler) }
 
     // 3. Realtime bildirimleri dinle + ses çal
     const sb = createClient()
