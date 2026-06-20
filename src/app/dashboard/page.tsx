@@ -1,8 +1,13 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
-import { TrendingUp, Wallet, FolderOpen, Clock, ClipboardCheck, ArrowUpRight, ArrowDownRight, ArrowRight, CheckCircle2 } from 'lucide-react'
+import {
+  TrendingUp, Wallet, FolderOpen, Clock, ClipboardCheck,
+  ArrowUpRight, ArrowDownRight, ArrowRight, CheckCircle2,
+  Wifi, WifiOff
+} from 'lucide-react'
 
 function BarChart({ bars }: { bars: { label: string; v: number; hi?: boolean }[] }) {
   const [m, setM] = useState(false)
@@ -57,9 +62,23 @@ function Donut({ segs }: { segs: { v: number; color: string; label: string }[] }
   )
 }
 
-function KPI({ label, value, sub, color, iconBg, Icon, trend, delay = 0 }: any) {
+function KPI({ label, value, sub, color, iconBg, Icon, trend, delay = 0, onClick, pulse }: any) {
   return (
-    <div className="kpi" style={{ borderLeft: `2.5px solid ${color}`, animationDelay: `${delay}ms` }}>
+    <div
+      className="kpi"
+      onClick={onClick}
+      style={{
+        borderLeft: `2.5px solid ${color}`,
+        animationDelay: `${delay}ms`,
+        cursor: onClick ? 'pointer' : 'default',
+        transition: 'border-color .15s, transform .15s, box-shadow .15s',
+      }}
+      onMouseEnter={e => { if (onClick) { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)'; (e.currentTarget as HTMLDivElement).style.boxShadow = `0 8px 24px ${color}22` } }}
+      onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = ''; (e.currentTarget as HTMLDivElement).style.boxShadow = '' }}
+    >
+      {pulse && (
+        <div style={{ position: 'absolute', top: 10, right: 10, width: 7, height: 7, borderRadius: '50%', background: 'var(--green)', animation: 'pulse 2.5s ease-in-out infinite' }} />
+      )}
       <div style={{ position: 'absolute', top: 0, right: 0, width: 80, height: 80, background: `radial-gradient(circle at top right,${color}18,transparent 70%)`, pointerEvents: 'none' }} />
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 10 }}>
         <div style={{ width: 34, height: 34, borderRadius: 9, background: iconBg, border: `1px solid ${color}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -74,34 +93,65 @@ function KPI({ label, value, sub, color, iconBg, Icon, trend, delay = 0 }: any) 
       <p className="kpi-label">{label}</p>
       <p className="kpi-value">{value}</p>
       {sub && <p className="kpi-sub">{sub}</p>}
+      {onClick && <p style={{ fontSize: 10, color, marginTop: 6, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 3 }}>
+        Görüntüle <ArrowRight size={10} />
+      </p>}
     </div>
   )
 }
 
 export default function DashboardPage() {
+  const router = useRouter()
   const [data, setData] = useState<any>({ tasks: [], projects: [], clients: [], transactions: [], approvals: [] })
   const [loading, setLoading] = useState(true)
   const [now, setNow] = useState(new Date())
   const [userName, setUserName] = useState('')
+  const [connected, setConnected] = useState(true)
+  const [lastUpdate, setLastUpdate] = useState(new Date())
+  const channelsRef = useRef<any[]>([])
 
   useEffect(() => { const id = setInterval(() => setNow(new Date()), 1000); return () => clearInterval(id) }, [])
 
-  useEffect(() => {
+  async function fetchAll() {
     const sb = createClient()
     sb.auth.getUser().then(({ data: { user } }) => {
       if (!user) return
       sb.from('profiles').select('full_name').eq('id', user.id).single().then(({ data }) => setUserName(data?.full_name?.split(' ')[0] || ''))
     })
-    Promise.all([
-      sb.from('tasks').select('id,title,status,priority,due_date'),
+    const [t, p, c, tr, ap] = await Promise.all([
+      sb.from('tasks').select('id,title,status,priority,due_date,assigned_to,client_id'),
       sb.from('projects').select('id,name,status,progress,deadline,client_id'),
       sb.from('clients').select('id,name,status'),
       sb.from('transactions').select('type,amount,date'),
-      sb.from('approvals').select('id,status'),
-    ]).then(([t, p, c, tr, ap]) => {
-      setData({ tasks: t.data || [], projects: p.data || [], clients: c.data || [], transactions: tr.data || [], approvals: ap.data || [] })
-      setLoading(false)
+      sb.from('approvals').select('id,status,client_status'),
+    ])
+    setData({ tasks: t.data || [], projects: p.data || [], clients: c.data || [], transactions: tr.data || [], approvals: ap.data || [] })
+    setLoading(false)
+    setLastUpdate(new Date())
+  }
+
+  useEffect(() => {
+    fetchAll()
+
+    // Realtime subscriptions
+    const sb = createClient()
+    const tables = ['tasks', 'projects', 'clients', 'transactions', 'approvals']
+    
+    tables.forEach(table => {
+      const ch = sb.channel(`db-${table}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table }, () => {
+          fetchAll()
+        })
+        .subscribe(status => {
+          setConnected(status === 'SUBSCRIBED')
+        })
+      channelsRef.current.push(ch)
     })
+
+    return () => {
+      channelsRef.current.forEach(ch => sb.removeChannel(ch))
+      channelsRef.current = []
+    }
   }, [])
 
   const { tasks, projects, clients, transactions, approvals } = data
@@ -111,6 +161,7 @@ export default function DashboardPage() {
   const done    = tasks.filter((t: any) => t.status === 'done')
   const overdue = tasks.filter((t: any) => t.status !== 'done' && t.due_date && new Date(t.due_date) < now)
   const pending = approvals.filter((a: any) => a.status === 'pending')
+  const clientPending = approvals.filter((a: any) => a.client_status === 'sent')
   const activeP = projects.filter((p: any) => p.status === 'active')
 
   const MONTHS = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara']
@@ -128,7 +179,7 @@ export default function DashboardPage() {
     { v: done.length,                                                  color: 'var(--green)',label: 'Tamamlandı' },
   ]
 
-  const fmt = (v: number) => v >= 1000000 ? `₺${(v / 1000000).toFixed(1)}M` : v >= 1000 ? `₺${Math.round(v / 1000)}K` : `₺${v}`
+  const fmt = (v: number) => v >= 1000000 ? `₺${(v/1000000).toFixed(1)}M` : v >= 1000 ? `₺${Math.round(v/1000)}K` : `₺${v}`
   const PRI: Record<string, string> = { critical: 'var(--red)', high: 'var(--amber)', normal: 'var(--blue)', low: 'var(--tx3)' }
 
   const overdueTop = [...overdue].sort((a: any, b: any) => {
@@ -139,6 +190,9 @@ export default function DashboardPage() {
   const weekEnd = new Date(now.getTime() + 7 * 86400000)
   const weekTasks = tasks.filter((t: any) => t.due_date && t.status !== 'done' && new Date(t.due_date) >= now && new Date(t.due_date) <= weekEnd)
     .sort((a: any, b: any) => String(a.due_date).localeCompare(String(b.due_date))).slice(0, 5)
+
+  const timeSince = Math.floor((now.getTime() - lastUpdate.getTime()) / 1000)
+  const lastUpdStr = timeSince < 5 ? 'Az önce' : timeSince < 60 ? `${timeSince}s önce` : `${Math.floor(timeSince/60)}dk önce`
 
   return (
     <>
@@ -152,34 +206,73 @@ export default function DashboardPage() {
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
         <TopBar
           title={userName ? `Merhaba, ${userName}` : 'Dashboard'}
-          subtitle={now.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+          subtitle={now.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' })}
           action={
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'var(--s2)', border: '1px solid var(--bdr)', borderRadius: 8, padding: '5px 11px' }}>
-              <span className="anim-pulse" style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--green)', display: 'inline-block' }} />
-              <span style={{ fontSize: 11.5, fontFamily: 'JetBrains Mono,monospace', color: 'var(--green)', fontWeight: 500 }}>
-                {now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-              </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {/* Realtime göstergesi */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'var(--s2)', border: `1px solid ${connected ? 'rgba(34,211,160,.2)' : 'rgba(242,87,87,.2)'}`, borderRadius: 8, padding: '5px 10px' }}>
+                {connected
+                  ? <Wifi size={11} style={{ color: 'var(--green)' }} strokeWidth={2} />
+                  : <WifiOff size={11} style={{ color: 'var(--red)' }} strokeWidth={2} />}
+                <span style={{ fontSize: 10.5, color: connected ? 'var(--green)' : 'var(--red)', fontWeight: 600 }}>
+                  {connected ? 'Canlı' : 'Bağlantı yok'}
+                </span>
+                <span style={{ fontSize: 10, color: 'var(--tx3)', borderLeft: '1px solid var(--bdr)', paddingLeft: 6 }}>{lastUpdStr}</span>
+              </div>
+              {/* Saat */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'var(--s2)', border: '1px solid var(--bdr)', borderRadius: 8, padding: '5px 11px' }}>
+                <span className="anim-pulse" style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--green)', display: 'inline-block' }} />
+                <span style={{ fontSize: 11.5, fontFamily: 'JetBrains Mono,monospace', color: 'var(--green)', fontWeight: 500 }}>
+                  {now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                </span>
+              </div>
             </div>
           }
         />
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '20px 20px 80px' }}>
           {loading ? (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 200, color: 'var(--tx3)', fontSize: 14 }}>Yükleniyor...</div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 200, color: 'var(--tx3)', fontSize: 14, flexDirection: 'column', gap: 10 }}>
+              <div style={{ width: 28, height: 28, borderRadius: 8, background: 'linear-gradient(135deg,var(--ac),#5b4de0)', animation: 'pulse 2s ease infinite', boxShadow: '0 0 16px rgba(124,106,247,.4)' }} />
+              Yükleniyor...
+            </div>
           ) : (<>
-            {/* KPI */}
+            {/* KPI — her biri tıklanabilir */}
             <div className="db-kpi">
-              <KPI label="Toplam Gelir"  value={fmt(income)}          sub={`Gider: ${fmt(expense)}`}    color="var(--green)"  iconBg="var(--green2)" Icon={TrendingUp}    trend={{ v: '+12%', up: true }}  delay={0} />
-              <KPI label="Net Kar"       value={fmt(net)}             sub={net >= 0 ? 'Kârlı' : 'Zarar'} color={net >= 0 ? 'var(--ac)' : 'var(--red)'} iconBg={net >= 0 ? 'var(--ac3)' : 'var(--red2)'} Icon={Wallet} delay={40} />
-              <KPI label="Aktif Proje"   value={String(activeP.length)} sub={`${clients.filter((c: any) => c.status === 'active').length} müşteri`} color="var(--blue)"  iconBg="var(--blue2)" Icon={FolderOpen} delay={80} />
-              <KPI label="Geciken Görev" value={String(overdue.length)} sub={overdue.length > 0 ? 'Kontrol!' : 'Temiz'} color={overdue.length > 0 ? 'var(--red)' : 'var(--green)'} iconBg={overdue.length > 0 ? 'var(--red2)' : 'var(--green2)'} Icon={Clock} delay={120} />
-              <KPI label="Onay Bekliyor" value={String(pending.length)} sub={`${tasks.length} toplam görev`} color="var(--amber)" iconBg="var(--amber2)" Icon={ClipboardCheck} delay={160} />
+              <KPI label="Toplam Gelir" value={fmt(income)} sub={`Gider: ${fmt(expense)}`}
+                color="var(--green)" iconBg="var(--green2)" Icon={TrendingUp}
+                trend={{ v: '+12%', up: true }} delay={0} pulse={connected}
+                onClick={() => router.push('/dashboard/finans')} />
+
+              <KPI label="Net Kar" value={fmt(net)} sub={net >= 0 ? 'Kârlı dönem' : 'Zarar'}
+                color={net >= 0 ? 'var(--ac)' : 'var(--red)'}
+                iconBg={net >= 0 ? 'var(--ac3)' : 'var(--red2)'} Icon={Wallet}
+                delay={40} onClick={() => router.push('/dashboard/muhasebe')} />
+
+              <KPI label="Aktif Proje" value={String(activeP.length)}
+                sub={`${clients.filter((c: any) => c.status === 'active').length} aktif müşteri`}
+                color="var(--blue)" iconBg="var(--blue2)" Icon={FolderOpen}
+                delay={80} onClick={() => router.push('/dashboard/projeler')} />
+
+              <KPI label="Geciken Görev" value={String(overdue.length)}
+                sub={overdue.length > 0 ? `${overdue.filter((t:any)=>t.priority==='critical').length} kritik` : 'Temiz 👌'}
+                color={overdue.length > 0 ? 'var(--red)' : 'var(--green)'}
+                iconBg={overdue.length > 0 ? 'var(--red2)' : 'var(--green2)'} Icon={Clock}
+                delay={120} onClick={() => router.push('/dashboard/gecikmeler')} />
+
+              <KPI label="Onay Bekliyor" value={String(pending.length)}
+                sub={clientPending.length > 0 ? `${clientPending.length} müşteri yanıtı bekleniyor` : `${tasks.length} toplam görev`}
+                color="var(--amber)" iconBg="var(--amber2)" Icon={ClipboardCheck}
+                delay={160} onClick={() => router.push('/dashboard/onay')} />
             </div>
 
             {/* Orta */}
             <div className="db-mid">
-              <div className="card anim-fade">
-                <div className="card-h"><span className="card-title">Aylık Gelir Trendi</span><span className="card-meta">Son 6 ay</span></div>
+              <div className="card anim-fade" style={{ cursor: 'pointer' }} onClick={() => router.push('/dashboard/finans')}>
+                <div className="card-h">
+                  <span className="card-title">Aylık Gelir Trendi</span>
+                  <span className="card-meta">Son 6 ay · Tıkla</span>
+                </div>
                 <div style={{ padding: '16px 18px 14px' }}>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 14 }}>
                     <span style={{ fontSize: 26, fontWeight: 700, fontFamily: 'JetBrains Mono,monospace', color: 'var(--tx)', letterSpacing: '-1px', lineHeight: 1 }}>{fmt(income)}</span>
@@ -199,8 +292,11 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              <div className="card anim-fade">
-                <div className="card-h"><span className="card-title">Görev Durumu</span><span className="card-meta">{tasks.length} toplam</span></div>
+              <div className="card anim-fade" style={{ cursor: 'pointer' }} onClick={() => router.push('/dashboard/gorevler')}>
+                <div className="card-h">
+                  <span className="card-title">Görev Durumu</span>
+                  <span className="card-meta">{tasks.length} toplam · Tıkla</span>
+                </div>
                 <div style={{ padding: '18px' }}>
                   <Donut segs={donutSegs} />
                   <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
@@ -219,19 +315,24 @@ export default function DashboardPage() {
 
             {/* Alt */}
             <div className="db-bot">
+              {/* Aktif Projeler */}
               <div className="card anim-fade">
                 <div className="card-h">
                   <span className="card-title">Aktif Projeler</span>
-                  <a href="/dashboard/projeler" style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 12, color: 'var(--tx3)', transition: 'color .15s' }}
+                  <button onClick={() => router.push('/dashboard/projeler')}
+                    style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 12, color: 'var(--tx3)', background: 'none', border: 'none', cursor: 'pointer', transition: 'color .15s' }}
                     onMouseEnter={e => (e.currentTarget.style.color = 'var(--ac)')}
                     onMouseLeave={e => (e.currentTarget.style.color = 'var(--tx3)')}>
                     Tümü <ArrowRight size={11} />
-                  </a>
+                  </button>
                 </div>
                 {activeP.length === 0
                   ? <div style={{ padding: 28, textAlign: 'center', color: 'var(--tx3)', fontSize: 13 }}>Aktif proje yok</div>
                   : activeP.slice(0, 5).map((p: any) => (
-                    <div key={p.id} className="row">
+                    <div key={p.id} className="row" style={{ cursor: 'pointer' }}
+                      onClick={() => router.push('/dashboard/projeler')}
+                      onMouseEnter={e => (e.currentTarget.style.background = 'var(--s2)')}
+                      onMouseLeave={e => (e.currentTarget.style.background = '')}>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{ fontSize: 13, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 6 }}>{p.name}</p>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -245,10 +346,16 @@ export default function DashboardPage() {
                   ))}
               </div>
 
+              {/* Gecikmeler */}
               <div className="card anim-fade">
                 <div className="card-h">
                   <span className="card-title">Gecikmeler</span>
-                  {overdue.length > 0 && <span className="badge badge-red">{overdue.length}</span>}
+                  {overdue.length > 0 && (
+                    <button onClick={() => router.push('/dashboard/gecikmeler')}
+                      className="badge badge-red" style={{ cursor: 'pointer', border: 'none' }}>
+                      {overdue.length} →
+                    </button>
+                  )}
                 </div>
                 {overdueTop.length === 0
                   ? <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: 28, color: 'var(--green)', fontSize: 13, fontWeight: 500 }}>
@@ -258,7 +365,10 @@ export default function DashboardPage() {
                     const days = Math.floor((now.getTime() - new Date(t.due_date).getTime()) / 86400000)
                     const c = PRI[t.priority] || 'var(--tx3)'
                     return (
-                      <div key={t.id} className="row">
+                      <div key={t.id} className="row" style={{ cursor: 'pointer' }}
+                        onClick={() => router.push('/dashboard/gecikmeler')}
+                        onMouseEnter={e => (e.currentTarget.style.background = 'var(--s2)')}
+                        onMouseLeave={e => (e.currentTarget.style.background = '')}>
                         <div style={{ width: 6, height: 6, borderRadius: '50%', background: c, flexShrink: 0 }} />
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <p style={{ fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.title || 'Görev'}</p>
@@ -270,15 +380,25 @@ export default function DashboardPage() {
                   })}
               </div>
 
+              {/* Bu Hafta */}
               <div className="card anim-fade">
-                <div className="card-h"><span className="card-title">Bu Hafta Teslim</span><span className="card-meta">{weekTasks.length} görev</span></div>
+                <div className="card-h">
+                  <span className="card-title">Bu Hafta Teslim</span>
+                  <button onClick={() => router.push('/dashboard/gorevler')}
+                    style={{ fontSize: 11.5, color: 'var(--tx3)', background: 'none', border: 'none', cursor: 'pointer' }}>
+                    {weekTasks.length} görev →
+                  </button>
+                </div>
                 {weekTasks.length === 0
                   ? <div style={{ padding: 28, textAlign: 'center', color: 'var(--tx3)', fontSize: 13 }}>Bu hafta teslim yok</div>
                   : weekTasks.map((t: any) => {
                     const diff = Math.ceil((new Date(t.due_date).getTime() - now.getTime()) / 86400000)
                     const urgent = diff <= 1
                     return (
-                      <div key={t.id} className="row">
+                      <div key={t.id} className="row" style={{ cursor: 'pointer' }}
+                        onClick={() => router.push('/dashboard/gorevler')}
+                        onMouseEnter={e => (e.currentTarget.style.background = 'var(--s2)')}
+                        onMouseLeave={e => (e.currentTarget.style.background = '')}>
                         <div style={{ width: 6, height: 6, borderRadius: '50%', background: urgent ? 'var(--red)' : 'var(--s5)', flexShrink: 0 }} />
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <p style={{ fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.title || 'Görev'}</p>
