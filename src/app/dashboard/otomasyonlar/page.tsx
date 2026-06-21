@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
 import { Plus, Play, Pause, Trash2, Send, MessageSquare, CheckCircle2, AlertCircle, Clock } from 'lucide-react'
+import ConfirmModal from '@/components/ConfirmModal'
 
 const TRIGGERS = [
   { value:'task_overdue',    label:'Görev geciktiğinde',    desc:'Deadline geçince tetiklenir', ph:'{{gorev}} - {{sorumlu}} - {{tarih}}' },
@@ -35,6 +36,7 @@ export default function OtomasyonlarPage() {
   const [testing,  setTesting]  = useState(false)
   const [toast,    setToast]    = useState('')
   const [testPhone,setTestPhone]= useState('')
+  const [confirmId, setConfirmId] = useState<string|null>(null)
   const [testMsg,  setTestMsg]  = useState('Daydream Agency ERP test mesajı!')
   const [form, setForm] = useState({
     name:'', trigger_event:'task_overdue', action:'sms',
@@ -90,9 +92,14 @@ export default function OtomasyonlarPage() {
   }
 
   async function del(id:string) {
-    if (!confirm('Silmek istediğinize emin misiniz?')) return
-    await createClient().from('automations').delete().eq('id',id)
-    setRules(r=>r.filter(x=>x.id!==id))
+    setConfirmId(id)
+  }
+
+  async function confirmDelete() {
+    if (!confirmId) return
+    await createClient().from('automations').delete().eq('id', confirmId)
+    setRules(r => r.filter(x => x.id !== confirmId))
+    setConfirmId(null)
   }
 
   async function testSms() {
@@ -265,6 +272,14 @@ export default function OtomasyonlarPage() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        open={!!confirmId}
+        title="Otomasyonu Sil"
+        message="Bu otomasyon kuralını silmek istediğinize emin misiniz? Aktif SMS bildirimleri duracak."
+        onConfirm={confirmDelete}
+        onCancel={() => setConfirmId(null)}
+      />
 
       {/* Test SMS Modal */}
       {testModal&&(

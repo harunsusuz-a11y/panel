@@ -5,6 +5,7 @@ import TopBar from '@/components/TopBar'
 import InfoBox from '@/components/InfoBox'
 import { FolderOpen, Plus, Link2, ChevronRight, Trash2, Upload, Download } from 'lucide-react'
 import { fmtDateTime, fmtDeadline } from '@/lib/utils'
+import ConfirmModal from '@/components/ConfirmModal'
 
 const STATUS: Record<string,{l:string;cls:string}> = {
   active:    {l:'Aktif',         cls:'badge badge-green'},
@@ -32,6 +33,7 @@ export default function ProjelerPage() {
   const [stageModal,setStageModal]= useState(false)
   const [uploading, setUploading] = useState(false)
   const [stageTasks, setStageTasks] = useState<any[]>([])
+  const [confirmData, setConfirmData] = useState<{type:string;id:string;path?:string}|null>(null)
   const [toast,     setToast]     = useState('')
   const [portalLink,setPortalLink]= useState('')
 
@@ -120,6 +122,10 @@ export default function ProjelerPage() {
   }
 
   async function deleteStage(id:string) {
+    setConfirmData({type:'stage',id})
+  }
+
+  async function deleteStageConfirmed(id:string) {
     await createClient().from('project_stages').delete().eq('id',id)
     setStages(ss => ss.filter(s => s.id!==id))
   }
@@ -142,6 +148,10 @@ export default function ProjelerPage() {
   }
 
   async function deleteFile(id:string, path:string) {
+    setConfirmData({type:'file',id,path})
+  }
+
+  async function deleteFileConfirmed(id:string, path:string) {
     const sb = createClient()
     const urlPath = path.split('/project-files/')[1]
     if (urlPath) await sb.storage.from('project-files').remove([urlPath])
@@ -170,6 +180,13 @@ export default function ProjelerPage() {
       navigator.clipboard.writeText(link)
       showToast('Portal linki kopyalandı!')
     }
+  }
+
+  async function handleConfirmDelete() {
+    if (!confirmData) return
+    if (confirmData.type === 'stage') await deleteStageConfirmed(confirmData.id)
+    if (confirmData.type === 'file') await deleteFileConfirmed(confirmData.id, confirmData.path||'')
+    setConfirmData(null)
   }
 
   const fmtSize = (b:number) => !b?'': b<1024?`${b}B`: b<1048576?`${(b/1024).toFixed(0)}KB`:`${(b/1048576).toFixed(1)}MB`
@@ -469,6 +486,13 @@ export default function ProjelerPage() {
           </div>
         </div>
       )}
+      <ConfirmModal
+        open={!!confirmData}
+        title={confirmData?.type==='stage' ? 'Aşamayı Sil' : 'Dosyayı Sil'}
+        message={confirmData?.type==='stage' ? 'Bu aşamayı silmek istediğinize emin misiniz?' : 'Bu dosyayı kalıcı olarak silmek istediğinize emin misiniz?'}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmData(null)}
+      />
     </>
   )
 }

@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
 import InfoBox from '@/components/InfoBox'
 import { Plus, X, Building2, Clock, MessageSquare, Send, Zap } from 'lucide-react'
+import ConfirmModal from '@/components/ConfirmModal'
 import { fmtDeadline, fmtDateTime, fmtRelative } from '@/lib/utils'
 
 const COLS = [
@@ -30,6 +31,7 @@ export default function GorevlerPage() {
   const [adding,   setAdding]   = useState(false)
   const [toast,    setToast]    = useState('')
   const [myId,     setMyId]     = useState('')
+  const [confirmId, setConfirmId] = useState<string|null>(null)
   const [detailTab,setDetailTab]= useState<'info'|'comments'|'time'>('info')
   const [comments, setComments] = useState<any[]>([])
   const [timeLogs, setTimeLogs] = useState<any[]>([])
@@ -108,9 +110,15 @@ export default function GorevlerPage() {
   }
 
   async function deleteTask(id: string) {
-    if (!confirm('Görevi silmek istediğinize emin misiniz?')) return
-    await createClient().from('tasks').delete().eq('id', id)
-    setTasks(ts => ts.filter(t => t.id !== id)); setDetail(null)
+    setConfirmId(id)
+  }
+
+  async function confirmDelete() {
+    if (!confirmId) return
+    await createClient().from('tasks').delete().eq('id', confirmId)
+    setTasks(ts => ts.filter(t => t.id !== confirmId))
+    setDetail(null)
+    setConfirmId(null)
   }
 
   async function addComment() {
@@ -383,6 +391,13 @@ export default function GorevlerPage() {
           </div>
         </div>
       )}
+      <ConfirmModal
+        open={!!confirmId}
+        title="Görevi Sil"
+        message="Bu görevi silmek istediğinize emin misiniz? Bu işlem geri alınamaz."
+        onConfirm={confirmDelete}
+        onCancel={() => setConfirmId(null)}
+      />
     </>
   )
 }

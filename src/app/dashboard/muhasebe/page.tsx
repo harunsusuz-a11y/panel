@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
 import InfoBox from '@/components/InfoBox'
 import { Plus, X } from 'lucide-react'
+import ConfirmModal from '@/components/ConfirmModal'
 import { fmtDeadline } from '@/lib/utils'
 
 const ST: Record<string,any> = {
@@ -21,6 +22,7 @@ export default function MuhasebePage() {
   const [loading, setLoading] = useState(true)
   const [modal,   setModal]   = useState(false)
   const [toast,   setToast]   = useState('')
+  const [confirmId, setConfirmId] = useState<string|null>(null)
   const [form,    setForm]    = useState({ description:'', amount:'', category:'', status:'paid', date: new Date().toISOString().slice(0,10), client_id:'', project_id:'' })
 
   const showToast = (m:string) => { setToast(m); setTimeout(()=>setToast(''),3500) }
@@ -58,8 +60,14 @@ export default function MuhasebePage() {
   }
 
   async function del(id:string) {
-    if (!confirm('Silinsin mi?')) return
-    const {error} = await createClient().from('transactions').delete().eq('id',id); if(error){showToast('Hata: '+error.message);return}; load()
+    setConfirmId(id)
+  }
+
+  async function confirmDelete() {
+    if (!confirmId) return
+    const {error} = await createClient().from('transactions').delete().eq('id', confirmId)
+    if (error) { showToast('Hata: '+error.message) } else { load() }
+    setConfirmId(null)
   }
 
   const filtered = rows.filter(r=>r.type===tab)
@@ -168,6 +176,13 @@ export default function MuhasebePage() {
           </div>
         </div>
       )}
+      <ConfirmModal
+        open={!!confirmId}
+        title="İşlemi Sil"
+        message="Bu finansal kaydı silmek istediğinize emin misiniz?"
+        onConfirm={confirmDelete}
+        onCancel={() => setConfirmId(null)}
+      />
     </>
   )
 }
