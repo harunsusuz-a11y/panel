@@ -261,7 +261,15 @@ export default function OnayPage() {
                             {item.client?.name && (
                               <span className="badge badge-muted" style={{ fontSize: 10 }}>{item.client.name}</span>
                             )}
-                            <span style={{ fontSize: 10.5, color: cst.color, fontWeight: 600 }}>· {cst.l}</span>
+                            {item.client_status === 'client_approved' && (
+                              <span style={{ fontSize: 10, fontWeight: 700, background: 'var(--green2)', color: 'var(--green)', padding: '1px 7px', borderRadius: 4 }}>✅ Onaylandı</span>
+                            )}
+                            {item.client_status === 'client_rejected' && (
+                              <span style={{ fontSize: 10, fontWeight: 700, background: 'var(--amber2)', color: 'var(--amber)', padding: '1px 7px', borderRadius: 4 }}>🔄 Revizyon</span>
+                            )}
+                            {item.client_status === 'sent' && item.client_status !== 'client_approved' && item.client_status !== 'client_rejected' && (
+                              <span style={{ fontSize: 10, color: 'var(--blue)', fontWeight: 600 }}>· Yanıt bekleniyor</span>
+                            )}
                           </div>
                         </div>
                         <span style={{ fontSize: 10.5, color: 'var(--tx3)', fontFamily: 'JetBrains Mono,monospace', flexShrink: 0 }}>
@@ -353,20 +361,47 @@ export default function OnayPage() {
                 </div>
 
                 {/* Adım 4: Müşteri Onayı */}
-                <div className="step" style={{ borderBottom: 'none' }}>
-                  <div className="step-num" style={{
-                    background: sel.client_status === 'client_approved' ? 'var(--green2)' : sel.client_status === 'client_rejected' ? 'var(--red2)' : 'var(--s4)',
-                    color: sel.client_status === 'client_approved' ? 'var(--green)' : sel.client_status === 'client_rejected' ? 'var(--red)' : 'var(--tx3)',
-                  }}>4</div>
-                  <div>
-                    <p style={{ fontSize: 12.5, fontWeight: 600 }}>Müşteri Onayı</p>
-                    <p style={{ fontSize: 11.5, color: 'var(--tx3)', marginTop: 2 }}>
-                      {sel.client_status === 'client_approved' ? '✓ Müşteri onayladı'
-                        : sel.client_status === 'client_rejected' ? '✕ Müşteri reddetti'
-                        : 'Bekliyor...'}
-                    </p>
-                  </div>
-                </div>
+                {(() => {
+                  const token = sel.portal_tokens?.[0]
+                  const decision = token?.client_decision
+                  const note = token?.client_note
+                  const decidedAt = token?.client_decided_at
+                  const isApproved = sel.client_status === 'client_approved'
+                  const isRejected = sel.client_status === 'client_rejected'
+                  const stepBg = isApproved ? 'var(--green2)' : isRejected ? 'var(--red2)' : 'var(--s4)'
+                  const stepC  = isApproved ? 'var(--green)' : isRejected ? 'var(--red)' : 'var(--tx3)'
+                  return (
+                    <div className="step" style={{ borderBottom: 'none' }}>
+                      <div className="step-num" style={{ background: stepBg, color: stepC }}>4</div>
+                      <div style={{ flex: 1 }}>
+                        <p style={{ fontSize: 12.5, fontWeight: 600 }}>Müşteri Onayı</p>
+                        {(isApproved || isRejected) ? (
+                          <div style={{ marginTop: 8 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: stepBg, borderRadius: 8, border: `1px solid ${stepC}25`, marginBottom: note ? 8 : 0 }}>
+                              <span style={{ fontSize: 16 }}>{isApproved ? '✅' : '🔄'}</span>
+                              <div>
+                                <p style={{ fontSize: 13, fontWeight: 700, color: stepC }}>
+                                  {isApproved ? 'Müşteri Onayladı' : 'Müşteri Revizyon İstedi'}
+                                </p>
+                                {decidedAt && <p style={{ fontSize: 11, color: 'var(--tx3)', marginTop: 2 }}>{fmtDateTime(decidedAt)}</p>}
+                              </div>
+                            </div>
+                            {note && (
+                              <div style={{ padding: '10px 12px', background: 'var(--s3)', borderRadius: 8, border: '1px solid var(--bdr)', borderLeft: `3px solid ${stepC}` }}>
+                                <p style={{ fontSize: 10.5, color: 'var(--tx3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 5 }}>Müşteri Notu</p>
+                                <p style={{ fontSize: 13, color: 'var(--tx)', lineHeight: 1.6 }}>"{note}"</p>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <p style={{ fontSize: 11.5, color: 'var(--tx3)', marginTop: 2 }}>
+                            {sel.client_status === 'sent' ? '⏳ Müşteriye gönderildi, yanıt bekleniyor...' : 'Henüz müşteriye gönderilmedi'}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })()}
               </div>
 
               {/* Detay bilgiler */}

@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Bell, CheckCheck, X, AlertCircle, CheckCircle2, MessageSquare, UserCog } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { fmtRelative } from '@/lib/utils'
 
 const TYPE_CONFIG: Record<string, { icon: any; color: string; bg: string }> = {
@@ -15,6 +16,7 @@ const TYPE_CONFIG: Record<string, { icon: any; color: string; bg: string }> = {
 }
 
 export default function NotificationBell() {
+  const router = useRouter()
   const [notifs,  setNotifs]  = useState<any[]>([])
   const [open,    setOpen]    = useState(false)
   const [myId,    setMyId]    = useState('')
@@ -124,7 +126,20 @@ export default function NotificationBell() {
               const cfg = TYPE_CONFIG[n.type] || TYPE_CONFIG.task_assigned
               const Icon = cfg.icon
               return (
-                <div key={n.id} className={`nb-item${!n.is_read ? ' unread' : ''}`} onClick={() => markRead(n.id)}>
+                <div key={n.id} className={`nb-item${!n.is_read ? ' unread' : ''}`} onClick={() => {
+                  markRead(n.id)
+                  setOpen(false)
+                  // Entity type'a göre yönlendir
+                  const routes: Record<string,string> = {
+                    approvals: '/dashboard/onay',
+                    tasks:     '/dashboard/gorevler',
+                    contents:  '/dashboard/icerik',
+                    projects:  '/dashboard/musteriler',
+                    clients:   '/dashboard/musteriler',
+                  }
+                  const route = routes[n.entity_type] || '/dashboard'
+                  router.push(route)
+                }}>
                   {!n.is_read && <div style={{ position: 'absolute', left: 6, width: 5, height: 5, borderRadius: '50%', background: 'var(--ac)', marginTop: 4 }} />}
                   <div style={{ width: 30, height: 30, borderRadius: 8, background: cfg.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <Icon size={13} style={{ color: cfg.color }} strokeWidth={2} />
