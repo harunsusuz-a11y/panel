@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
 import InfoBox from '@/components/InfoBox'
-import { Plus, X, Building2, Calendar, User, ChevronRight } from 'lucide-react'
+import { Plus, X, Building2, Calendar, User, ChevronRight, Send } from 'lucide-react'
 import { fmtDeadline, fmtDateTime } from '@/lib/utils'
 
 const ST: Record<string,any> = {
@@ -72,6 +72,42 @@ export default function IcerikPage() {
     setItems(prev => prev.map(x => x.id===id ? {...x,status} : x))
     if (sel?.id===id) setSel((s:any) => s ? {...s,status} : null)
     showToast(`Durum → ${ST[status]?.l}`)
+  }
+
+  async function sendToApproval(item: any) {
+    const sb = createClient()
+    const { data: { user } } = await sb.auth.getUser()
+    // Daha önce bu içerik için onay talebi var mı?
+    const { data: existing } = await sb.from('approvals')
+      .select('id,status').eq('content_id', item.id).order('created_at', { ascending: false }).limit(1)
+    if (existing && existing.length > 0 && existing[0].status === 'pending') {
+      showToast('Hata: Bu içerik zaten onay bekliyor')
+      return
+    }
+    const { error } = await sb.from('approvals').insert({
+      title: item.title,
+      type: 'content',
+      status: 'pending',
+      client_id: item.client_id || null,
+      content_id: item.id,
+      requested_by: user?.id,
+      notes: item.notes || null,
+    })
+    if (error) {
+      // content_id kolonu yoksa basit insert
+      const { error: e2 } = await sb.from('approvals').insert({
+        title: item.title,
+        type: 'content',
+        status: 'pending',
+        client_id: item.client_id || null,
+        requested_by: user?.id,
+        notes: item.notes || null,
+      })
+      if (e2) { showToast('Hata: ' + e2.message); return }
+    }
+    // İçerik durumunu pending'e çek
+    await changeStatus(item.id, 'pending')
+    showToast('✓ Onay talebi oluşturuldu! Onay sayfasından takip edin.')
   }
 
   // Filtrele
@@ -235,6 +271,18 @@ export default function IcerikPage() {
               {sel.notes&&(
                 <div style={{marginTop:12,background:'var(--s2)',borderRadius:8,padding:'10px 12px',fontSize:12.5,color:'var(--tx2)',lineHeight:1.6}}>
                   {sel.notes}
+                </div>
+              )}
+
+              {/* Onaya Gönder */}
+              {sel.status === 'draft' && (
+                <div style={{marginTop:14}}>
+                  <p style={{fontSize:10.5,fontWeight:700,color:'var(--tx3)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:8}}>İç Onay</p>
+                  <button onClick={() => sendToApproval(sel)}
+                    style={{width:'100%',display:'flex',alignItems:'center',justifyContent:'center',gap:7,padding:'9px 14px',background:'var(--amber2)',border:'1px solid rgba(240,168,67,.25)',borderRadius:9,cursor:'pointer',fontSize:12.5,fontWeight:700,color:'var(--amber)'}}>
+                    <Send size={13} strokeWidth={2}/>Onaya Gönder
+                  </button>
+                  <p style={{fontSize:11,color:'var(--tx3)',marginTop:5,textAlign:'center'}}>Onay sayfasına talep düşer</p>
                 </div>
               )}
             </div>

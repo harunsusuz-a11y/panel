@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
-import { UserCog, Plus, X, Shield, Check, Clock, Activity, LogIn, AlertCircle } from 'lucide-react'
+import { UserCog, Plus, X, Shield, Check, Clock, Activity, LogIn, AlertCircle, KeyRound, Eye, EyeOff } from 'lucide-react'
 import PhoneInput from '@/components/PhoneInput'
 import { fmtDateTime, fmtRelative } from '@/lib/utils'
 
@@ -46,6 +46,10 @@ export default function KullanicilarPage() {
   const [view,     setView]     = useState<'edit'|'access'|'logs'>('edit')
   const [myRole,   setMyRole]   = useState('')
   const [myId,     setMyId]     = useState('')
+  const [pwdModal, setPwdModal] = useState(false)
+  const [pwdForm,  setPwdForm]  = useState({ pw1: '', pw2: '' })
+  const [pwdShow,  setPwdShow]  = useState(false)
+  const [pwdSaving,setPwdSaving]= useState(false)
 
   const [form, setForm] = useState({ full_name:'', role:'member', department:'', phone:'' })
   const [inv,  setInv]  = useState({ email:'', full_name:'', role:'member', department:'' })
@@ -112,6 +116,20 @@ export default function KullanicilarPage() {
     showToast(`✓ Davet kaydedildi: ${inv.email}`)
     setModal(false)
     setInv({ email: '', full_name: '', role: 'member', department: '' })
+  }
+
+  async function resetPassword() {
+    if (!sel) return
+    if (pwdForm.pw1.length < 6) { showToast('Hata: En az 6 karakter'); return }
+    if (pwdForm.pw1 !== pwdForm.pw2) { showToast('Hata: Şifreler eşleşmiyor'); return }
+    setPwdSaving(true)
+    const res = await fetch('/api/admin/reset-password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: sel.id, password: pwdForm.pw1 }) })
+    const json = await res.json()
+    setPwdSaving(false)
+    if (json.error) { showToast('Hata: ' + json.error); return }
+    showToast('2713 Şifre değiştirildi!')
+    setPwdModal(false)
+    setPwdForm({ pw1: '', pw2: '' })
   }
 
   const isAdmin = myRole === 'admin'
@@ -260,9 +278,17 @@ export default function KullanicilarPage() {
                       </div>
                     ) : null
                   })()}
-                  <button className="btn" onClick={save} disabled={saving} style={{ alignSelf: 'flex-start', padding: '8px 20px' }}>
-                    {saving ? 'Kaydediliyor...' : '✓ Kaydet'}
-                  </button>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button className="btn" onClick={save} disabled={saving} style={{ padding: '8px 20px' }}>
+                      {saving ? 'Kaydediliyor...' : '✓ Kaydet'}
+                    </button>
+                    {isAdmin && sel?.id !== myId && (
+                      <button onClick={() => { setPwdModal(true); setPwdForm({ pw1: '', pw2: '' }) }}
+                        style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', background: 'var(--amber2)', border: '1px solid rgba(240,168,67,.25)', borderRadius: 9, cursor: 'pointer', fontSize: 12.5, fontWeight: 600, color: 'var(--amber)' }}>
+                        <KeyRound size={13} strokeWidth={2} />Şifre Değiştir
+                      </button>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -372,6 +398,62 @@ export default function KullanicilarPage() {
               </div>
               <button className="btn" onClick={invite} disabled={saving} style={{ width: '100%', justifyContent: 'center', padding: '10px' }}>
                 {saving ? 'Kaydediliyor...' : 'Davet Gönder'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    <>
+      {/* Şifre Değiştir Modal */}
+      {pwdModal && (
+        <div className="overlay" onClick={e => { if (e.target === e.currentTarget) setPwdModal(false) }}>
+          <div className="modal" style={{ maxWidth: 400 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+              <p className="modal-title" style={{ margin: 0 }}>🔐 Şifre Değiştir</p>
+              <button onClick={() => setPwdModal(false)} style={{ background: 'none', border: 'none', color: 'var(--tx3)', cursor: 'pointer' }}><X size={16} /></button>
+            </div>
+            <div style={{ background: 'var(--amber2)', borderRadius: 9, padding: '10px 14px', marginBottom: 16, fontSize: 12.5, color: 'var(--amber)', border: '1px solid rgba(240,168,67,.2)' }}>
+              <strong>{sel?.full_name}</strong> kullanıcısının şifresini değiştiriyorsunuz.
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div>
+                <label className="label">Yeni Şifre (en az 6 karakter)</label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type={pwdShow ? 'text' : 'password'}
+                    value={pwdForm.pw1}
+                    onChange={e => setPwdForm(p => ({ ...p, pw1: e.target.value }))}
+                    placeholder="Yeni şifre..."
+                    className="inp"
+                    style={{ paddingRight: 38 }}
+                    autoFocus
+                  />
+                  <button onClick={() => setPwdShow(v => !v)} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx3)', padding: 0 }}>
+                    {pwdShow ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label className="label">Şifre Tekrar</label>
+                <input
+                  type={pwdShow ? 'text' : 'password'}
+                  value={pwdForm.pw2}
+                  onChange={e => setPwdForm(p => ({ ...p, pw2: e.target.value }))}
+                  placeholder="Tekrar girin..."
+                  className="inp"
+                  onKeyDown={e => e.key === 'Enter' && resetPassword()}
+                />
+              </div>
+              {pwdForm.pw1 && pwdForm.pw2 && pwdForm.pw1 !== pwdForm.pw2 && (
+                <p style={{ fontSize: 12, color: 'var(--red)', fontWeight: 600 }}>⚠ Şifreler eşleşmiyor</p>
+              )}
+              <button
+                className="btn"
+                onClick={resetPassword}
+                disabled={pwdSaving || !pwdForm.pw1 || pwdForm.pw1 !== pwdForm.pw2}
+                style={{ width: '100%', justifyContent: 'center', padding: '10px' }}
+              >
+                {pwdSaving ? 'Değiştiriliyor...' : '🔐 Şifreyi Değiştir'}
               </button>
             </div>
           </div>

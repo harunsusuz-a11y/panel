@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
 import InfoBox from '@/components/InfoBox'
-import { CheckCircle2, XCircle, Clock, Send, Link2, FileText, FolderOpen, Receipt, MoreHorizontal, ChevronRight } from 'lucide-react'
+import { CheckCircle2, XCircle, Clock, Send, Link2, FileText, FolderOpen, Receipt, MoreHorizontal, ChevronRight, Plus, X, MessageSquare } from 'lucide-react'
 import { fmtDateTime } from '@/lib/utils'
 
 // İç onay statüsü
@@ -38,18 +38,23 @@ export default function OnayPage() {
   const [sel,         setSel]         = useState<any>(null)
   const [portalLink,  setPortalLink]  = useState('')
   const [sending,     setSending]     = useState(false)
+  const [newModal,    setNewModal]    = useState(false)
+  const [clients,     setClients]     = useState<any[]>([])
+  const [newForm,     setNewForm]     = useState({ title: '', type: 'content', client_id: '', notes: '' })
+  const [creating,    setCreating]    = useState(false)
 
   const showToast = (m:string) => { setToast(m); setTimeout(()=>setToast(''),3500) }
 
   async function load() {
     const sb = createClient()
-    const [a, u] = await Promise.all([
+    const [a, u, c] = await Promise.all([
       sb.from('approvals')
         .select('*, requester:profiles!approvals_requested_by_fkey(full_name), approver:profiles!approvals_approved_by_fkey(full_name), client:clients(id,name,email)')
         .order('created_at', { ascending: false }),
       sb.auth.getUser(),
     ])
     setItems(a.data || [])
+    setClients(c.data || [])
     if (u.data.user) {
       const { data: p } = await sb.from('profiles').select('role,full_name').eq('id', u.data.user.id).single()
       setCurrentUser({ ...u.data.user, ...p })
@@ -112,6 +117,27 @@ export default function OnayPage() {
     setSending(false)
   }
 
+  async function createApproval() {
+    if (!newForm.title.trim()) { showToast('Hata: Başlık zorunlu'); return }
+    setCreating(true)
+    const sb = createClient()
+    const { data: { user } } = await sb.auth.getUser()
+    const { error } = await sb.from('approvals').insert({
+      title: newForm.title.trim(),
+      type: newForm.type,
+      status: 'pending',
+      client_id: newForm.client_id || null,
+      requested_by: user?.id,
+      notes: newForm.notes || null,
+    })
+    setCreating(false)
+    if (error) { showToast('Hata: ' + error.message); return }
+    showToast('✓ Onay talebi oluşturuldu!')
+    setNewModal(false)
+    setNewForm({ title: '', type: 'content', client_id: '', notes: '' })
+    load()
+  }
+
   const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'manager'
   const filtered = filter === 'all' ? items : items.filter(i => i.status === filter)
   const pendingCount = items.filter(i => i.status === 'pending').length
@@ -132,6 +158,11 @@ export default function OnayPage() {
         <TopBar
           title="Onay Yönetimi"
           subtitle={pendingCount > 0 ? `${pendingCount} iç onay bekliyor` : 'Temiz'}
+          action={isAdmin ? (
+            <button className="btn" onClick={() => setNewModal(true)}>
+              <Plus size={14} strokeWidth={2} />Onay Talebi Oluştur
+            </button>
+          ) : undefined}
         />
         {toast && <div className={`toast ${toast.startsWith('Hata') ? 'toast-err' : 'toast-ok'}`}>{toast}</div>}
 
@@ -334,6 +365,52 @@ export default function OnayPage() {
           )}
         </div>
       </div>
+    <>
+      {/* Yeni Onay Modal */}
+      {newModal && (
+        <div className="overlay" onClick={e => { if (e.target === e.currentTarget) setNewModal(false) }}>
+          <div className="modal" style={{ maxWidth: 440 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+              <p className="modal-title" style={{ margin: 0 }}>Onay Talebi Oluştur</p>
+              <button onClick={() => setNewModal(false)} style={{ background: 'none', border: 'none', color: 'var(--tx3)', cursor: 'pointer' }}><X size={16} /></button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div>
+                <label className="label">Başlık *</label>
+                <input value={newForm.title} onChange={e => setNewForm(p => ({ ...p, title: e.target.value }))} placeholder="Onay başlığı..." className="inp" autoFocus />
+              </div>
+              <div className="modal-grid">
+                <div>
+                  <label className="label">Tür</label>
+                  <select value={newForm.type} onChange={e => setNewForm(p => ({ ...p, type: e.target.value }))} className="inp">
+                    <option value="content">İçerik</option>
+                    <option value="project">Proje</option>
+                    <option value="invoice">Fatura</option>
+                    <option value="other">Diğer</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="label">Müşteri</label>
+                  <select value={newForm.client_id} onChange={e => setNewForm(p => ({ ...p, client_id: e.target.value }))} className="inp">
+                    <option value="">— Seçin —</option>
+                    {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="label">Not / Açıklama</label>
+                <textarea value={newForm.notes} onChange={e => setNewForm(p => ({ ...p, notes: e.target.value }))} className="inp" rows={3} placeholder="Brief, açıklama veya link..." />
+              </div>
+              <div style={{ background: 'var(--blue2)', borderRadius: 9, padding: '10px 14px', fontSize: 12.5, color: 'var(--blue)', border: '1px solid rgba(78,168,240,.15)', lineHeight: 1.6 }}>
+                💡 Talep oluşturulduktan sonra Onay sayfasından iç onayı verin, ardından müşteriye portal linki gönderin.
+              </div>
+              <button className="btn" onClick={createApproval} disabled={creating || !newForm.title.trim()} style={{ width: '100%', justifyContent: 'center', padding: '10px' }}>
+                {creating ? 'Oluşturuluyor...' : 'Onay Talebi Oluştur'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }
