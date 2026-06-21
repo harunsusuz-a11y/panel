@@ -194,6 +194,26 @@ export default function IcerikPage() {
                 ))}
               </div>
 
+              {/* Müşteri yok uyarısı */}
+              {!sel.client_id && (
+                <div style={{background:'var(--amber2)',border:'1px solid rgba(240,168,67,.2)',borderRadius:8,padding:'9px 12px',marginBottom:10,fontSize:12,color:'var(--amber)'}}>
+                  ⚠ Müşteri atanmamış — aşağıdan seçin
+                  <div style={{marginTop:8}}>
+                    <select className="inp" style={{fontSize:12,padding:'5px 8px',height:'auto'}}
+                      onChange={async e=>{
+                        if(!e.target.value) return
+                        await createClient().from('contents').update({client_id:e.target.value}).eq('id',sel.id)
+                        showToast('✓ Müşteri atandı!')
+                        load()
+                        setSel((s:any)=>s?{...s,client_id:e.target.value}:null)
+                      }}>
+                      <option value="">— Müşteri Seç —</option>
+                      {clients.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
+                    </select>
+                  </div>
+                </div>
+              )}
+
               {/* Detaylar */}
               <p style={{fontSize:10.5,fontWeight:700,color:'var(--tx3)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:8}}>Detaylar</p>
               <div style={{display:'flex',flexDirection:'column',gap:6}}>
