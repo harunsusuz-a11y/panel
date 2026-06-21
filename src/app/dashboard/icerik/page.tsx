@@ -7,21 +7,21 @@ import { Plus, X, Building2, Calendar, User, ChevronRight, Send } from 'lucide-r
 import { fmtDeadline, fmtDateTime } from '@/lib/utils'
 
 const ST: Record<string,any> = {
-  draft:    { l:'Taslak',        cls:'badge-muted',  color:'var(--tx3)',   owner:'Aslı/Gizem' },
-  pending:  { l:'Onay Bekliyor', cls:'badge-amber',  color:'var(--amber)', owner:'İç Onay'    },
-  approved: { l:'Onaylandı',     cls:'badge-green',  color:'var(--green)', owner:'Müşteri'    },
-  revision: { l:'Revizyon',      cls:'badge-red',    color:'var(--red)',   owner:'Gizem/Yasin'},
-  published:{ l:'Yayında',       cls:'badge-ac',     color:'var(--ac)',    owner:'—'          },
+  draft:    { l:'Taslak',        cls:'badge-muted',  color:'var(--tx3)',   owner:'İçerik Ekibi'  },
+  pending:  { l:'Onay Bekliyor', cls:'badge-amber',  color:'var(--amber)', owner:'İç Onay'       },
+  approved: { l:'Onaylandı',     cls:'badge-green',  color:'var(--green)', owner:'Müşteri'       },
+  revision: { l:'Revizyon',      cls:'badge-red',    color:'var(--red)',   owner:'İçerik Ekibi'  },
+  published:{ l:'Yayında',       cls:'badge-ac',     color:'var(--ac)',    owner:'—'             },
 }
 const TYPE: Record<string,string> = { post:'Post', story:'Story', blog:'Blog', ad:'Reklam', other:'Diğer' }
 
 // Daydream içerik üretim akışı
 const WORKFLOW = [
-  { id:'draft',    l:'Taslak',        sub:'Aslı konsept kurar',           c:'var(--tx3)'   },
-  { id:'pending',  l:'İç Onay',       sub:'Gizem kalite kontrol',         c:'var(--amber)' },
-  { id:'approved', l:'Müşteri Onayı', sub:'Emir / portal üzerinden',      c:'var(--blue)'  },
-  { id:'revision', l:'Revizyon',      sub:'Gizem & Yasin düzenler',       c:'var(--red)'   },
-  { id:'published',l:'Yayında',       sub:'Gizem yayınlar',               c:'var(--green)' },
+  { id:'draft',    l:'Taslak',        sub:'İçerik oluşturulur',    c:'var(--tx3)'   },
+  { id:'pending',  l:'İç Onay',       sub:'Kalite kontrol',         c:'var(--amber)' },
+  { id:'approved', l:'Müşteri Onayı', sub:'Portal üzerinden',       c:'var(--blue)'  },
+  { id:'revision', l:'Revizyon',      sub:'Düzenleme yapılır',      c:'var(--red)'   },
+  { id:'published',l:'Yayında',       sub:'Yayınlandı',             c:'var(--green)' },
 ]
 
 export default function IcerikPage() {

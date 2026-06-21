@@ -34,11 +34,31 @@ export async function POST(req: Request) {
       client_decided_at: new Date().toISOString(),
     }).eq('id', tokenRow.id)
 
-    // Approval varsa güncelle
+    // Approval_id varsa direkt güncelle
+    // is_client_token=true ise müşterinin tüm son onaylarını güncelle
     if (tokenRow.approval_id) {
       await sb.from('approvals').update({
         client_status: decision === 'approved' ? 'client_approved' : 'client_rejected',
       }).eq('id', tokenRow.approval_id)
+    } else if (tokenRow.is_client_token && tokenRow.client_id) {
+      // Müşteriye ait en son gönderilmiş onayı güncelle
+      const { data: latestApproval } = await sb
+        .from('approvals')
+        .select('id, content_id, requested_by, title')
+        .eq('client_id', tokenRow.client_id)
+        .eq('client_status', 'sent')
+        .order('client_sent_at', { ascending: false })
+        .limit(1)
+        .single()
+      if (latestApproval) {
+        await sb.from('approvals').update({
+          client_status: decision === 'approved' ? 'client_approved' : 'client_rejected',
+        }).eq('id', latestApproval.id)
+        // Revizyon → içeriği geri çek
+        if (decision === 'revision' && latestApproval.content_id) {
+          await sb.from('contents').update({ status: 'revision' }).eq('id', latestApproval.content_id)
+        }
+      }
     }
 
     // Müşteri adını çek

@@ -323,7 +323,7 @@ export default function DashboardPage() {
 
     // Realtime subscriptions
     const sb = createClient()
-    const tables = ['tasks', 'projects', 'clients', 'transactions', 'approvals']
+    const tables = ['tasks', 'projects', 'clients', 'transactions', 'approvals', 'client_portal_tokens']
     
     tables.forEach(table => {
       const ch = sb.channel(`db-${table}`)

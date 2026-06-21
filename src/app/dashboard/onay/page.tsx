@@ -60,7 +60,7 @@ export default function OnayPage() {
       const role = p?.role || 'member'
       // Member → sadece kendi oluşturduğu onay talepleri
       let q = sb.from('approvals')
-        .select('*, requester:profiles!approvals_requested_by_fkey(full_name), approver:profiles!approvals_approved_by_fkey(full_name), client:clients(id,name,email)')
+        .select('*, requester:profiles!approvals_requested_by_fkey(full_name), approver:profiles!approvals_approved_by_fkey(full_name), client:clients(id,name,email,phone), portal_tokens:client_portal_tokens(client_decision,client_note,client_decided_at)')
         .order('created_at', { ascending: false })
       if (role === 'member') q = q.eq('requested_by', u.data.user.id)
       const { data: a } = await q
@@ -108,40 +108,36 @@ export default function OnayPage() {
     if (!item.client_id) { showToast('Hata: Müşteri atanmamış'); return }
     setSending(true)
     const sb = createClient()
-    // Portal token oluştur
-    // Önce mevcut token var mı?
-    let tokenData = null
+
+    // Approval'a bağlı TEK token — önce bak, yoksa oluştur
+    let tokenData: any = null
     try {
-      const {data: existingToken} = await sb.from('client_portal_tokens')
+      const { data: ex } = await sb.from('client_portal_tokens')
         .select().eq('approval_id', item.id).limit(1).single()
-      if (existingToken) tokenData = existingToken
+      if (ex) tokenData = ex
     } catch {}
+
     if (!tokenData) {
-      const {data: newToken} = await sb.from('client_portal_tokens')
-        .insert({ client_id: item.client_id, approval_id: item.id }).select().single()
-      tokenData = newToken
+      const { data: nt, error: ne } = await sb.from('client_portal_tokens')
+        .insert({ client_id: item.client_id, approval_id: item.id, is_client_token: false })
+        .select().single()
+      if (ne || !nt) { showToast('Hata: Token oluşturulamadı — ' + ne?.message); setSending(false); return }
+      tokenData = nt
     }
 
-    if (tokenData) {
-      const link = `${window.location.origin}/portal/${tokenData.token}`
-      setPortalLink(link)
-      try { navigator.clipboard.writeText(link) } catch {}
-      // client_sent_at güncelle
-      await sb.from('approvals').update({
-        client_status: 'sent',
-        client_sent_at: new Date().toISOString(),
-        portal_link: link,
-      }).eq('id', item.id)
-      showToast('✓ Portal linki oluşturuldu ve kopyalandı!')
-      load()
-    } else {
-      // Fallback: doğrudan link
-      const link = `${window.location.origin}/portal/${item.id}`
-      setPortalLink(link)
-      try { navigator.clipboard.writeText(link) } catch {}
-      showToast('✓ Link oluşturuldu (kopyalandı)')
-    }
+    const link = `${window.location.origin}/portal/${tokenData.token}`
+    setPortalLink(link)
+    try { await navigator.clipboard.writeText(link) } catch {}
+
+    await sb.from('approvals').update({
+      client_status: 'sent',
+      client_sent_at: new Date().toISOString(),
+      portal_link: link,
+    }).eq('id', item.id)
+
     setSending(false)
+    showToast('✓ Portal linki kopyalandı! Müşteriye gönderin.')
+    load()
   }
 
   async function createApproval() {
@@ -185,11 +181,11 @@ export default function OnayPage() {
         <TopBar
           title="Onay Yönetimi"
           subtitle={pendingCount > 0 ? `${pendingCount} iç onay bekliyor` : 'Temiz'}
-          action={isAdmin ? (
+          action={
             <button className="btn" onClick={() => setNewModal(true)}>
               <Plus size={14} strokeWidth={2} />Onay Talebi Oluştur
             </button>
-          ) : undefined}
+          }
         />
         {toast && <div className={`toast ${toast.startsWith('Hata') ? 'toast-err' : 'toast-ok'}`}>{toast}</div>}
 
