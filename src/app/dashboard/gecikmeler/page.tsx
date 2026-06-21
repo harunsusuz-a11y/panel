@@ -14,17 +14,33 @@ export default function GecikmelerPage() {
   const [loading, setLoading] = useState(true)
 
   async function load() {
-    const { data } = await createClient().from('tasks')
-      .select('id,title,status,priority,due_date,assigned_to')
+    const sb = createClient()
+    const { data } = await sb.from('tasks')
+      .select('id,title,status,priority,due_date,assigned_to,client_id,project_id')
       .neq('status','done').lt('due_date', new Date().toISOString()).order('due_date')
-    // Get profiles separately
-    const ids = (data||[]).map((t:any)=>t.assigned_to).filter(Boolean)
+
+    const assigneeIds = [...new Set((data||[]).map((t:any)=>t.assigned_to).filter(Boolean))]
+    const clientIds   = [...new Set((data||[]).map((t:any)=>t.client_id).filter(Boolean))]
+
     const profiles: Record<string,any> = {}
-    if (ids.length > 0) {
-      const {data:pr} = await createClient().from('profiles').select('id,full_name,department').in('id',ids)
-      ;(pr||[]).forEach((p:any)=>{profiles[p.id]=p})
-    }
-    setTasks((data||[]).map((t:any)=>({...t,assignee:profiles[t.assigned_to]})))
+    const clientMap: Record<string,any> = {}
+
+    await Promise.all([
+      assigneeIds.length > 0
+        ? sb.from('profiles').select('id,full_name,department').in('id', assigneeIds)
+            .then(({data:pr}) => { (pr||[]).forEach((p:any)=>{profiles[p.id]=p}) })
+        : Promise.resolve(),
+      clientIds.length > 0
+        ? sb.from('clients').select('id,name').in('id', clientIds)
+            .then(({data:cl}) => { (cl||[]).forEach((c:any)=>{clientMap[c.id]=c}) })
+        : Promise.resolve(),
+    ])
+
+    setTasks((data||[]).map((t:any)=>({
+      ...t,
+      assignee: profiles[t.assigned_to],
+      client:   clientMap[t.client_id],
+    })))
     setLoading(false)
   }
   useEffect(()=>{load()},[])
@@ -83,7 +99,8 @@ function TaskRow({t,onDone}:{t:any;onDone:(id:string)=>void}) {
         <p style={{fontSize:13,fontWeight:600,marginBottom:4,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{t.title}</p>
         <div style={{display:'flex',gap:8,alignItems:'center'}}>
           <span className="badge" style={{background:`${c}18`,color:c}}>{PRI_L[t.priority]}</span>
-          {t.assignee&&<span style={{fontSize:11.5,color:'var(--tx3)'}}>{t.assignee.full_name}</span>}
+          {t.client&&<span style={{fontSize:11.5,color:'var(--blue)'}}>🏢 {t.client.name}</span>}
+          {t.assignee&&<span style={{fontSize:11.5,color:'var(--tx3)'}}>👤 {t.assignee.full_name}</span>}
           <span style={{fontSize:11.5,color:'var(--tx3)',fontFamily:'JetBrains Mono,monospace'}}>{fmtDeadline(t.due_date)}</span>
         </div>
       </div>

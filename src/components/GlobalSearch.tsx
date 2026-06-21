@@ -14,6 +14,16 @@ export default function GlobalSearch() {
   const [results, setResults] = useState<any[]>([])
   const [open,    setOpen]    = useState(false)
   const [loading, setLoading] = useState(false)
+  const [myRole,  setMyRole]  = useState('member')
+
+  useEffect(() => {
+    const sb = createClient()
+    sb.auth.getUser().then(({data:{user}}) => {
+      if (!user) return
+      sb.from('profiles').select('role').eq('id', user.id).single()
+        .then(({data}) => setMyRole(data?.role || 'member'))
+    })
+  }, [])
   const ref    = useRef<HTMLDivElement>(null)
   const timerRef = useRef<any>(null)
 
@@ -32,17 +42,21 @@ export default function GlobalSearch() {
       setLoading(true); setOpen(true)
       const sb = createClient()
       const term = `%${q.trim()}%`
-      const [p, t, c, ct] = await Promise.all([
-        sb.from('projects').select('id,name').ilike('name', term).limit(3),
+      const isMember = myRole === 'member'
+      const baseQueries = [
         sb.from('tasks').select('id,title,status').ilike('title', term).limit(3),
-        sb.from('clients').select('id,name').ilike('name', term).limit(3),
         sb.from('contents').select('id,title,status').ilike('title', term).limit(3),
-      ])
+      ] as const
+      const managerQueries = !isMember ? [
+        sb.from('projects').select('id,name').ilike('name', term).limit(3),
+        sb.from('clients').select('id,name').ilike('name', term).limit(3),
+      ] as const : []
+      const [t, ct, p, c] = await Promise.all([...baseQueries, ...managerQueries])
       const merged = [
-        ...(p.data||[]).map((x:any) => ({ ...x, _type:'projects', _label: x.name })),
-        ...(t.data||[]).map((x:any) => ({ ...x, _type:'tasks',    _label: x.title })),
-        ...(c.data||[]).map((x:any) => ({ ...x, _type:'clients',  _label: x.name })),
-        ...(ct.data||[]).map((x:any) => ({ ...x, _type:'contents',_label: x.title })),
+        ...(t?.data||[]).map((x:any) => ({ ...x, _type:'tasks',    _label: x.title })),
+        ...(ct?.data||[]).map((x:any) => ({ ...x, _type:'contents',_label: x.title })),
+        ...(!isMember ? (p?.data||[]).map((x:any) => ({ ...x, _type:'projects', _label: x.name })) : []),
+        ...(!isMember ? (c?.data||[]).map((x:any) => ({ ...x, _type:'clients',  _label: x.name })) : []),
       ]
       setResults(merged)
       setLoading(false)

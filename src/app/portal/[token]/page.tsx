@@ -32,8 +32,20 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
 
   if (tokenErr || !tokenRow) return notFound()
 
+  // is_client_token=true ise yeni müşteri paneline yönlendir
+  if (tokenRow.is_client_token) {
+    const { redirect } = await import('next/navigation')
+    redirect(`/portal/musteri/${tokenRow.token}`)
+  }
+
   const project = tokenRow.project
   const client  = tokenRow.client
+
+  // project null ise müşteri paneline yönlendir
+  if (!project?.id) {
+    const { redirect } = await import('next/navigation')
+    redirect(`/portal/musteri/${tokenRow.token}`)
+  }
 
   // Aşamalar ve dosyalar
   const [{ data: stages }, { data: files }] = await Promise.all([

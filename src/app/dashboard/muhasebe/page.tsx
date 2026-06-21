@@ -65,9 +65,13 @@ export default function MuhasebePage() {
 
   async function confirmDelete() {
     if (!confirmId) return
-    const {error} = await createClient().from('transactions').delete().eq('id', confirmId)
-    if (error) { showToast('Hata: '+error.message) } else { load() }
+    const id = confirmId
     setConfirmId(null)
+    // Anlık UI güncellemesi — load beklemeden
+    setRows(rs => rs.filter(r => r.id !== id))
+    const {error} = await createClient().from('transactions').delete().eq('id', id)
+    if (error) { showToast('Hata: '+error.message); load() }
+    else showToast('Silindi.')
   }
 
   const filtered = rows.filter(r=>r.type===tab)
