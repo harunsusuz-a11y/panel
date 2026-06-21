@@ -147,8 +147,29 @@ export default function MusterilerPage() {
     const sb = createClient(); const {data:{user}} = await sb.auth.getUser()
     const {error} = await sb.from('clients').insert({...clientForm, created_by:user?.id})
     setSaving(false)
-    if (error) showToast('Hata: '+error.message)
-    else { showToast('Müşteri eklendi!'); setClientModal(false); loadClients(); setClientForm({name:'',email:'',phone:'',company:'',status:'active',notes:''}) }
+    if (error) { showToast('Hata: '+error.message); setSaving(false); return }
+
+    // Yeni müşteri için otomatik portal token oluştur
+    try {
+      const { data: lastClient } = await sb
+        .from('clients')
+        .select('id')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+      if (lastClient?.id) {
+        await sb.from('client_portal_tokens').insert({
+          client_id: lastClient.id,
+          project_id: null,
+          is_client_token: true,
+        })
+      }
+    } catch {}
+
+    showToast('✓ Müşteri eklendi!')
+    setClientModal(false)
+    loadClients()
+    setClientForm({name:'',email:'',phone:'',company:'',status:'active',notes:''})
   }
 
   async function updateClient(id:string, data:any) {
@@ -238,27 +259,55 @@ export default function MusterilerPage() {
 
   // ── Dosya ────────────────────────────────────────────
   async function uploadFile(e:React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]; if (!file||!selProj) return
+    const file = e.target.files?.[0]
+    e.target.value = '' // input'u hemen resetle
+    if (!file) { showToast('Hata: Dosya seçilmedi'); return }
+    if (!selProj?.id) { showToast('Hata: Önce bir proje seçin'); return }
+    if (file.size > 50 * 1024 * 1024) { showToast('Hata: Dosya 50MB den buyuk olamaz'); return }
+
     setUploading(true)
-    const sb = createClient(); const {data:{user}} = await sb.auth.getUser()
-    // Türkçe karakter ve boşlukları temizle
-    const safeName = file.name
-      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')  // aksanları kaldır
-      .replace(/[^a-zA-Z0-9._-]/g, '_')                   // özel karakterleri _ yap
-    const path = `${selProj.id}/${Date.now()}_${safeName}`
-    const {error:ue} = await sb.storage.from('project-files').upload(path, file, {
-      cacheControl: '3600',
-      upsert: false,
-    })
-    if (ue) { showToast('Yükleme hatası: '+ue.message); setUploading(false); return }
-    const {data:{publicUrl}} = sb.storage.from('project-files').getPublicUrl(path)
-    const {data:fd} = await sb.from('project_files').insert({
-      project_id:selProj.id, name:file.name, file_path:publicUrl,
-      file_size:file.size, mime_type:file.type, uploaded_by:user?.id, is_client_visible:true
-    }).select().single()
-    if (fd) setProjFiles(fs => [fd,...fs])
-    setUploading(false); showToast('Dosya yüklendi!')
-    e.target.value = ''
+    try {
+      const sb = createClient()
+      const { data: { user } } = await sb.auth.getUser()
+      if (!user) { showToast('Hata: Oturum açık değil'); setUploading(false); return }
+
+      // Dosya adını güvenli hale getir
+      const ext = file.name.includes('.') ? '.'+file.name.split('.').pop() : ''
+      const baseName = file.name.replace(/\.[^.]+$/, '')
+        .normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .replace(/[^a-zA-Z0-9_-]/g, '_')
+        .slice(0, 60)
+      const safeName = `${baseName}${ext}`
+      const path = `${selProj.id}/${Date.now()}_${safeName}`
+
+      // Storage'a yükle
+      const { error: ue } = await sb.storage.from('project-files').upload(path, file, {
+        cacheControl: '3600',
+        upsert: false,
+      })
+      if (ue) { showToast('Hata: '+ue.message); setUploading(false); return }
+
+      // Public URL al
+      const { data: { publicUrl } } = sb.storage.from('project-files').getPublicUrl(path)
+
+      // DB kaydı
+      const { data: fd, error: de } = await sb.from('project_files').insert({
+        project_id: selProj.id,
+        name: file.name,
+        file_path: publicUrl,
+        file_size: file.size,
+        mime_type: file.type || 'application/octet-stream',
+        uploaded_by: user.id,
+        is_client_visible: true,
+      }).select().single()
+
+      if (de) { showToast('Hata: DB kaydı başarısız - '+de.message); setUploading(false); return }
+      if (fd) setProjFiles(fs => [fd, ...fs])
+      showToast('✓ Dosya yüklendi!')
+    } catch (err: any) {
+      showToast('Hata: '+( err?.message || 'Beklenmedik hata'))
+    }
+    setUploading(false)
   }
 
   async function handleConfirm() {
