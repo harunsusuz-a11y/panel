@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState } from 'react'
 import DaydreamLogo from './DaydreamLogo'
 import {
-  LayoutDashboard, Users, FolderOpen, CheckSquare, CalendarDays,
+  LayoutDashboard, Users, CheckSquare, CalendarDays,
   FileText, Activity, AlertCircle, ShieldCheck,
   Receipt, BarChart2, TrendingUp, UserCog, Workflow,
   SlidersHorizontal, LogOut, Menu, X, BookOpen
@@ -17,7 +17,6 @@ const NAV_ALL = [
   ]},
   { g: 'İş Yönetimi', items: [
     { href: '/dashboard/musteriler',     label: 'Müşteriler',   Icon: Users,           roles: ['admin','manager'] },
-    { href: '/dashboard/projeler',       label: 'Projeler',     Icon: FolderOpen,      roles: ['admin','manager','member'] },
     { href: '/dashboard/gorevler',       label: 'Görevler',     Icon: CheckSquare,     roles: ['admin','manager','member'] },
     { href: '/dashboard/takvim',         label: 'Takvim',       Icon: CalendarDays,    roles: ['admin','manager','member'] },
   ]},

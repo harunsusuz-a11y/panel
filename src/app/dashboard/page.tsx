@@ -487,7 +487,7 @@ export default function DashboardPage() {
               <KPI label="Aktif Proje" value={String(activeP.length)}
                 sub={`${clients.filter((c: any) => c.status === 'active').length} aktif müşteri`}
                 color="var(--blue)" iconBg="var(--blue2)" Icon={FolderOpen}
-                delay={80} onClick={() => router.push('/dashboard/projeler')} />
+                delay={80} onClick={() => router.push('/dashboard/musteriler')} />
 
               <KPI label="Geciken Görev" value={String(overdue.length)}
                 sub={overdue.length > 0 ? `${overdue.filter((t:any)=>t.priority==='critical').length} kritik` : 'Temiz 👌'}
@@ -554,7 +554,7 @@ export default function DashboardPage() {
               <div className="card anim-fade">
                 <div className="card-h">
                   <span className="card-title">Aktif Projeler</span>
-                  <button onClick={() => router.push('/dashboard/projeler')}
+                  <button onClick={() => router.push('/dashboard/musteriler')}
                     style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 12, color: 'var(--tx3)', background: 'none', border: 'none', cursor: 'pointer', transition: 'color .15s' }}
                     onMouseEnter={e => (e.currentTarget.style.color = 'var(--ac)')}
                     onMouseLeave={e => (e.currentTarget.style.color = 'var(--tx3)')}>
@@ -565,7 +565,7 @@ export default function DashboardPage() {
                   ? <div style={{ padding: 28, textAlign: 'center', color: 'var(--tx3)', fontSize: 13 }}>Aktif proje yok</div>
                   : activeP.slice(0, 5).map((p: any) => (
                     <div key={p.id} className="row" style={{ cursor: 'pointer' }}
-                      onClick={() => router.push('/dashboard/projeler')}
+                      onClick={() => router.push('/dashboard/musteriler')}
                       onMouseEnter={e => (e.currentTarget.style.background = 'var(--s2)')}
                       onMouseLeave={e => (e.currentTarget.style.background = '')}>
                       <div style={{ flex: 1, minWidth: 0 }}>

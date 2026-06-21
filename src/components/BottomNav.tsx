@@ -1,13 +1,13 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, CheckSquare, FolderOpen, Users, BarChart2 } from 'lucide-react'
+import { LayoutDashboard, CheckSquare, Users, BarChart2, FileText } from 'lucide-react'
 
 const NAV = [
   { href:'/dashboard',            label:'Dashboard',  Icon:LayoutDashboard },
   { href:'/dashboard/gorevler',   label:'Görevler',   Icon:CheckSquare },
-  { href:'/dashboard/projeler',   label:'Projeler',   Icon:FolderOpen },
   { href:'/dashboard/musteriler', label:'Müşteriler', Icon:Users },
+  { href:'/dashboard/icerik',     label:'İçerik',     Icon:FileText },
   { href:'/dashboard/finans',     label:'Finans',     Icon:BarChart2 },
 ]
 

@@ -6,7 +6,7 @@ import { Search, FolderOpen, CheckSquare, Users, FileText, X } from 'lucide-reac
 
 const ICONS: Record<string,any> = { projects: FolderOpen, tasks: CheckSquare, clients: Users, contents: FileText }
 const LABELS: Record<string,string> = { projects:'Proje', tasks:'Görev', clients:'Müşteri', contents:'İçerik' }
-const ROUTES: Record<string,string> = { projects:'/dashboard/projeler', tasks:'/dashboard/gorevler', clients:'/dashboard/musteriler', contents:'/dashboard/icerik' }
+const ROUTES: Record<string,string> = { projects:'/dashboard/musteriler', tasks:'/dashboard/gorevler', clients:'/dashboard/musteriler', contents:'/dashboard/icerik' }
 
 export default function GlobalSearch() {
   const router = useRouter()

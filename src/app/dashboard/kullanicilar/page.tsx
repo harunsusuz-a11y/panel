@@ -13,13 +13,13 @@ const ROLES = [
 ]
 
 const PAGE_ACCESS: Record<string, string[]> = {
-  admin:   ['dashboard','musteriler','projeler','gorevler','takvim','icerik','operasyon','gecikmeler','onay','muhasebe','finans','performans','kullanicilar','otomasyonlar','ayarlar','dokumantasyon'],
-  manager: ['dashboard','musteriler','projeler','gorevler','takvim','icerik','operasyon','gecikmeler','onay','muhasebe','finans','performans','otomasyonlar','ayarlar','dokumantasyon'],
+  admin:   ['dashboard','musteriler','gorevler','takvim','icerik','operasyon','gecikmeler','onay','muhasebe','finans','performans','kullanicilar','otomasyonlar','ayarlar','dokumantasyon'],
+  manager: ['dashboard','musteriler','gorevler','takvim','icerik','operasyon','gecikmeler','onay','muhasebe','finans','performans','otomasyonlar','ayarlar','dokumantasyon'],
   member:  ['dashboard','gorevler','takvim','icerik','onay','ayarlar','dokumantasyon'],
 }
 
 const PAGE_LABELS: Record<string,string> = {
-  dashboard:'Dashboard', musteriler:'Müşteriler', projeler:'Projeler', gorevler:'Görevler',
+  dashboard:'Dashboard', musteriler:'Müşteriler', gorevler:'Görevler',
   takvim:'Takvim', icerik:'İçerik', operasyon:'Operasyon', gecikmeler:'Gecikmeler',
   onay:'Onay', muhasebe:'Muhasebe', finans:'Finans', performans:'Performans',
   kullanicilar:'Kullanıcılar', otomasyonlar:'Otomasyonlar', ayarlar:'Ayarlar', dokumantasyon:'Kılavuz',
