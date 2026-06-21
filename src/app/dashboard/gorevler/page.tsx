@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
 import InfoBox from '@/components/InfoBox'
@@ -79,7 +79,22 @@ export default function GorevlerPage() {
     setProfiles((pr.data || []).filter((p: any) => p.full_name))
     setLoading(false)
   }
-  useEffect(() => { load() }, [])
+  const loadRef = useRef(load)
+  useEffect(() => { loadRef.current = load })
+
+  useEffect(() => {
+    loadRef.current()
+
+    // Realtime — başka sayfadan görev eklenince otomatik güncelle
+    const sb = createClient()
+    const ch = sb.channel('gorevler-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, () => {
+        loadRef.current()
+      })
+      .subscribe()
+
+    return () => { sb.removeChannel(ch) }
+  }, [])
 
   async function loadDetail(task: any) {
     setDetail(task); setDetailTab('info'); setComments([]); setTimeLogs([])

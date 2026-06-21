@@ -170,7 +170,8 @@ export default function MusterilerPage() {
       created_by: user?.id,
     }).select().single()
     if (error) { showToast('Hata: '+error.message); return }
-    setProjects(ps => [data, ...ps])
+    const enrichedProj = {...data, client: sel}
+    setProjects(ps => [enrichedProj, ...ps])
     setProjModal(false)
     setProjForm({name:'',description:'',deadline:'',budget:'',priority:'normal',status:'active'})
     showToast('Proje oluşturuldu!')
@@ -216,7 +217,10 @@ export default function MusterilerPage() {
     }).select().single()
     if (error) { showToast('Hata: '+error.message); return }
     const pr = profiles.find((x:any) => x.id===taskForm.assigned_to)
-    setProjTasks(ts => [{...data, assignee:pr}, ...ts])
+    const enriched = {...data, assignee:pr}
+    setProjTasks(ts => [enriched, ...ts])
+    // Müşteri Görevler sekmesini de güncelle
+    setClientTasks(ts => [enriched, ...ts])
     setTaskModal(false)
     setTaskForm({title:'',assigned_to:'',priority:'normal',due_date:'',description:''})
     showToast('Görev oluşturuldu!')
