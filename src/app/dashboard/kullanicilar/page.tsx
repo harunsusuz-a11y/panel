@@ -403,7 +403,6 @@ export default function KullanicilarPage() {
           </div>
         </div>
       )}
-    <>
       {/* Şifre Değiştir Modal */}
       {pwdModal && (
         <div className="overlay" onClick={e => { if (e.target === e.currentTarget) setPwdModal(false) }}>

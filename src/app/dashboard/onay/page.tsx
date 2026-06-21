@@ -52,6 +52,7 @@ export default function OnayPage() {
         .select('*, requester:profiles!approvals_requested_by_fkey(full_name), approver:profiles!approvals_approved_by_fkey(full_name), client:clients(id,name,email)')
         .order('created_at', { ascending: false }),
       sb.auth.getUser(),
+      sb.from('clients').select('id,name').order('name'),
     ])
     setItems(a.data || [])
     setClients(c.data || [])
@@ -365,7 +366,6 @@ export default function OnayPage() {
           )}
         </div>
       </div>
-    <>
       {/* Yeni Onay Modal */}
       {newModal && (
         <div className="overlay" onClick={e => { if (e.target === e.currentTarget) setNewModal(false) }}>
