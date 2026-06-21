@@ -399,7 +399,7 @@ export default function AyarlarPage() {
                   <input value={pf.full_name} onChange={e=>setPf(p=>({...p,full_name:e.target.value}))} className="inp"/>
                 </div>
                 <div><label className="label">Telefon</label>
-                  <input value={pf.phone} onChange={e=>setPf(p=>({...p,phone:e.target.value}))} placeholder="05XX XXX XX XX" className="inp"/>
+                  <PhoneInput value={pf.phone} onChange={v=>setPf(p=>({...p,phone:v}))} />
                 </div>
                 <div><label className="label">Departman</label>
                   <input value={pf.department} onChange={e=>setPf(p=>({...p,department:e.target.value}))} className="inp"/>
@@ -538,7 +538,7 @@ export default function AyarlarPage() {
                   <input value={co.company_email} onChange={e=>setCo(p=>({...p,company_email:e.target.value}))} className="inp"/>
                 </div>
                 <div><label className="label">Telefon</label>
-                  <input value={co.company_phone} onChange={e=>setCo(p=>({...p,company_phone:e.target.value}))} className="inp"/>
+                  <PhoneInput value={co.company_phone} onChange={v=>setCo(p=>({...p,company_phone:v}))} />
                 </div>
               </div>
               <div><label className="label">Adres</label>

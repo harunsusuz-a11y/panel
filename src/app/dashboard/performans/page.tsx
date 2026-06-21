@@ -98,7 +98,8 @@ export default function PerformansPage() {
     const overdue= my.filter(t => t.status !== 'done' && t.due_date && new Date(t.due_date) < now).length
     const inProg = my.filter(t => t.status === 'in_progress').length
     const score  = total === 0 ? 0 : Math.max(0, Math.min(100, Math.round((done / total) * 100 - overdue * 10)))
-    const hours  = Math.round(timeLogs.filter((l: any) => l.user_id === p.id).reduce((s: number, l: any) => s + (l.duration_min || 0), 0) / 60)
+    const totalMin = timeLogs.filter((l: any) => l.user_id === p.id && l.duration_min != null && l.duration_min > 0).reduce((s: number, l: any) => s + l.duration_min, 0)
+    const hours = Math.round(totalMin / 60)
     const color  = score >= 80 ? 'var(--green)' : score >= 60 ? 'var(--ac)' : score >= 40 ? 'var(--amber)' : 'var(--red)'
     const fn     = p.full_name || ''
     const firstName = fn.split(' ')[0]

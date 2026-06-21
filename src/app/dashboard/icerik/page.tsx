@@ -67,7 +67,8 @@ export default function IcerikPage() {
   }
 
   async function changeStatus(id:string, status:string) {
-    await createClient().from('contents').update({status}).eq('id',id)
+    const {error} = await createClient().from('contents').update({status}).eq('id',id)
+    if (error) { showToast('Hata: '+error.message); return }
     setItems(prev => prev.map(x => x.id===id ? {...x,status} : x))
     if (sel?.id===id) setSel((s:any) => s ? {...s,status} : null)
     showToast(`Durum → ${ST[status]?.l}`)

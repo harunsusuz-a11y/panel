@@ -154,7 +154,16 @@ export default function ProjelerPage() {
     const cid = sel.client_id || sel.client?.id
     if (!cid) { showToast('Hata: Projeye müşteri atanmamış'); return }
     const sb = createClient()
-    const {data} = await sb.from('client_portal_tokens').insert({client_id:cid,project_id:sel.id}).select().single()
+    // Önce mevcut token var mı kontrol et
+    let data = null
+    try {
+      const {data: existing} = await sb.from('client_portal_tokens').select().eq('project_id',sel.id).order('created_at',{ascending:false}).limit(1).single()
+      if (existing) data = existing
+    } catch {}
+    if (!data) {
+      const {data: newToken} = await sb.from('client_portal_tokens').insert({client_id:cid,project_id:sel.id}).select().single()
+      data = newToken
+    }
     if (data) {
       const link = `${window.location.origin}/portal/${data.token}`
       setPortalLink(link)

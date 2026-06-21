@@ -36,7 +36,13 @@ export default function MuhasebePage() {
     setRows(t.data||[]); setClients(c.data||[]); setProjects(p.data||[])
     setLoading(false)
   }
-  useEffect(()=>{ load() },[])
+  useEffect(()=>{
+    load()
+    // Sekme aktif olunca yenile (başka sekmede kayıt yapılmış olabilir)
+    const onVisible = () => { if (document.visibilityState === 'visible') load() }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
+  },[])
 
   async function add() {
     if (!form.description||!form.amount) { showToast('Hata: Açıklama ve tutar zorunlu'); return }

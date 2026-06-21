@@ -30,8 +30,9 @@ export default function GecikmelerPage() {
   useEffect(()=>{load()},[])
 
   async function markDone(id:string) {
-    await createClient().from('tasks').update({status:'done',completed_at:new Date().toISOString()}).eq('id',id)
-    setTasks(ts=>ts.filter(t=>t.id!==id))
+    // completed_at trigger tarafından set edilir
+    const {error} = await createClient().from('tasks').update({status:'done'}).eq('id',id)
+    if (!error) setTasks(ts=>ts.filter(t=>t.id!==id))
   }
 
   const critical = tasks.filter(t=>t.priority==='critical')

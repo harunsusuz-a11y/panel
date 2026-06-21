@@ -48,7 +48,8 @@ export default function MusterilerPage() {
   }
 
   async function update(id:string, data:any) {
-    await createClient().from('clients').update(data).eq('id',id)
+    const {error} = await createClient().from('clients').update(data).eq('id',id)
+    if (error) { showToast('Hata: '+error.message); return }
     setClients(cs => cs.map(c => c.id===id ? {...c,...data} : c))
     if (sel?.id===id) setSel((s:any) => s ? {...s,...data} : null)
     showToast('Güncellendi!')

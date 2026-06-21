@@ -77,11 +77,18 @@ export default function OnayPage() {
     setSending(true)
     const sb = createClient()
     // Portal token oluştur
-    const { data: tokenData } = await sb
-      .from('client_portal_tokens')
-      .insert({ client_id: item.client_id, approval_id: item.id })
-      .select()
-      .single()
+    // Önce mevcut token var mı?
+    let tokenData = null
+    try {
+      const {data: existingToken} = await sb.from('client_portal_tokens')
+        .select().eq('approval_id', item.id).limit(1).single()
+      if (existingToken) tokenData = existingToken
+    } catch {}
+    if (!tokenData) {
+      const {data: newToken} = await sb.from('client_portal_tokens')
+        .insert({ client_id: item.client_id, approval_id: item.id }).select().single()
+      tokenData = newToken
+    }
 
     if (tokenData) {
       const link = `${window.location.origin}/portal/approval/${tokenData.token}`
