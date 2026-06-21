@@ -101,12 +101,6 @@ export default function ProjelerPage() {
     if (data) loadProject({...data, client: clients.find(c=>c.id===data.client_id)||null})
   }
 
-  async function updateProgress(id:string, progress:number) {
-    await createClient().from('projects').update({progress}).eq('id',id)
-    setProjects(ps => ps.map(p => p.id===id ? {...p,progress} : p))
-    if (sel?.id===id) setSel((s:any) => ({...s, progress}))
-  }
-
   async function addStage() {
     if (!stageForm.title.trim() || !sel) return
     const {data,error} = await createClient().from('project_stages').insert({

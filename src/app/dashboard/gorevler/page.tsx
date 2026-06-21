@@ -101,7 +101,8 @@ export default function GorevlerPage() {
   async function moveTask(id: string, status: string) {
     const upd: any = { status }
     if (status === 'done') upd.completed_at = new Date().toISOString()
-    await createClient().from('tasks').update(upd).eq('id', id)
+    const { error } = await createClient().from('tasks').update(upd).eq('id', id)
+    if (error) { showToast('Hata: ' + error.message); return }
     setTasks(ts => ts.map(t => t.id === id ? { ...t, ...upd } : t))
     setDetail((d: any) => d ? { ...d, ...upd } : null)
   }

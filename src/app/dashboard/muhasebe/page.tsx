@@ -53,7 +53,7 @@ export default function MuhasebePage() {
 
   async function del(id:string) {
     if (!confirm('Silinsin mi?')) return
-    await createClient().from('transactions').delete().eq('id',id); load()
+    const {error} = await createClient().from('transactions').delete().eq('id',id); if(error){showToast('Hata: '+error.message);return}; load()
   }
 
   const filtered = rows.filter(r=>r.type===tab)
