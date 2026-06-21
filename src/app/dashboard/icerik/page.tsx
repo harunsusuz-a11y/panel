@@ -34,6 +34,8 @@ export default function IcerikPage() {
   const [sel,      setSel]      = useState<any>(null)
   const [toast,    setToast]    = useState('')
   const [loading,  setLoading]  = useState(true)
+  const [myId,     setMyId]     = useState('')
+  const [myRole,   setMyRole]   = useState('')
   const [form, setForm] = useState({ title:'', client_id:'', type:'post', status:'draft', assigned_to:'', publish_date:'', notes:'' })
 
   const showToast = (m:string) => { setToast(m); setTimeout(()=>setToast(''),3500) }
@@ -46,6 +48,8 @@ export default function IcerikPage() {
     // Rolü çek
     const { data: prof } = await sb.from('profiles').select('role').eq('id', user.id).single()
     const role = prof?.role || 'member'
+    setMyId(user.id)
+    setMyRole(role)
 
     const [b, c] = await Promise.all([
       sb.from('clients').select('id,name').order('name'),
@@ -79,6 +83,12 @@ export default function IcerikPage() {
   }
 
   async function changeStatus(id:string, status:string) {
+    // Member: sadece kendi içeriği, sadece draft→pending (onaya gönder)
+    if (myRole === 'member') {
+      const item = items.find(x => x.id === id)
+      if (!item || item.assigned_to !== myId) { showToast('Hata: Bu içeriği düzenleyemezsiniz'); return }
+      if (!(item.status === 'draft' && status === 'pending')) { showToast('Hata: Bu değişikliğe yetkiniz yok'); return }
+    }
     const {error} = await createClient().from('contents').update({status}).eq('id',id)
     if (error) { showToast('Hata: '+error.message); return }
     setItems(prev => prev.map(x => x.id===id ? {...x,status} : x))
@@ -234,9 +244,16 @@ export default function IcerikPage() {
               {/* Durum değiştir */}
               <p style={{fontSize:10.5,fontWeight:700,color:'var(--tx3)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:8}}>Durum Değiştir</p>
               <div style={{display:'flex',flexDirection:'column',gap:5,marginBottom:16}}>
-                {Object.entries(ST).map(([k,v])=>(
+                {Object.entries(ST).filter(([k])=>{
+                  if (myRole==='member') {
+                    // Member: sadece mevcut durumu ve pending'e geçişi göster (draft ise)
+                    return k===sel.status || (sel.status==='draft' && k==='pending')
+                  }
+                  return true
+                }).map(([k,v])=>(
                   <button key={k} onClick={()=>changeStatus(sel.id,k)}
-                    style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'8px 12px',borderRadius:8,border:`1px solid ${sel.status===k?v.color:'var(--bdr)'}`,background:sel.status===k?`${v.color}15`:'var(--s2)',cursor:'pointer',transition:'all .12s'}}>
+                    disabled={k===sel.status}
+                    style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'8px 12px',borderRadius:8,border:`1px solid ${sel.status===k?v.color:'var(--bdr)'}`,background:sel.status===k?`${v.color}15`:'var(--s2)',cursor:k===sel.status?'default':'pointer',transition:'all .12s'}}>
                     <span style={{fontSize:12.5,fontWeight:sel.status===k?700:400,color:sel.status===k?v.color:'var(--tx2)'}}>{v.l}</span>
                     {sel.status===k&&<span style={{fontSize:10,color:v.color,fontWeight:700}}>✓ Mevcut</span>}
                   </button>

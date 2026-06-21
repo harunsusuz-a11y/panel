@@ -79,6 +79,26 @@ export default function OnayPage() {
       resolved_at: new Date().toISOString(),
       internal_note: status === 'approved' ? 'İç onay tamamlandı' : 'Reddedildi',
     }).eq('id', id)
+
+    // Talebi oluşturana bildirim gönder
+    const approval = items.find(x => x.id === id)
+    if (approval?.requested_by && approval.requested_by !== user?.id) {
+      await sb.from('notifications').insert({
+        user_id: approval.requested_by,
+        type: status === 'approved' ? 'approval_approved' : 'approval_rejected',
+        title: status === 'approved' ? '✅ Onay talebiniz onaylandı' : '❌ Onay talebiniz reddedildi',
+        body: `"${approval.title}" talebi ${status === 'approved' ? 'onaylandı' : 'reddedildi'}.`,
+        entity_type: 'approvals',
+        entity_id: id,
+        is_read: false,
+      })
+    }
+
+    // Eğer reddedildiyse ve content_id varsa içeriği revizyon'a çek
+    if (status === 'rejected' && approval?.content_id) {
+      await sb.from('contents').update({ status: 'revision' }).eq('id', approval.content_id)
+    }
+
     showToast(status === 'approved' ? '✓ Onaylandı! Şimdi müşteriye gönderebilirsiniz.' : '✕ Reddedildi.')
     load()
     if (sel?.id === id) setSel((s:any) => s ? { ...s, status, approved_by: user?.id } : null)
@@ -103,7 +123,7 @@ export default function OnayPage() {
     }
 
     if (tokenData) {
-      const link = `${window.location.origin}/portal/approval/${tokenData.token}`
+      const link = `${window.location.origin}/portal/${tokenData.token}`
       setPortalLink(link)
       try { navigator.clipboard.writeText(link) } catch {}
       // client_sent_at güncelle
@@ -116,7 +136,7 @@ export default function OnayPage() {
       load()
     } else {
       // Fallback: doğrudan link
-      const link = `${window.location.origin}/portal/approval/${item.id}`
+      const link = `${window.location.origin}/portal/${item.id}`
       setPortalLink(link)
       try { navigator.clipboard.writeText(link) } catch {}
       showToast('✓ Link oluşturuldu (kopyalandı)')

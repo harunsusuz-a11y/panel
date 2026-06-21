@@ -11,14 +11,14 @@ import {
 
 // İş akışı aşamaları — Daydream hiyerarşisi
 const PIPELINE = [
-  { id: 'brief',    label: 'Brief Alındı',     owner: 'Aslı',   color: 'var(--tx3)'  },
-  { id: 'konsept',  label: 'Konsept',          owner: 'Aslı',   color: 'var(--blue)' },
-  { id: 'uretim',   label: 'Üretim',           owner: 'Gizem',  color: 'var(--ac)'   },
-  { id: 'kontrol',  label: 'Kalite Kontrol',   owner: 'Gizem',  color: 'var(--amber)'},
-  { id: 'uygulama', label: 'Uygulama/Export',  owner: 'Yasin',  color: 'var(--blue)' },
-  { id: 'mert',     label: 'Gönderim Hazır',   owner: 'Mert',   color: 'var(--ac)'   },
-  { id: 'final',    label: 'Emir Onayı',       owner: 'Emir',   color: 'var(--amber)'},
-  { id: 'musteri',  label: 'Teslim Edildi ✓',   owner: 'Müşteriye',color: 'var(--green)'},
+  { id: 'brief',    label: 'Brief Alındı',     owner: 'İçerik Ekibi',  color: 'var(--tx3)'  },
+  { id: 'konsept',  label: 'Konsept',          owner: 'Yaratıcı Lead', color: 'var(--blue)' },
+  { id: 'uretim',   label: 'Üretim',           owner: 'Sosyal Medya',  color: 'var(--ac)'   },
+  { id: 'kontrol',  label: 'Kalite Kontrol',   owner: 'Sosyal Medya',  color: 'var(--amber)'},
+  { id: 'uygulama', label: 'Uygulama/Export',  owner: 'SEO/Operasyon', color: 'var(--blue)' },
+  { id: 'mert',     label: 'Gönderim Hazır',   owner: 'Operasyon',     color: 'var(--ac)'   },
+  { id: 'final',    label: 'Yönetici Onayı',   owner: 'Yönetici',      color: 'var(--amber)'},
+  { id: 'musteri',  label: 'Teslim Edildi ✓',  owner: 'Müşteriye',     color: 'var(--green)'},
 ]
 
 const STATUS_MAP: Record<string, string> = {

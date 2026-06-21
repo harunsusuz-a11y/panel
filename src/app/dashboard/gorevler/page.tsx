@@ -31,6 +31,7 @@ export default function GorevlerPage() {
   const [adding,   setAdding]   = useState(false)
   const [toast,    setToast]    = useState('')
   const [myId,     setMyId]     = useState('')
+  const [myRole,   setMyRole]   = useState('')
   const [confirmId, setConfirmId] = useState<string|null>(null)
   const [detailTab,setDetailTab]= useState<'info'|'comments'|'time'>('info')
   const [comments, setComments] = useState<any[]>([])
@@ -51,6 +52,7 @@ export default function GorevlerPage() {
     // Rolü çek
     const { data: prof } = await sb.from('profiles').select('role').eq('id', user.id).single()
     const role = prof?.role || 'member'
+    setMyRole(role)
 
     const [p, c, pr] = await Promise.all([
       sb.from('projects').select('id,name,client_id').order('name'),
@@ -129,8 +131,15 @@ export default function GorevlerPage() {
   }
 
   async function moveTask(id: string, status: string) {
+    // Member: sadece kendi görevi, sadece todo→in_progress veya in_progress→review
+    if (myRole === 'member') {
+      const task = tasks.find(t => t.id === id)
+      if (!task || task.assigned_to !== myId) { showToast('Hata: Bu görevi taşıyamazsınız'); return }
+      const allowed = (task.status === 'todo' && status === 'in_progress') ||
+                      (task.status === 'in_progress' && status === 'review')
+      if (!allowed) { showToast('Hata: Bu geçişe yetkiniz yok'); return }
+    }
     const upd: any = { status }
-    // completed_at DB trigger tarafından set ediliyor, client-side gereksiz
     const { error } = await createClient().from('tasks').update(upd).eq('id', id)
     if (error) { showToast('Hata: ' + error.message); return }
     setTasks(ts => ts.map(t => t.id === id ? { ...t, ...upd } : t))
@@ -138,6 +147,7 @@ export default function GorevlerPage() {
   }
 
   async function deleteTask(id: string) {
+    if (myRole === 'member') { showToast('Hata: Görev silme yetkiniz yok'); return }
     setConfirmId(id)
   }
 
@@ -322,11 +332,22 @@ export default function GorevlerPage() {
                   <div>
                     <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--tx3)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 8 }}>Taşı</p>
                     <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
-                      {COLS.filter(c => c.id !== detail.status).map(c => (
+                      {COLS.filter(c => {
+                        if (c.id === detail.status) return false
+                        if (myRole === 'member') {
+                          // Member: sadece todo→in_progress ve in_progress→review
+                          if (detail.status === 'todo' && c.id === 'in_progress') return true
+                          if (detail.status === 'in_progress' && c.id === 'review') return true
+                          return false
+                        }
+                        return true
+                      }).map(c => (
                         <button key={c.id} onClick={() => moveTask(detail.id, c.id)} className="btn-ghost" style={{ fontSize: 12, color: c.color, borderColor: `${c.color}44` }}>→ {c.label}</button>
                       ))}
                     </div>
-                    <button className="btn-danger" onClick={() => deleteTask(detail.id)} style={{ width: '100%', justifyContent: 'center', padding: 9 }}>Görevi Sil</button>
+                    {myRole !== 'member' && (
+                      <button className="btn-danger" onClick={() => deleteTask(detail.id)} style={{ width: '100%', justifyContent: 'center', padding: 9 }}>Görevi Sil</button>
+                    )}
                   </div>
                 </div>
               )}

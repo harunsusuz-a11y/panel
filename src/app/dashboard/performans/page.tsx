@@ -23,14 +23,21 @@ function Ring({ value, color, size = 56 }: { value: number; color: string; size?
   )
 }
 
-// Daydream hiyerarşisi — sabit
-const TEAM_ROLES: Record<string, { title: string; color: string }> = {
-  'Emir':    { title: 'Founder & Executive Producer', color: 'var(--ac)'    },
-  'Aslı':    { title: 'Creative Lead',                color: 'var(--blue)'  },
-  'Gizem':   { title: 'Social Media Lead / Design',   color: 'var(--green)' },
-  'Yasin':   { title: 'Junior Operator',              color: 'var(--amber)' },
-  'Mert':    { title: 'Operations Manager',           color: 'var(--tx2)'   },
-  'Caner':   { title: 'Accounting',                   color: 'var(--tx3)'   },
+// Renk paleti — DB'deki departman bazlı
+const DEPT_COLORS: Record<string, string> = {
+  'Yönetim':          'var(--ac)',
+  'Tasarım':          'var(--blue)',
+  'Sosyal Medya':     'var(--green)',
+  'SEO':              'var(--amber)',
+  'Operasyon':        'var(--tx2)',
+  'Muhasebe':         'var(--tx3)',
+  'İçerik':           'var(--blue)',
+  'Müşteri İlişkileri':'var(--green)',
+}
+const ROLE_COLORS: Record<string, string> = {
+  admin:   'var(--ac)',
+  manager: 'var(--blue)',
+  member:  'var(--tx2)',
 }
 
 export default function PerformansPage() {
@@ -103,7 +110,7 @@ export default function PerformansPage() {
     const color  = score >= 80 ? 'var(--green)' : score >= 60 ? 'var(--ac)' : score >= 40 ? 'var(--amber)' : 'var(--red)'
     const fn     = p.full_name || ''
     const firstName = fn.split(' ')[0]
-    const roleInfo = TEAM_ROLES[firstName] || { title: p.department || 'Ekip', color: 'var(--tx3)' }
+    const roleInfo = { title: p.department || p.role || 'Ekip', color: DEPT_COLORS[p.department] || ROLE_COLORS[p.role] || 'var(--tx3)' }
     return { ...p, done, total, overdue, inProg, score, color, roleInfo }
   }).filter(p => p.full_name).sort((a, b) => b.score - a.score)
 

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { Download, CheckCircle2, FileText } from 'lucide-react'
+import ClientActions from '@/app/portal/[token]/ClientActions'
 
 const STAGE_S: Record<string,{l:string;c:string}> = {
   pending:          {l:'Bekliyor',      c:'#50506a'},
@@ -226,6 +227,24 @@ export default async function MusteriPortalPage({ params }: { params: Promise<{ 
               </div>
             )
           })}
+
+          {/* Bekleyen onay varsa müşteri değerlendirme butonu */}
+          {(allApprovals||[]).some((a:any) => a.status==='approved' && (a.client_status==='sent' || a.client_status==='not_sent')) && (() => {
+            const pendingApproval = (allApprovals||[]).find((a:any) => a.status==='approved' && (a.client_status==='sent' || a.client_status==='not_sent'))
+            if (!pendingApproval) return null
+            // Bu onay için token bul — ana portal tokenini kullanıyoruz
+            return (
+              <div className="card" style={{marginBottom:14}}>
+                <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(255,255,255,.06)'}}>
+                  <p style={{fontSize:13,fontWeight:700,marginBottom:4}}>📋 {pendingApproval.title}</p>
+                  <p style={{fontSize:12,color:'#50506a'}}>Değerlendirmenizi bekliyoruz</p>
+                </div>
+                <div style={{padding:'14px 18px'}}>
+                  <ClientActions token={token} currentDecision="pending" />
+                </div>
+              </div>
+            )
+          })()}
 
           {/* Onay Geçmişi */}
           {(allApprovals||[]).length>0&&(

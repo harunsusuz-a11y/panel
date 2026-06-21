@@ -145,26 +145,21 @@ export default function MusterilerPage() {
     if (!clientForm.name.trim()) { showToast('Hata: İsim zorunlu'); return }
     setSaving(true)
     const sb = createClient(); const {data:{user}} = await sb.auth.getUser()
-    const {error} = await sb.from('clients').insert({...clientForm, created_by:user?.id})
+    // Tek insert, dönen ID ile portal token oluştur — yarış koşulu yok
+    const { data: newClient, error } = await sb
+      .from('clients')
+      .insert({...clientForm, created_by:user?.id})
+      .select('id')
+      .single()
     setSaving(false)
-    if (error) { showToast('Hata: '+error.message); setSaving(false); return }
-
-    // Yeni müşteri için otomatik portal token oluştur
-    try {
-      const { data: lastClient } = await sb
-        .from('clients')
-        .select('id')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single()
-      if (lastClient?.id) {
-        await sb.from('client_portal_tokens').insert({
-          client_id: lastClient.id,
-          project_id: null,
-          is_client_token: true,
-        })
-      }
-    } catch {}
+    if (error) { showToast('Hata: '+error.message); return }
+    if (newClient?.id) {
+      await sb.from('client_portal_tokens').insert({
+        client_id: newClient.id,
+        project_id: null,
+        is_client_token: true,
+      })
+    }
 
     showToast('✓ Müşteri eklendi!')
     setClientModal(false)
