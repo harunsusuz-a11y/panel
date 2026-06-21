@@ -91,6 +91,11 @@ export default function MusterilerPage() {
   const [portalLink,  setPortalLink]  = useState('')
   const [copied,      setCopied]      = useState(false)
 
+  // Müşteri bazlı portal
+  const [clientPortalModal, setClientPortalModal] = useState(false)
+  const [clientPortalLink,  setClientPortalLink]  = useState('')
+  const [clientPortalCopied,setClientPortalCopied]= useState(false)
+
   function showToast(m:string) { setToast(m); setTimeout(()=>setToast(''), 3500) }
 
   // ── Yükle ────────────────────────────────────────────
@@ -273,6 +278,29 @@ export default function MusterilerPage() {
   }
 
   // ── Portal link ──────────────────────────────────────
+  async function openClientPortalModal() {
+    if (!sel) return
+    const sb = createClient()
+    // Müşteri bazlı tek token — is_client_token = true
+    let tokenData: any = null
+    try {
+      const { data: ex } = await sb.from('client_portal_tokens')
+        .select().eq('client_id', sel.id).eq('is_client_token', true).single()
+      if (ex) tokenData = ex
+    } catch {}
+    if (!tokenData) {
+      const { data: nt } = await sb.from('client_portal_tokens')
+        .insert({ client_id: sel.id, project_id: null, is_client_token: true })
+        .select().single()
+      tokenData = nt
+    }
+    if (tokenData) {
+      setClientPortalLink(`${window.location.origin}/portal/musteri/${tokenData.token}`)
+      setClientPortalModal(true)
+      setClientPortalCopied(false)
+    }
+  }
+
   async function openPortalModal() {
     if (!selProj || !sel) return
     const sb = createClient()
@@ -379,6 +407,10 @@ export default function MusterilerPage() {
                 <select value={sel.status} onChange={e=>updateClient(sel.id,{status:e.target.value})} className="inp" style={{width:'auto',fontSize:11,padding:'3px 7px',height:'auto'}}>
                   <option value="active">Aktif</option><option value="passive">Pasif</option>
                 </select>
+                <button onClick={openClientPortalModal}
+                  style={{display:'flex',alignItems:'center',gap:5,fontSize:11,padding:'5px 10px',background:'var(--ac2)',border:'1px solid rgba(124,106,247,.3)',borderRadius:7,cursor:'pointer',color:'var(--ac)',fontWeight:600,flexShrink:0}}>
+                  <Link2 size={11}/>Müşteri Paneli
+                </button>
                 <button onClick={()=>{setSel(null);setSelProj(null)}} style={{background:'none',border:'none',color:'var(--tx3)',cursor:'pointer',fontSize:18,flexShrink:0}}>✕</button>
               </div>
 
@@ -820,6 +852,46 @@ export default function MusterilerPage() {
               </div>
               <div><label className="label">Açıklama</label><textarea value={taskForm.description} onChange={e=>setTaskForm(p=>({...p,description:e.target.value}))} className="inp" rows={2}/></div>
               <button onClick={addTask} className="btn" style={{width:'100%',justifyContent:'center',padding:'9px'}}>Görevi Oluştur</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Müşteri Portal Modal ── */}
+      {clientPortalModal && (
+        <div className="overlay" onClick={e=>{if(e.target===e.currentTarget){setClientPortalModal(false);setClientPortalCopied(false)}}}>
+          <div className="modal" style={{maxWidth:440}}>
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16}}>
+              <p className="modal-title" style={{margin:0}}>🏢 Müşteri Paneli Linki</p>
+              <button onClick={()=>{setClientPortalModal(false);setClientPortalCopied(false)}} style={{background:'none',border:'none',color:'var(--tx3)',cursor:'pointer'}}><X size={15}/></button>
+            </div>
+            <div style={{background:'var(--blue2)',borderRadius:9,padding:'10px 14px',marginBottom:14,fontSize:12.5,color:'var(--blue)',border:'1px solid rgba(78,168,240,.15)',lineHeight:1.6}}>
+              Bu link <strong>{sel?.name}</strong> için kalıcıdır. Tüm projeleri, dosyaları ve onay geçmişini gösterir. Bir kez paylaşın, her zaman güncel kalır.
+            </div>
+            <div style={{background:'var(--s2)',borderRadius:9,padding:'10px 14px',marginBottom:14,border:'1px solid var(--bdr)'}}>
+              <p style={{fontSize:11,color:'var(--tx3)',marginBottom:5,fontWeight:600,textTransform:'uppercase',letterSpacing:'.05em'}}>Panel Linki</p>
+              <p style={{fontSize:11,fontFamily:'JetBrains Mono,monospace',color:'var(--blue)',wordBreak:'break-all',lineHeight:1.6}}>{clientPortalLink}</p>
+            </div>
+            <div style={{display:'flex',flexDirection:'column',gap:8}}>
+              <button onClick={async()=>{try{await navigator.clipboard.writeText(clientPortalLink)}catch{}setClientPortalCopied(true);setTimeout(()=>setClientPortalCopied(false),2500)}}
+                style={{display:'flex',alignItems:'center',justifyContent:'center',gap:7,padding:'10px',background:clientPortalCopied?'var(--green2)':'var(--s2)',border:`1px solid ${clientPortalCopied?'rgba(34,211,160,.3)':'var(--bdr)'}`,borderRadius:9,cursor:'pointer',fontSize:13,fontWeight:600,color:clientPortalCopied?'var(--green)':'var(--tx)',transition:'all .2s'}}>
+                {clientPortalCopied ? <><CheckCheck size={14}/>Kopyalandı!</> : <><Copy size={14}/>Linki Kopyala</>}
+              </button>
+              {sel?.phone ? (
+                <button onClick={()=>{
+                  const phone=(sel.phone||'').replace(/\D/g,'')
+                  const msg=encodeURIComponent(`Merhaba! Proje panelinize aşağıdaki linkten ulaşabilirsiniz:\n${clientPortalLink}`)
+                  window.open(`https://wa.me/${phone}?text=${msg}`,'_blank')
+                }}
+                  style={{display:'flex',alignItems:'center',justifyContent:'center',gap:7,padding:'10px',background:'#25D36618',border:'1px solid #25D36630',borderRadius:9,cursor:'pointer',fontSize:13,fontWeight:700,color:'#25D366'}}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                  WhatsApp ile Gönder
+                </button>
+              ) : (
+                <div style={{padding:'9px 12px',background:'var(--amber2)',borderRadius:8,fontSize:12,color:'var(--amber)',border:'1px solid rgba(240,168,67,.2)'}}>
+                  ⚠ Telefon numarası yok — WhatsApp gönderilemez.
+                </div>
+              )}
             </div>
           </div>
         </div>
