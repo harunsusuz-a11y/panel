@@ -7,7 +7,7 @@ import { fmtDeadline, fmtRelative } from '@/lib/utils'
 import {
   TrendingUp, Wallet, FolderOpen, Clock, ClipboardCheck,
   ArrowUpRight, ArrowDownRight, ArrowRight, CheckCircle2,
-  Wifi, WifiOff
+  Wifi, WifiOff, CalendarHeart, ChevronRight, Bell
 } from 'lucide-react'
 
 function BarChart({ bars }: { bars: { label: string; v: number; hi?: boolean }[] }) {
@@ -100,6 +100,190 @@ function KPI({ label, value, sub, color, iconBg, Icon, trend, delay = 0, onClick
     </div>
   )
 }
+
+
+// ─────────────────────────────────────────────────────────
+// ÖZEL GÜNLER — 2026 & 2027
+// ─────────────────────────────────────────────────────────
+const SPECIAL_DAYS: { date: string; name: string; category: string }[] = [
+  // ── 2026 KALAN ──────────────────────────────────────────
+  { date:"2026-06-21", name:"🤳 Dünya Selfie Günü", category:"dijital" },
+  { date:"2026-06-21", name:"☀️ Yaz Gündönümü", category:"kulturel" },
+  { date:"2026-06-21", name:"🎵 Dünya Müzik Günü", category:"pazarlama" },
+  { date:"2026-06-21", name:"👔 Babalar Günü", category:"pazarlama" },
+  { date:"2026-06-30", name:"📱 Dünya Sosyal Medya Günü", category:"dijital" },
+  { date:"2026-07-02", name:"📊 Yılın Ortası (Mid-Year)", category:"ticaret" },
+  { date:"2026-07-07", name:"🍫 Dünya Çikolata Günü", category:"eğlenceli" },
+  { date:"2026-07-15", name:"🇹🇷 Demokrasi ve Millî Birlik Günü", category:"resmi" },
+  { date:"2026-07-17", name:"😀 Dünya Emoji Günü", category:"dijital" },
+  { date:"2026-07-26", name:"🎂 Dünya Pasta Günü", category:"eğlenceli" },
+  { date:"2026-08-08", name:"🐱 Dünya Kediler Günü", category:"eğlenceli" },
+  { date:"2026-08-12", name:"👦 Dünya Gençlik Günü", category:"farkındalık" },
+  { date:"2026-08-19", name:"📷 Dünya Fotoğraf Günü", category:"pazarlama" },
+  { date:"2026-08-26", name:"🐶 Dünya Köpekler Günü", category:"eğlenceli" },
+  { date:"2026-08-30", name:"⚔️ Zafer Bayramı", category:"resmi" },
+  { date:"2026-09-12", name:"🧠 Dünya Migren Günü", category:"farkındalık" },
+  { date:"2026-09-14", name:"📚 Okul Açılış Haftası", category:"ticaret" },
+  { date:"2026-09-21", name:"🧡 Dünya Alzheimer Günü", category:"farkındalık" },
+  { date:"2026-09-23", name:"🍂 Sonbahar Ekinoksu", category:"kulturel" },
+  { date:"2026-09-27", name:"✈️ Dünya Turizm Günü", category:"pazarlama" },
+  { date:"2026-09-29", name:"❤️ Dünya Kalp Günü", category:"farkındalık" },
+  { date:"2026-10-01", name:"☕ Dünya Kahve Günü", category:"eğlenceli" },
+  { date:"2026-10-01", name:"👴 Dünya Yaşlılar Günü", category:"farkındalık" },
+  { date:"2026-10-04", name:"🐾 Dünya Hayvanları Koruma Günü", category:"pazarlama" },
+  { date:"2026-10-05", name:"🍎 Dünya Öğretmenler Günü (UNESCO)", category:"farkındalık" },
+  { date:"2026-10-09", name:"📮 Dünya Posta Günü", category:"pazarlama" },
+  { date:"2026-10-10", name:"🧠 Dünya Ruh Sağlığı Günü", category:"pazarlama" },
+  { date:"2026-10-12", name:"🦴 Dünya Artrit Günü", category:"farkındalık" },
+  { date:"2026-10-14", name:"📏 Dünya Standartlar Günü", category:"dijital" },
+  { date:"2026-10-15", name:"✍️ Dünya Blog Günü", category:"dijital" },
+  { date:"2026-10-16", name:"🌾 Dünya Gıda Günü", category:"pazarlama" },
+  { date:"2026-10-20", name:"📈 Dünya İstatistik Günü", category:"dijital" },
+  { date:"2026-10-29", name:"🌐 Dünya İnternet Günü", category:"dijital" },
+  { date:"2026-10-29", name:"🇹🇷 Cumhuriyet Bayramı", category:"resmi" },
+  { date:"2026-10-31", name:"💰 Dünya Tasarruf Günü", category:"ticaret" },
+  { date:"2026-10-31", name:"🎃 Cadılar Bayramı / Halloween", category:"pazarlama" },
+  { date:"2026-11-08", name:"🏃 İstanbul Maratonu (yaklaşık)", category:"spor" },
+  { date:"2026-11-12", name:"✅ Dünya Kalite Günü", category:"ticaret" },
+  { date:"2026-11-14", name:"💉 Dünya Diyabet Günü", category:"farkındalık" },
+  { date:"2026-11-16", name:"🚀 Dünya Girişimcilik Haftası", category:"dijital" },
+  { date:"2026-11-19", name:"📢 Dünya Reklamcılık Haftası", category:"dijital" },
+  { date:"2026-11-20", name:"🧒 Dünya Çocuk Hakları Günü", category:"pazarlama" },
+  { date:"2026-11-24", name:"🍎 Öğretmenler Günü (TR)", category:"resmi" },
+  { date:"2026-11-27", name:"🛍️ Black Friday", category:"ticaret" },
+  { date:"2026-11-30", name:"💻 Siber Pazartesi", category:"ticaret" },
+  { date:"2026-12-01", name:"🎗️ Dünya AIDS Günü", category:"farkındalık" },
+  { date:"2026-12-02", name:"💻 Dünya Bilgisayar Günü", category:"dijital" },
+  { date:"2026-12-03", name:"♿ Dünya Engelliler Günü", category:"farkındalık" },
+  { date:"2026-12-05", name:"🤝 Dünya Gönüllüler Günü", category:"farkındalık" },
+  { date:"2026-12-10", name:"🕊️ İnsan Hakları Günü", category:"farkındalık" },
+  { date:"2026-12-21", name:"❄️ Kış Gündönümü", category:"kulturel" },
+  { date:"2026-12-24", name:"🎄 Noel Arifesi", category:"kulturel" },
+  { date:"2026-12-25", name:"🎄 Noel", category:"kulturel" },
+  { date:"2026-12-26", name:"🛍️ Boxing Day", category:"ticaret" },
+  { date:"2026-12-31", name:"🎆 Yılbaşı Arifesi", category:"kulturel" },
+  // ── 2027 ──────────────────────────────────────────────────
+  { date:"2027-01-01", name:"🎆 Yılbaşı", category:"resmi" },
+  { date:"2027-01-31", name:"🤝 Dünya Lepra Günü", category:"farkındalık" },
+  { date:"2027-02-04", name:"🎗️ Dünya Kanser Günü", category:"farkındalık" },
+  { date:"2027-02-09", name:"🍕 Dünya Pizza Günü", category:"eğlenceli" },
+  { date:"2027-02-14", name:"💕 Sevgililer Günü", category:"pazarlama" },
+  { date:"2027-03-08", name:"👩 Dünya Kadınlar Günü", category:"pazarlama" },
+  { date:"2027-03-09", name:"🌙 Ramazan Başlangıcı", category:"dini" },
+  { date:"2027-03-11", name:"🎊 Ramazan Bayramı 1. Gün", category:"dini" },
+  { date:"2027-03-12", name:"🎊 Ramazan Bayramı 2. Gün", category:"dini" },
+  { date:"2027-03-13", name:"🎊 Ramazan Bayramı 3. Gün", category:"dini" },
+  { date:"2027-03-14", name:"🔢 Pi Günü", category:"eğlenceli" },
+  { date:"2027-03-15", name:"💄 Dünya Tüketici Hakları Günü", category:"ticaret" },
+  { date:"2027-03-20", name:"🌸 İlkbahar Ekinoksu / Nevruz", category:"kulturel" },
+  { date:"2027-03-21", name:"💛 Dünya Down Sendromu Günü", category:"farkındalık" },
+  { date:"2027-03-21", name:"🌳 Dünya Ormancılık Günü", category:"farkındalık" },
+  { date:"2027-03-22", name:"💧 Dünya Su Günü", category:"farkındalık" },
+  { date:"2027-03-23", name:"🌤️ Dünya Meteoroloji Günü", category:"farkındalık" },
+  { date:"2027-03-24", name:"🫁 Dünya Tüberküloz Günü", category:"farkındalık" },
+  { date:"2027-03-27", name:"🎭 Dünya Tiyatro Günü", category:"kultur" },
+  { date:"2027-04-01", name:"😂 Nisan Şakası Günü", category:"eğlenceli" },
+  { date:"2027-04-02", name:"🧩 Dünya Otizm Farkındalık Günü", category:"farkındalık" },
+  { date:"2027-04-06", name:"⚽ Dünya Spor Günü", category:"pazarlama" },
+  { date:"2027-04-07", name:"🏥 Dünya Sağlık Günü", category:"farkındalık" },
+  { date:"2027-04-11", name:"🐶 Dünya Evcil Hayvan Günü", category:"eğlenceli" },
+  { date:"2027-04-23", name:"📚 Dünya Kitap Günü", category:"pazarlama" },
+  { date:"2027-04-23", name:"🎈 Ulusal Egemenlik ve Çocuk Bayramı", category:"resmi" },
+  { date:"2027-04-27", name:"🎨 Dünya Grafik Tasarım Günü", category:"pazarlama" },
+  { date:"2027-04-29", name:"💃 Dünya Dans Günü", category:"kultur" },
+  { date:"2027-05-01", name:"🔨 Emek ve Dayanışma Günü (1 Mayıs)", category:"resmi" },
+  { date:"2027-05-03", name:"📰 Dünya Basın Özgürlüğü Günü", category:"farkındalık" },
+  { date:"2027-05-09", name:"💐 Anneler Günü", category:"pazarlama" },
+  { date:"2027-05-17", name:"📡 Dünya Telekomünikasyon Günü", category:"dijital" },
+  { date:"2027-05-17", name:"🐑 Kurban Bayramı 1. Gün", category:"dini" },
+  { date:"2027-05-18", name:"🐑 Kurban Bayramı 2. Gün", category:"dini" },
+  { date:"2027-05-19", name:"🏃 Atatürk'ü Anma, Gençlik ve Spor Bayramı", category:"resmi" },
+  { date:"2027-05-19", name:"🐑 Kurban Bayramı 3. Gün", category:"dini" },
+  { date:"2027-05-20", name:"🐝 Dünya Arılar Günü", category:"farkındalık" },
+  { date:"2027-05-20", name:"🐑 Kurban Bayramı 4. Gün", category:"dini" },
+  { date:"2027-05-21", name:"🍵 Dünya Çay Günü", category:"eğlenceli" },
+  { date:"2027-05-28", name:"🍔 Dünya Hamburger Günü", category:"eğlenceli" },
+  { date:"2027-05-31", name:"🚭 Dünya Tütünsüz Günü", category:"farkındalık" },
+  { date:"2027-06-01", name:"🌍 Dünya Çevre Haftası", category:"farkındalık" },
+  { date:"2027-06-05", name:"🌿 Dünya Çevre Günü", category:"pazarlama" },
+  { date:"2027-06-08", name:"🌊 Dünya Okyanuslar Günü", category:"farkındalık" },
+  { date:"2027-06-14", name:"🩸 Dünya Kan Bağışçıları Günü", category:"farkındalık" },
+  { date:"2027-06-18", name:"🍽️ Dünya Gastronomi Günü", category:"pazarlama" },
+  { date:"2027-06-20", name:"👔 Babalar Günü", category:"pazarlama" },
+  { date:"2027-06-21", name:"☀️ Yaz Gündönümü", category:"kulturel" },
+  { date:"2027-06-21", name:"🎵 Dünya Müzik Günü", category:"pazarlama" },
+  { date:"2027-06-30", name:"📱 Dünya Sosyal Medya Günü", category:"dijital" },
+  { date:"2027-07-02", name:"📊 Yılın Ortası (Mid-Year)", category:"ticaret" },
+  { date:"2027-07-07", name:"🍫 Dünya Çikolata Günü", category:"eğlenceli" },
+  { date:"2027-07-15", name:"🇹🇷 Demokrasi ve Millî Birlik Günü", category:"resmi" },
+  { date:"2027-07-17", name:"😀 Dünya Emoji Günü", category:"dijital" },
+  { date:"2027-07-26", name:"🎂 Dünya Pasta Günü", category:"eğlenceli" },
+  { date:"2027-08-08", name:"🐱 Dünya Kediler Günü", category:"eğlenceli" },
+  { date:"2027-08-12", name:"👦 Dünya Gençlik Günü", category:"farkındalık" },
+  { date:"2027-08-19", name:"📷 Dünya Fotoğraf Günü", category:"pazarlama" },
+  { date:"2027-08-26", name:"🐶 Dünya Köpekler Günü", category:"eğlenceli" },
+  { date:"2027-08-30", name:"⚔️ Zafer Bayramı", category:"resmi" },
+  { date:"2027-09-12", name:"🧠 Dünya Migren Günü", category:"farkındalık" },
+  { date:"2027-09-14", name:"📚 Okul Açılış Haftası", category:"ticaret" },
+  { date:"2027-09-21", name:"🧡 Dünya Alzheimer Günü", category:"farkındalık" },
+  { date:"2027-09-23", name:"🍂 Sonbahar Ekinoksu", category:"kulturel" },
+  { date:"2027-09-27", name:"✈️ Dünya Turizm Günü", category:"pazarlama" },
+  { date:"2027-09-29", name:"❤️ Dünya Kalp Günü", category:"farkındalık" },
+  { date:"2027-10-01", name:"☕ Dünya Kahve Günü", category:"eğlenceli" },
+  { date:"2027-10-01", name:"👴 Dünya Yaşlılar Günü", category:"farkındalık" },
+  { date:"2027-10-04", name:"🐾 Dünya Hayvanları Koruma Günü", category:"pazarlama" },
+  { date:"2027-10-05", name:"🍎 Dünya Öğretmenler Günü (UNESCO)", category:"farkındalık" },
+  { date:"2027-10-09", name:"📮 Dünya Posta Günü", category:"pazarlama" },
+  { date:"2027-10-10", name:"🧠 Dünya Ruh Sağlığı Günü", category:"pazarlama" },
+  { date:"2027-10-12", name:"🦴 Dünya Artrit Günü", category:"farkındalık" },
+  { date:"2027-10-14", name:"📏 Dünya Standartlar Günü", category:"dijital" },
+  { date:"2027-10-15", name:"✍️ Dünya Blog Günü", category:"dijital" },
+  { date:"2027-10-16", name:"🌾 Dünya Gıda Günü", category:"pazarlama" },
+  { date:"2027-10-20", name:"📈 Dünya İstatistik Günü", category:"dijital" },
+  { date:"2027-10-29", name:"🌐 Dünya İnternet Günü", category:"dijital" },
+  { date:"2027-10-29", name:"🇹🇷 Cumhuriyet Bayramı", category:"resmi" },
+  { date:"2027-10-31", name:"💰 Dünya Tasarruf Günü", category:"ticaret" },
+  { date:"2027-10-31", name:"🎃 Cadılar Bayramı / Halloween", category:"pazarlama" },
+  { date:"2027-11-08", name:"🏃 İstanbul Maratonu (yaklaşık)", category:"spor" },
+  { date:"2027-11-11", name:"✅ Dünya Kalite Günü", category:"ticaret" },
+  { date:"2027-11-14", name:"💉 Dünya Diyabet Günü", category:"farkındalık" },
+  { date:"2027-11-15", name:"🚀 Dünya Girişimcilik Haftası", category:"dijital" },
+  { date:"2027-11-19", name:"📢 Dünya Reklamcılık Haftası", category:"dijital" },
+  { date:"2027-11-20", name:"🧒 Dünya Çocuk Hakları Günü", category:"pazarlama" },
+  { date:"2027-11-24", name:"🍎 Öğretmenler Günü (TR)", category:"resmi" },
+  { date:"2027-11-26", name:"🛍️ Black Friday", category:"ticaret" },
+  { date:"2027-11-29", name:"💻 Siber Pazartesi", category:"ticaret" },
+  { date:"2027-12-01", name:"🎗️ Dünya AIDS Günü", category:"farkındalık" },
+  { date:"2027-12-02", name:"💻 Dünya Bilgisayar Günü", category:"dijital" },
+  { date:"2027-12-03", name:"♿ Dünya Engelliler Günü", category:"farkındalık" },
+  { date:"2027-12-05", name:"🤝 Dünya Gönüllüler Günü", category:"farkındalık" },
+  { date:"2027-12-10", name:"🕊️ İnsan Hakları Günü", category:"farkındalık" },
+  { date:"2027-12-21", name:"❄️ Kış Gündönümü", category:"kulturel" },
+  { date:"2027-12-24", name:"🎄 Noel Arifesi", category:"kulturel" },
+  { date:"2027-12-25", name:"🎄 Noel", category:"kulturel" },
+  { date:"2027-12-26", name:"🛍️ Boxing Day", category:"ticaret" },
+  { date:"2027-12-31", name:"🎆 Yılbaşı Arifesi", category:"kulturel" },
+]
+
+function getUpcomingSpecialDays(days: number = 7) {
+  const today = new Date()
+  today.setHours(0,0,0,0)
+  const limit = new Date(today)
+  limit.setDate(limit.getDate() + days)
+  return SPECIAL_DAYS.filter(d => {
+    const dt = new Date(d.date)
+    dt.setHours(0,0,0,0)
+    return dt >= today && dt <= limit
+  }).sort((a,b) => a.date.localeCompare(b.date))
+}
+
+const CAT_COLOR: Record<string,string> = {
+  resmi:'var(--ac)', pazarlama:'var(--blue)', dijital:'var(--green)',
+  ticaret:'var(--amber)', dini:'var(--red)', farkındalık:'var(--tx2)',
+  kulturel:'#e879f9', eğlenceli:'#f97316', spor:'#06b6d4',
+  ticaret2:'var(--amber)', kultur:'#a78bfa', default:'var(--tx3)'
+}
+
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -208,6 +392,53 @@ export default function DashboardPage() {
         @media(max-width:768px){.db-kpi{grid-template-columns:repeat(2,1fr)}.db-mid{grid-template-columns:1fr}.db-bot{grid-template-columns:1fr}}
       `}</style>
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+        {/* ── Özel Gün Uyarı Bandı ─────────────────────── */}
+        {(() => {
+          const upcoming = getUpcomingSpecialDays(7)
+          if (upcoming.length === 0) return null
+          return (
+            <div style={{
+              background:'linear-gradient(90deg,rgba(124,106,247,.12) 0%,rgba(124,106,247,.04) 100%)',
+              borderBottom:'1px solid rgba(124,106,247,.2)',
+              padding:'9px 16px',
+              display:'flex',
+              alignItems:'center',
+              gap:10,
+              overflowX:'auto',
+              flexShrink:0,
+            }}>
+              <div style={{display:'flex',alignItems:'center',gap:6,flexShrink:0}}>
+                <Bell size={13} style={{color:'var(--ac)'}} strokeWidth={2}/>
+                <span style={{fontSize:11.5,fontWeight:700,color:'var(--ac)',whiteSpace:'nowrap'}}>Bu Hafta</span>
+              </div>
+              <div style={{display:'flex',gap:8,overflowX:'auto',flexShrink:0}}>
+                {upcoming.map((d,i) => {
+                  const dt = new Date(d.date)
+                  const today2 = new Date(); today2.setHours(0,0,0,0)
+                  const diff = Math.round((dt.getTime()-today2.getTime())/86400000)
+                  const clr = CAT_COLOR[d.category] || 'var(--ac)'
+                  const dayLabel = diff===0?'Bugün':diff===1?'Yarın':`${diff} gün`
+                  return (
+                    <div key={i} style={{
+                      display:'flex',alignItems:'center',gap:6,
+                      background:`${clr}12`,
+                      border:`1px solid ${clr}30`,
+                      borderRadius:8,padding:'4px 10px',
+                      flexShrink:0,whiteSpace:'nowrap',
+                    }}>
+                      <span style={{fontSize:12.5}}>{d.name.split(' ')[0]}</span>
+                      <span style={{fontSize:12,color:'var(--tx2)',fontWeight:500}}>{d.name.split(' ').slice(1).join(' ')}</span>
+                      <span style={{fontSize:10.5,fontWeight:700,color:clr,background:`${clr}20`,padding:'1px 6px',borderRadius:4,marginLeft:2}}>
+                        {dayLabel}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )
+        })()}
+
         <TopBar
           title={userName ? `Merhaba, ${userName}` : 'Dashboard'}
           subtitle={now.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' })}
@@ -446,6 +677,63 @@ export default function DashboardPage() {
               </div>
             )}
           </>)}
+
+          {/* ── Özel Günler — Gelecek 30 Gün ─────────────────── */}
+          {(() => {
+            const next30 = (() => {
+              const today2 = new Date(); today2.setHours(0,0,0,0)
+              const limit = new Date(today2); limit.setDate(limit.getDate()+30)
+              return SPECIAL_DAYS.filter(d => {
+                const dt = new Date(d.date); dt.setHours(0,0,0,0)
+                return dt >= today2 && dt <= limit
+              }).sort((a,b)=>a.date.localeCompare(b.date))
+            })()
+            if (next30.length === 0) return null
+            const months_tr: Record<number,string> = {1:'Oca',2:'Şub',3:'Mar',4:'Nis',5:'May',6:'Haz',7:'Tem',8:'Ağu',9:'Eyl',10:'Eki',11:'Kas',12:'Ara'}
+            return (
+              <div style={{background:'var(--s1)',border:'1px solid var(--bdr)',borderRadius:14,padding:'16px 18px',marginTop:14,marginBottom:80}}>
+                <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:14}}>
+                  <CalendarHeart size={15} style={{color:'var(--ac)'}} strokeWidth={2}/>
+                  <span style={{fontSize:13.5,fontWeight:700}}>Yaklaşan Özel Günler</span>
+                  <span style={{fontSize:11,color:'var(--tx3)',marginLeft:'auto'}}>Sonraki 30 gün · {next30.length} gün</span>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(240px,1fr))',gap:8}}>
+                  {next30.map((d,i) => {
+                    const dt = new Date(d.date)
+                    const today3 = new Date(); today3.setHours(0,0,0,0)
+                    const diff = Math.round((dt.getTime()-today3.getTime())/86400000)
+                    const clr = CAT_COLOR[d.category] || 'var(--tx3)'
+                    const dayStr = diff===0?'Bugün 🔥':diff===1?'Yarın':diff<=7?`${diff} gün kaldı`:`${diff} gün kaldı`
+                    const mo = dt.getMonth()+1
+                    const urgent = diff <= 7
+                    return (
+                      <div key={i} style={{
+                        display:'flex',alignItems:'center',gap:10,
+                        padding:'9px 12px',
+                        background:urgent?`${clr}08`:'var(--s2)',
+                        border:`1px solid ${urgent?clr+'30':'var(--bdr)'}`,
+                        borderRadius:9,
+                        borderLeft:`3px solid ${clr}`,
+                      }}>
+                        <div style={{textAlign:'center',minWidth:34,flexShrink:0}}>
+                          <div style={{fontSize:15,fontWeight:800,fontFamily:'JetBrains Mono,monospace',color:clr,lineHeight:1}}>{dt.getDate()}</div>
+                          <div style={{fontSize:9.5,color:'var(--tx3)',fontWeight:600,textTransform:'uppercase'}}>{months_tr[mo]}</div>
+                        </div>
+                        <div style={{flex:1,minWidth:0}}>
+                          <div style={{fontSize:12.5,fontWeight:500,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{d.name}</div>
+                          <div style={{fontSize:10.5,color:'var(--tx3)',marginTop:2}}>{d.category}</div>
+                        </div>
+                        <span style={{fontSize:10.5,fontWeight:700,color:urgent?clr:'var(--tx3)',flexShrink:0,background:urgent?`${clr}15`:'transparent',padding:'2px 7px',borderRadius:5}}>
+                          {dayStr}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })()}
+
         </div>
       </div>
     </>
