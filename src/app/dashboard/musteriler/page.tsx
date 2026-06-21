@@ -236,8 +236,15 @@ export default function MusterilerPage() {
     const file = e.target.files?.[0]; if (!file||!selProj) return
     setUploading(true)
     const sb = createClient(); const {data:{user}} = await sb.auth.getUser()
-    const path = `${selProj.id}/${Date.now()}_${file.name}`
-    const {error:ue} = await sb.storage.from('project-files').upload(path, file)
+    // Türkçe karakter ve boşlukları temizle
+    const safeName = file.name
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')  // aksanları kaldır
+      .replace(/[^a-zA-Z0-9._-]/g, '_')                   // özel karakterleri _ yap
+    const path = `${selProj.id}/${Date.now()}_${safeName}`
+    const {error:ue} = await sb.storage.from('project-files').upload(path, file, {
+      cacheControl: '3600',
+      upsert: false,
+    })
     if (ue) { showToast('Yükleme hatası: '+ue.message); setUploading(false); return }
     const {data:{publicUrl}} = sb.storage.from('project-files').getPublicUrl(path)
     const {data:fd} = await sb.from('project_files').insert({
