@@ -2,16 +2,17 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
-// Daydream erişim matrisi
-// admin   = Emir    → her şey
-// manager = Mert    → operasyon hariç yaratıcı kararlar, finans dahil
-// member  = Aslı, Gizem, Yasin, Caner, Batuhan&Kerem → kısıtlı
+// ── Daydream Erişim Matrisi ──────────────────────────────
+// admin   → her şey
+// manager → ADMIN_ONLY hariç her şey
+// member  → yalnızca MEMBER_ALLOWED
 
 const ADMIN_ONLY = [
   '/dashboard/kullanicilar',
 ]
 
 const MANAGER_PLUS = [
+  '/dashboard/musteriler',
   '/dashboard/operasyon',
   '/dashboard/gecikmeler',
   '/dashboard/performans',
@@ -20,10 +21,21 @@ const MANAGER_PLUS = [
   '/dashboard/otomasyonlar',
 ]
 
+// Member'ların erişebildiği tam liste
+const MEMBER_ALLOWED = [
+  '/dashboard/gorevler',
+  '/dashboard/takvim',
+  '/dashboard/icerik',
+  '/dashboard/onay',
+  '/dashboard/ayarlar',
+  '/dashboard/dokumantasyon',
+  '/dashboard',          // sadece /dashboard (dashboard ana sayfa)
+]
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Login sayfasına oturum açık kullanıcı gelirse dashboard'a yönlendir
+  // Login / kök → oturum açıksa dashboard'a
   if (pathname === '/login' || pathname === '/') {
     try {
       const supabase = createServerClient(
@@ -37,7 +49,12 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Sadece dashboard sayfaları kontrol et
+  // Portal sayfası → auth gerekmez, geç
+  if (pathname.startsWith('/portal')) {
+    return NextResponse.next()
+  }
+
+  // Dashboard dışı → geç
   if (!pathname.startsWith('/dashboard')) {
     return NextResponse.next()
   }
@@ -63,11 +80,13 @@ export async function middleware(request: NextRequest) {
       }
     )
 
+    // Oturum kontrolü
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       return NextResponse.redirect(new URL('/login', request.url))
     }
 
+    // Rol çek
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
@@ -76,7 +95,7 @@ export async function middleware(request: NextRequest) {
 
     const role = profile?.role || 'member'
 
-    // Admin (Emir) → her şeye erişim
+    // Admin → kısıtsız
     if (role === 'admin') return response
 
     // Admin-only sayfalar
@@ -84,16 +103,22 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
 
-    // Manager (Mert) → admin-only hariç her şey
+    // Manager → admin-only dışında kısıtsız
     if (role === 'manager') return response
 
-    // Member → kısıtlı erişim
-    if (MANAGER_PLUS.some(p => pathname.startsWith(p))) {
+    // Member → sadece izin verilen sayfalara
+    const allowed = MEMBER_ALLOWED.some(p =>
+      p === '/dashboard'
+        ? pathname === '/dashboard'          // tam eşleşme
+        : pathname.startsWith(p)
+    )
+
+    if (!allowed) {
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
 
   } catch {
-    // Hata durumunda geç
+    // Hata → geç (login sayfasında sonsuz döngü engeli)
   }
 
   return response
