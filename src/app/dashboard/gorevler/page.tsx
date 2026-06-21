@@ -45,17 +45,30 @@ export default function GorevlerPage() {
   async function load() {
     const sb = createClient()
     const { data: { user } } = await sb.auth.getUser()
-    if (user) setMyId(user.id)
-    const [t, p, c, pr] = await Promise.all([
-      sb.from('tasks').select('id,title,status,priority,due_date,assigned_to,project_id,client_id,completed_at,description,created_at').order('created_at', { ascending: false }),
+    if (!user) return
+    setMyId(user.id)
+
+    // Rolü çek
+    const { data: prof } = await sb.from('profiles').select('role').eq('id', user.id).single()
+    const role = prof?.role || 'member'
+
+    const [p, c, pr] = await Promise.all([
       sb.from('projects').select('id,name,client_id').order('name'),
       sb.from('clients').select('id,name').order('name'),
       sb.from('profiles').select('id,full_name,department').not('full_name', 'is', null),
     ])
+
+    // Member → sadece kendine atanmış görevler
+    let taskQuery = sb.from('tasks').select('id,title,status,priority,due_date,assigned_to,project_id,client_id,completed_at,description,created_at').order('created_at', { ascending: false })
+    if (role === 'member') {
+      taskQuery = taskQuery.eq('assigned_to', user.id)
+    }
+    const { data: t } = await taskQuery
+
     const pm: Record<string, any> = {}; (p.data || []).forEach((x: any) => { pm[x.id] = x })
     const cm: Record<string, any> = {}; (c.data || []).forEach((x: any) => { cm[x.id] = x })
     const prm: Record<string, any> = {}; (pr.data || []).forEach((x: any) => { prm[x.id] = x })
-    setTasks((t.data || []).map((x: any) => ({
+    setTasks((t || []).map((x: any) => ({
       ...x,
       project: pm[x.project_id],
       client: cm[x.client_id] || (x.project_id && pm[x.project_id] ? cm[pm[x.project_id]?.client_id] : null),

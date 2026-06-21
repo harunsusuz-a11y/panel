@@ -47,18 +47,24 @@ export default function OnayPage() {
 
   async function load() {
     const sb = createClient()
-    const [a, u, c] = await Promise.all([
-      sb.from('approvals')
-        .select('*, requester:profiles!approvals_requested_by_fkey(full_name), approver:profiles!approvals_approved_by_fkey(full_name), client:clients(id,name,email)')
-        .order('created_at', { ascending: false }),
+    const [u, c] = await Promise.all([
       sb.auth.getUser(),
       sb.from('clients').select('id,name').order('name'),
     ])
-    setItems(a.data || [])
     setClients(c.data || [])
+
     if (u.data.user) {
       const { data: p } = await sb.from('profiles').select('role,full_name').eq('id', u.data.user.id).single()
       setCurrentUser({ ...u.data.user, ...p })
+
+      const role = p?.role || 'member'
+      // Member → sadece kendi oluşturduğu onay talepleri
+      let q = sb.from('approvals')
+        .select('*, requester:profiles!approvals_requested_by_fkey(full_name), approver:profiles!approvals_approved_by_fkey(full_name), client:clients(id,name,email)')
+        .order('created_at', { ascending: false })
+      if (role === 'member') q = q.eq('requested_by', u.data.user.id)
+      const { data: a } = await q
+      setItems(a || [])
     }
     setLoading(false)
   }

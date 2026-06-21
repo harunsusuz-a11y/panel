@@ -40,14 +40,26 @@ export default function IcerikPage() {
 
   async function load() {
     const sb = createClient()
-    const [a, b, c] = await Promise.all([
-      sb.from('contents').select('*').order('created_at',{ascending:false}),
+    const { data: { user } } = await sb.auth.getUser()
+    if (!user) return
+
+    // Rolü çek
+    const { data: prof } = await sb.from('profiles').select('role').eq('id', user.id).single()
+    const role = prof?.role || 'member'
+
+    const [b, c] = await Promise.all([
       sb.from('clients').select('id,name').order('name'),
       sb.from('profiles').select('id,full_name').not('full_name','is',null),
     ])
+
+    // Member → sadece kendine atanmış içerikler
+    let q = sb.from('contents').select('*').order('created_at',{ascending:false})
+    if (role === 'member') q = q.eq('assigned_to', user.id)
+    const { data: a } = await q
+
     const cm: Record<string,any> = {}; (b.data||[]).forEach((x:any) => { cm[x.id] = x })
     const pm: Record<string,any> = {}; (c.data||[]).forEach((x:any) => { pm[x.id] = x })
-    setItems((a.data||[]).map((x:any) => ({ ...x, client: cm[x.client_id], assignee: pm[x.assigned_to] })))
+    setItems((a||[]).map((x:any) => ({ ...x, client: cm[x.client_id], assignee: pm[x.assigned_to] })))
     setClients(b.data||[])
     setProfiles(c.data||[])
     setLoading(false)
