@@ -309,7 +309,7 @@ export default function DashboardPage() {
       sb.from('projects').select('id,name,status,progress,deadline,client_id'),
       sb.from('clients').select('id,name,status'),
       sb.from('transactions').select('type,amount,date'),
-      sb.from('approvals').select('id,status,client_status'),
+      sb.from('approvals').select('id,title,type,status,client_status,created_at,client_id,requested_by,portal_tokens:client_portal_tokens(client_decision,client_note,client_decided_at),client:clients(name)'),
       sb.from('activities').select('*, user:profiles!activities_user_id_fkey(full_name)').order('created_at',{ascending:false}).limit(8),
     ])
     setData({ tasks: t.data || [], projects: p.data || [], clients: c.data || [], transactions: tr.data || [], approvals: ap.data || [] })
@@ -350,6 +350,13 @@ export default function DashboardPage() {
   const overdue = tasks.filter((t: any) => t.status !== 'done' && t.due_date && new Date(t.due_date) < now)
   const pending = approvals.filter((a: any) => a.status === 'pending')
   const clientPending = approvals.filter((a: any) => a.client_status === 'sent')
+  const clientApproved = approvals.filter((a: any) => a.client_status === 'client_approved')
+  const clientRevision = approvals.filter((a: any) => a.client_status === 'client_rejected')
+  const clientDecided  = [...clientApproved, ...clientRevision].sort((a: any, b: any) => {
+    const ta = a.portal_tokens?.[0]?.client_decided_at || ''
+    const tb = b.portal_tokens?.[0]?.client_decided_at || ''
+    return tb.localeCompare(ta)
+  }).slice(0, 8)
   const activeP = projects.filter((p: any) => p.status === 'active')
 
   const MONTHS = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara']
@@ -385,10 +392,10 @@ export default function DashboardPage() {
   return (
     <>
       <style>{`
-        .db-kpi{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}
+        .db-kpi{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:16px}
         .db-mid{display:grid;grid-template-columns:1.6fr 1fr;gap:14px;margin-bottom:14px}
-        .db-bot{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:14px}
-        @media(max-width:1100px){.db-kpi{grid-template-columns:repeat(3,1fr)}}
+        .db-bot{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px}
+        @media(max-width:1200px){.db-kpi{grid-template-columns:repeat(3,1fr)}}
         @media(max-width:768px){.db-kpi{grid-template-columns:repeat(2,1fr)}.db-mid{grid-template-columns:1fr}.db-bot{grid-template-columns:1fr}}
       `}</style>
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
@@ -496,9 +503,15 @@ export default function DashboardPage() {
                 delay={120} onClick={() => router.push('/dashboard/gecikmeler')} />
 
               <KPI label="Onay Bekliyor" value={String(pending.length)}
-                sub={clientPending.length > 0 ? `${clientPending.length} müşteri yanıtı bekleniyor` : `${tasks.length} toplam görev`}
+                sub={clientPending.length > 0 ? `${clientPending.length} müşteri yanıtı bekleniyor` : 'İç onay kuyruğu'}
                 color="var(--amber)" iconBg="var(--amber2)" Icon={ClipboardCheck}
-                delay={160} onClick={() => router.push('/dashboard/onay')} />
+                delay={160} onClick={() => router.push('/dashboard/onay')} pulse={pending.length > 0} />
+
+              <KPI label="Müşteri Kararları" value={String(clientApproved.length + clientRevision.length)}
+                sub={clientRevision.length > 0 ? `${clientRevision.length} revizyon istedi` : clientApproved.length > 0 ? `${clientApproved.length} onayladı` : 'Beklenen karar yok'}
+                color={clientRevision.length > 0 ? 'var(--red)' : clientApproved.length > 0 ? 'var(--green)' : 'var(--tx3)'}
+                iconBg={clientRevision.length > 0 ? 'var(--red2)' : clientApproved.length > 0 ? 'var(--green2)' : 'var(--s3)'}
+                Icon={CheckCircle2} delay={200} onClick={() => router.push('/dashboard/onay')} />
             </div>
 
             {/* Orta */}
@@ -550,6 +563,45 @@ export default function DashboardPage() {
 
             {/* Alt */}
             <div className="db-bot">
+
+              {/* Müşteri Kararları */}
+              <div className="card anim-fade" style={{ cursor: 'pointer' }} onClick={() => router.push('/dashboard/onay')}>
+                <div className="card-h">
+                  <span className="card-title">Müşteri Kararları</span>
+                  <span className="card-meta">{clientDecided.length} karar · Tıkla</span>
+                </div>
+                {clientDecided.length === 0 ? (
+                  <div style={{ padding: '28px 18px', textAlign: 'center', color: 'var(--tx3)', fontSize: 13 }}>
+                    Henüz müşteri kararı yok
+                  </div>
+                ) : (
+                  <div style={{ padding: '6px 0' }}>
+                    {clientDecided.map((a: any) => {
+                      const isApproved = a.client_status === 'client_approved'
+                      const token = a.portal_tokens?.[0]
+                      const note = token?.client_note
+                      const decidedAt = token?.client_decided_at
+                      return (
+                        <div key={a.id} className="row" style={{ borderLeft: `3px solid ${isApproved ? 'var(--green)' : 'var(--amber)'}`, paddingLeft: 12 }}>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 3 }}>
+                              <span style={{ fontSize: 13 }}>{isApproved ? '✅' : '🔄'}</span>
+                              <p style={{ fontSize: 12.5, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.client?.name || '—'}</p>
+                              <span style={{ fontSize: 10.5, fontWeight: 700, color: isApproved ? 'var(--green)' : 'var(--amber)', background: isApproved ? 'var(--green2)' : 'var(--amber2)', padding: '1px 6px', borderRadius: 4, flexShrink: 0 }}>
+                                {isApproved ? 'Onayladı' : 'Revizyon'}
+                              </span>
+                            </div>
+                            <p style={{ fontSize: 11.5, color: 'var(--tx3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.title}</p>
+                            {note && <p style={{ fontSize: 11, color: 'var(--tx2)', marginTop: 2, fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>"{note}"</p>}
+                          </div>
+                          {decidedAt && <span style={{ fontSize: 10.5, color: 'var(--tx3)', fontFamily: 'JetBrains Mono,monospace', flexShrink: 0 }}>{fmtRelative(decidedAt)}</span>}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+
               {/* Aktif Projeler */}
               <div className="card anim-fade">
                 <div className="card-h">

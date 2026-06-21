@@ -1,6 +1,16 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
+async function sendPush(userId: string, title: string, body: string, url: string) {
+  try {
+    await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'https://panelson.vercel.app'}/api/push/send`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, title, body, url, type: 'client_response' }),
+    })
+  } catch {}
+}
+
 export async function POST(req: Request) {
   try {
     const { token, decision, note } = await req.json()
@@ -8,7 +18,7 @@ export async function POST(req: Request) {
 
     const sb = await createClient()
 
-    // Token'ı bul — hem proje bazlı hem müşteri bazlı tokenlar desteklenir
+    // Token'ı bul
     const { data: tokenRow, error: te } = await sb
       .from('client_portal_tokens')
       .select('id, approval_id, client_id, project_id, is_client_token')
@@ -24,63 +34,83 @@ export async function POST(req: Request) {
       client_decided_at: new Date().toISOString(),
     }).eq('id', tokenRow.id)
 
-    // Eğer approval_id varsa → o onayı güncelle
+    // Approval varsa güncelle
     if (tokenRow.approval_id) {
       await sb.from('approvals').update({
         client_status: decision === 'approved' ? 'client_approved' : 'client_rejected',
       }).eq('id', tokenRow.approval_id)
     }
 
-    // Müşteri ismini çek
+    // Müşteri adını çek
     const { data: client } = await sb
-      .from('clients')
-      .select('name')
-      .eq('id', tokenRow.client_id)
-      .single()
+      .from('clients').select('name').eq('id', tokenRow.client_id).single()
     const clientName = client?.name || 'Müşteri'
 
-    // Admin ve manager'lara bildirim gönder
-    const { data: adminUsers } = await sb
-      .from('profiles')
-      .select('id')
-      .in('role', ['admin', 'manager'])
-
-    if (adminUsers && adminUsers.length > 0) {
-      const notifTitle = decision === 'approved'
-        ? `✅ ${clientName} onayladı`
-        : `🔄 ${clientName} revizyon istedi`
-      const notifBody = decision === 'approved'
-        ? `${note ? `Not: "${note}"` : 'Müşteri içeriği/projeyi onayladı.'}`
-        : `Revizyon talebi${note ? `: "${note}"` : ' gönderildi.'}`
-
-      const notifs = adminUsers.map((u: any) => ({
-        user_id: u.id,
-        type: 'client_response',
-        title: notifTitle,
-        body: notifBody,
-        entity_type: tokenRow.approval_id ? 'approvals' : 'projects',
-        entity_id: tokenRow.approval_id || tokenRow.project_id || null,
-        is_read: false,
-      }))
-
-      await sb.from('notifications').insert(notifs)
-    }
-
-    // Eğer revizyon ise ve content_id veya project bağlı onay varsa durumu güncelle
-    if (decision === 'revision' && tokenRow.approval_id) {
-      const { data: approval } = await sb
+    // Onay bilgisini çek (title ve requested_by için)
+    let approvalTitle = ''
+    let requestedBy: string | null = null
+    if (tokenRow.approval_id) {
+      const { data: appr } = await sb
         .from('approvals')
-        .select('content_id')
+        .select('title, requested_by, content_id')
         .eq('id', tokenRow.approval_id)
         .single()
+      approvalTitle = appr?.title || ''
+      requestedBy = appr?.requested_by || null
 
-      if (approval?.content_id) {
-        await sb.from('contents').update({ status: 'revision' }).eq('id', approval.content_id)
+      // Revizyon → içeriği geri çek
+      if (decision === 'revision' && appr?.content_id) {
+        await sb.from('contents').update({ status: 'revision' }).eq('id', appr.content_id)
       }
+    }
+
+    // Bildirim metinleri
+    const notifTitle = decision === 'approved'
+      ? `✅ ${clientName} onayladı`
+      : `🔄 ${clientName} revizyon istedi`
+    const notifBody = approvalTitle
+      ? `"${approvalTitle}"${note ? ` — Not: "${note}"` : ''}`
+      : note ? `Not: "${note}"` : decision === 'approved' ? 'Müşteri onay verdi.' : 'Revizyon talebi gönderildi.'
+
+    // Admin + manager'lara bildirim + push
+    const { data: adminUsers } = await sb
+      .from('profiles').select('id').in('role', ['admin', 'manager'])
+
+    const adminIds = (adminUsers || []).map((u: any) => u.id)
+
+    // İlgili personele de bildirim (talebi oluşturan, admin/manager değilse)
+    const extraIds: string[] = []
+    if (requestedBy && !adminIds.includes(requestedBy)) {
+      extraIds.push(requestedBy)
+    }
+
+    const allRecipients = [...adminIds, ...extraIds]
+
+    if (allRecipients.length > 0) {
+      // DB bildirimi
+      await sb.from('notifications').insert(
+        allRecipients.map(uid => ({
+          user_id: uid,
+          type: 'client_response',
+          title: notifTitle,
+          body: notifBody,
+          entity_type: tokenRow.approval_id ? 'approvals' : 'projects',
+          entity_id: tokenRow.approval_id || tokenRow.project_id || null,
+          is_read: false,
+        }))
+      )
+
+      // Push bildirimi — her alıcıya ayrı gönder
+      await Promise.allSettled(
+        allRecipients.map(uid =>
+          sendPush(uid, notifTitle, notifBody, '/dashboard/onay')
+        )
+      )
     }
 
     return NextResponse.json({ ok: true })
   } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 })
+    console.error('Decision API error:', e?.message)
+    return NextResponse.json({ error: e?.message || 'Unknown error' }, { status: 500 })
   }
 }
