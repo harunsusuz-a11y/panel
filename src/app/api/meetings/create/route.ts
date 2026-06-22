@@ -34,7 +34,13 @@ export async function POST(req: NextRequest) {
     const { data: { user } } = await sb.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Oturum yok' }, { status: 401 })
 
-    const accessToken = await getValidToken(sb, user.id)
+    // Token'ı önce mevcut kullanıcıdan, yoksa admin'den al
+    let accessToken = await getValidToken(sb, user.id)
+    if (!accessToken) {
+      // Admin token'ını bul (sistem hesabı)
+      const { data: adminProfile } = await sb.from('profiles').select('id').eq('role', 'admin').limit(1).single()
+      if (adminProfile) accessToken = await getValidToken(sb, adminProfile.id)
+    }
     let meetLink = null, googleEventId = null
 
     if (accessToken) {

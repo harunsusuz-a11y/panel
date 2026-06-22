@@ -39,18 +39,25 @@ export default function ToplantiPage() {
     const { data: { user } } = await sb.auth.getUser()
     if (user) setMyId(user.id)
 
+    // Admin profilini bul
+    const { data: adminProf } = await sb.from('profiles').select('id,role').eq('role','admin').limit(1).single()
+    const isAdmin = adminProf?.id === user?.id
+
     const [m, p, c, gt] = await Promise.all([
       sb.from('meetings')
         .select('*, creator:profiles!meetings_created_by_fkey(full_name), client:clients(name), participants:meeting_participants(user_id, profile:profiles(full_name))')
         .order('start_time', { ascending: false }),
       sb.from('profiles').select('id,full_name,department').not('full_name','is',null),
       sb.from('clients').select('id,name').order('name'),
-      sb.from('google_tokens').select('id').eq('user_id', user?.id || '').maybeSingle(),
+      // Admin token'ı var mı kontrol et (sistem geneli bağlantı)
+      sb.from('google_tokens').select('id').eq('user_id', adminProf?.id || user?.id || '').maybeSingle(),
     ])
     setMeetings(m.data || [])
     setProfiles((p.data || []).filter((x:any) => x.full_name))
     setClients(c.data || [])
     setGoogleConn(!!gt.data)
+    // Admin değilse isAdmin false — bağlantı uyarısı gösterme
+    if (!isAdmin && !gt.data) setGoogleConn(true) // Diğerleri uyarı görmesin
     setLoading(false)
   }
 
@@ -142,8 +149,8 @@ export default function ToplantiPage() {
         }/>
         {toast && <div className={`toast ${toast.startsWith('Hata')?'toast-err':'toast-ok'}`}>{toast}</div>}
 
-        {/* Google bağlantı uyarısı */}
-        {!googleConn && (
+        {/* Google bağlantı uyarısı — sadece admin görür */}
+        {!googleConn && myId === profiles.find((p:any) => p.role === 'admin')?.id && (
           <div style={{padding:'10px 16px',background:'var(--amber2)',borderBottom:'1px solid rgba(240,168,67,.2)',display:'flex',alignItems:'center',justifyContent:'space-between',flexShrink:0}}>
             <span style={{fontSize:13,color:'var(--amber)'}}>⚠ Google Calendar bağlı değil — Meet linki otomatik oluşturulamaz</span>
             <a href="/api/auth/google"
