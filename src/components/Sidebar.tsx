@@ -37,7 +37,9 @@ const NAV_ALL = [
     { href: '/dashboard/kullanicilar',   label: 'Kullanıcılar', Icon: UserCog,         roles: ['admin'] },
     { href: '/dashboard/otomasyonlar',   label: 'Otomasyonlar', Icon: Workflow,        roles: ['admin','manager'] },
     { href: '/dashboard/ayarlar',        label: 'Ayarlar',      Icon: SlidersHorizontal, roles: ['admin','manager','member'] },
-    { href: '/dashboard/dokumantasyon',  label: 'Kılavuz',      Icon: BookOpen,           roles: ['admin','manager','member'] },
+    { href: '/dashboard/toplanti',        label: 'Toplantılar',  Icon: Video,              roles: ['admin','manager'] },
+    { href: '/dashboard/destek',          label: 'Destek',       Icon: LifeBuoy,           roles: ['admin','manager'] },
+    { href: '/dashboard/dokumantasyon',   label: 'Kılavuz',      Icon: BookOpen,           roles: ['admin','manager','member'] },
   ]},
 ]
 
