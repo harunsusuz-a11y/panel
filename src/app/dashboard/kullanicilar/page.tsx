@@ -13,8 +13,8 @@ const ROLES = [
 ]
 
 const PAGE_ACCESS: Record<string, string[]> = {
-  admin:   ['dashboard','musteriler','gorevler','takvim','icerik','operasyon','gecikmeler','onay','muhasebe','finans','performans','kullanicilar','otomasyonlar','destek','ayarlar','dokumantasyon'],
-  manager: ['dashboard','musteriler','gorevler','takvim','icerik','operasyon','gecikmeler','onay','performans','otomasyonlar','destek','ayarlar','dokumantasyon'],
+  admin:   ['dashboard','musteriler','gorevler','takvim','icerik','operasyon','gecikmeler','onay','muhasebe','finans','performans','kullanicilar','otomasyonlar','destek','toplanti','ayarlar','dokumantasyon'],
+  manager: ['dashboard','musteriler','gorevler','takvim','icerik','operasyon','gecikmeler','onay','performans','otomasyonlar','destek','toplanti','ayarlar','dokumantasyon'],
   member:  ['dashboard','gorevler','takvim','icerik','onay','ayarlar','dokumantasyon'],
 }
 
