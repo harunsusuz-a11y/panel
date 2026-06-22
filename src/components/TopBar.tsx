@@ -1,6 +1,7 @@
 'use client'
 import { ReactNode } from 'react'
 import NotificationBell from './NotificationBell'
+import ThemeToggle from './ThemeToggle'
 
 export default function TopBar({ title, subtitle, action }: {
   title: string; subtitle?: string; action?: ReactNode
@@ -13,6 +14,7 @@ export default function TopBar({ title, subtitle, action }: {
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
         {action && <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>{action}</div>}
+        <ThemeToggle />
         <NotificationBell />
       </div>
     </div>

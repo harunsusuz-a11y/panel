@@ -42,6 +42,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-title" content="Daydream" />
       </head>
       <body>
+        <script dangerouslySetInnerHTML={{ __html: `
+          (function() {
+            var t = localStorage.getItem('daydream-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', t);
+          })();
+        ` }} />
         <PWAProvider />
         {children}
       </body>
