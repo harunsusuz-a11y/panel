@@ -404,9 +404,9 @@ const SUPPORT_TYPE: Record<string,{label:string;color:string}> = {
   return (
     <>
       <style>{`
-        .db-kpi{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:16px}
-        .db-mid{display:grid;grid-template-columns:1.6fr 1fr;gap:14px;margin-bottom:14px}
-        .db-bot{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px}
+        .db-kpi{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:18px}
+        .db-mid{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-bottom:16px}
+        .db-bot{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px}
         @media(max-width:1200px){.db-kpi{grid-template-columns:repeat(3,1fr)}}
         @media(max-width:768px){.db-kpi{grid-template-columns:repeat(2,1fr)}.db-mid{grid-template-columns:1fr}.db-bot{grid-template-columns:1fr}}
       `}</style>
