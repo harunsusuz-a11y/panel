@@ -161,8 +161,11 @@ export default function GorevlerPage() {
     const upd: any = { status }
     const { error } = await createClient().from('tasks').update(upd).eq('id', id)
     if (error) { showToast('Hata: ' + error.message); return }
-    setTasks(ts => ts.map(t => t.id === id ? { ...t, ...upd } : t))
-    setDetail((d: any) => d ? { ...d, ...upd } : null)
+    // DB trigger completed_at'i set ediyor — güncel veriyi çek
+    const { data: fresh } = await createClient().from('tasks').select('completed_at').eq('id', id).single()
+    const updWithTime = { ...upd, completed_at: fresh?.completed_at || null }
+    setTasks(ts => ts.map(t => t.id === id ? { ...t, ...updWithTime } : t))
+    setDetail((d: any) => d ? { ...d, ...updWithTime } : null)
   }
 
   async function deleteTask(id: string) {
@@ -336,6 +339,7 @@ export default function GorevlerPage() {
                     { l: 'Deadline',    v: fmtDeadline(detail.due_date) },
                     { l: 'Oluşturuldu', v: detail.created_at ? fmtDateTime(detail.created_at) : '—' },
                     { l: 'Tamamlandı',  v: detail.completed_at ? fmtDateTime(detail.completed_at) : '—' },
+                    { l: 'Harcanan Süre', v: totalMinutes > 0 ? fmtMin(totalMinutes) : '—' },
                   ].map(f => (
                     <div key={f.l} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 11px', background: 'var(--s2)', borderRadius: 7 }}>
                       <span style={{ fontSize: 12, color: 'var(--tx3)' }}>{f.l}</span>
