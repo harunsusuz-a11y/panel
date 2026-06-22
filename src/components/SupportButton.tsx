@@ -60,7 +60,7 @@ export default function SupportButton() {
         onClick={() => setOpen(true)}
         title="Destek Talebi Oluştur"
         style={{
-          position: 'fixed', bottom: 80, right: 18, zIndex: 900,
+          position: 'fixed', bottom: 'var(--support-btn-bottom, 20px)', right: 18, zIndex: 900,
           width: 42, height: 42, borderRadius: '50%',
           background: 'var(--ac)', border: 'none', cursor: 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
