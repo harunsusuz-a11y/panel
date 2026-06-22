@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState } from 'react'
 import DaydreamLogo from './DaydreamLogo'
 import {
-  LayoutDashboard, Users, CheckSquare, CalendarDays,
+  LayoutDashboard, Users, CheckSquare, CalendarDays, LifeBuoy,
   FileText, Activity, AlertCircle, ShieldCheck,
   Receipt, BarChart2, TrendingUp, UserCog, Workflow,
   SlidersHorizontal, LogOut, Menu, X, BookOpen

@@ -19,6 +19,7 @@ const MANAGER_PLUS = [
   '/dashboard/gecikmeler',
   '/dashboard/performans',
   '/dashboard/otomasyonlar',
+  '/dashboard/destek',
 ]
 
 // Member'ların erişebildiği tam liste

@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import GlobalSearch from './GlobalSearch'
 import DaydreamLogo from './DaydreamLogo'
 import {
-  LayoutDashboard, Users, CheckSquare, CalendarDays,
+  LayoutDashboard, Users, CheckSquare, CalendarDays, LifeBuoy,
   FileText, Activity, AlertCircle, ShieldCheck,
   Receipt, BarChart2, TrendingUp, UserCog, Workflow,
   SlidersHorizontal, LogOut, BookOpen
