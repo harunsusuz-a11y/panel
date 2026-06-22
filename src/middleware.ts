@@ -9,6 +9,8 @@ import { createServerClient } from '@supabase/ssr'
 
 const ADMIN_ONLY = [
   '/dashboard/kullanicilar',
+  '/dashboard/finans',
+  '/dashboard/muhasebe',
 ]
 
 const MANAGER_PLUS = [
@@ -16,8 +18,6 @@ const MANAGER_PLUS = [
   '/dashboard/operasyon',
   '/dashboard/gecikmeler',
   '/dashboard/performans',
-  '/dashboard/finans',
-  '/dashboard/muhasebe',
   '/dashboard/otomasyonlar',
 ]
 

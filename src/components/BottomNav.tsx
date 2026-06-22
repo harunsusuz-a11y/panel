@@ -11,7 +11,7 @@ const NAV_ALL = [
   { href:'/dashboard/musteriler', label:'Müşteriler', Icon:Users,           roles:['admin','manager'] },
   { href:'/dashboard/icerik',     label:'İçerik',     Icon:FileText,        roles:['admin','manager','member'] },
   { href:'/dashboard/onay',       label:'Onay',       Icon:ShieldCheck,     roles:['admin','manager','member'] },
-  { href:'/dashboard/finans',     label:'Finans',     Icon:BarChart2,       roles:['admin','manager'] },
+  { href:'/dashboard/finans',     label:'Finans',     Icon:BarChart2,       roles:['admin'] },
 ]
 
 export default function BottomNav() {
