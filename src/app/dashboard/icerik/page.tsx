@@ -287,7 +287,8 @@ export default function IcerikPage() {
                   {l:'Müşteri',   v:sel.client?.name||'—'},
                   {l:'Tür',       v:TYPE[sel.type]||sel.type},
                   {l:'Sorumlu',   v:sel.assignee?.full_name||'—'},
-                  {l:'Yayın Tar.',v:fmtDeadline(sel.publish_date)},
+                  {l:'Yayın Tarihi',v:fmtDeadline(sel.publish_date)},
+                  {l:'Oluşturuldu', v:fmtDateTime(sel.created_at)},
                   {l:'Akış Adımı',v:ST[sel.status]?.owner||'—'},
                 ].map(f=>(
                   <div key={f.l} style={{display:'flex',justifyContent:'space-between',padding:'7px 10px',background:'var(--s2)',borderRadius:7}}>

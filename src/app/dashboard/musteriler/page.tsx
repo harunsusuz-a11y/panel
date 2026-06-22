@@ -9,7 +9,7 @@ import {
 } from 'lucide-react'
 import PhoneInput from '@/components/PhoneInput'
 import ConfirmModal from '@/components/ConfirmModal'
-import { fmtDateTime, fmtDeadline } from '@/lib/utils'
+import { fmtDateTime, fmtDeadline, fmtDate } from '@/lib/utils'
 
 // ── Status tanımları ─────────────────────────────────────
 const ST_PROJ: Record<string,{l:string;c:string}> = {

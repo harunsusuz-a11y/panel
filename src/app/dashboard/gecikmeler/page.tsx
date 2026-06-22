@@ -16,7 +16,7 @@ export default function GecikmelerPage() {
   async function load() {
     const sb = createClient()
     const { data } = await sb.from('tasks')
-      .select('id,title,status,priority,due_date,assigned_to,client_id,project_id')
+      .select('id,title,status,priority,due_date,assigned_to,client_id,project_id,created_at')
       .neq('status','done').lt('due_date', new Date().toISOString()).order('due_date')
 
     const assigneeIds = [...new Set((data||[]).map((t:any)=>t.assigned_to).filter(Boolean))]
@@ -101,7 +101,10 @@ function TaskRow({t,onDone}:{t:any;onDone:(id:string)=>void}) {
           <span className="badge" style={{background:`${c}18`,color:c}}>{PRI_L[t.priority]}</span>
           {t.client&&<span style={{fontSize:11.5,color:'var(--blue)'}}>🏢 {t.client.name}</span>}
           {t.assignee&&<span style={{fontSize:11.5,color:'var(--tx3)'}}>👤 {t.assignee.full_name}</span>}
-          <span style={{fontSize:11.5,color:'var(--tx3)',fontFamily:'JetBrains Mono,monospace'}}>{fmtDeadline(t.due_date)}</span>
+          <div style={{textAlign:'right'}}>
+            <span style={{fontSize:11.5,color:'var(--red)',fontWeight:700,display:'block'}}>📅 {fmtDeadline(t.due_date)}</span>
+            <span style={{fontSize:10.5,color:'var(--tx3)'}}>🕐 {fmtDateTime(t.created_at)}</span>
+          </div>
         </div>
       </div>
       <span style={{fontSize:13,fontWeight:700,color:c,fontFamily:'JetBrains Mono,monospace',flexShrink:0}}>+{days}g</span>
