@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
 import { fmtDeadline, fmtRelative } from '@/lib/utils'
 import {
-  TrendingUp, Wallet, FolderOpen, Clock, ClipboardCheck,
+  TrendingUp, Wallet, FolderOpen, Clock, ClipboardCheck, LifeBuoy,
   ArrowUpRight, ArrowDownRight, ArrowRight, CheckCircle2,
   Wifi, WifiOff, CalendarHeart, ChevronRight, Bell
 } from 'lucide-react'
@@ -289,6 +289,8 @@ export default function DashboardPage() {
   const router = useRouter()
   const [data, setData] = useState<any>({ tasks: [], projects: [], clients: [], transactions: [], approvals: [] })
   const [activities, setActivities] = useState<any[]>([])
+  const [support,     setSupport]     = useState<any[]>([])
+  const [myRole,      setMyRole]      = useState('')
   const [loading, setLoading] = useState(true)
   const [now, setNow] = useState(new Date())
   const [userName, setUserName] = useState('')
@@ -302,7 +304,7 @@ export default function DashboardPage() {
     const sb = createClient()
     sb.auth.getUser().then(({ data: { user } }) => {
       if (!user) return
-      sb.from('profiles').select('full_name').eq('id', user.id).single().then(({ data }) => setUserName(data?.full_name?.split(' ')[0] || ''))
+      sb.from('profiles').select('full_name,role').eq('id', user.id).single().then(({ data }) => { setUserName(data?.full_name?.split(' ')[0] || ''); setMyRole(data?.role || '') })
     })
     const [t, p, c, tr, ap, ap2] = await Promise.all([
       sb.from('tasks').select('id,title,status,priority,due_date,assigned_to,client_id'),
@@ -310,6 +312,7 @@ export default function DashboardPage() {
       sb.from('clients').select('id,name,status'),
       sb.from('transactions').select('type,amount,date'),
       sb.from('approvals').select('id,title,type,status,client_status,created_at,client_id,requested_by,portal_tokens:client_portal_tokens(client_decision,client_note,client_decided_at),client:clients(name)'),
+      sb.from('support_tickets').select('id,type,title,status,created_at,user_id').eq('status','open').order('created_at',{ascending:false}).limit(5),
       sb.from('activities').select('*, user:profiles!activities_user_id_fkey(full_name)').order('created_at',{ascending:false}).limit(8),
     ])
     setData({ tasks: t.data || [], projects: p.data || [], clients: c.data || [], transactions: tr.data || [], approvals: ap.data || [] })
@@ -352,6 +355,14 @@ export default function DashboardPage() {
   const clientPending = approvals.filter((a: any) => a.client_status === 'sent')
   const clientApproved = approvals.filter((a: any) => a.client_status === 'client_approved')
   const clientRevision = approvals.filter((a: any) => a.client_status === 'client_rejected')
+
+const SUPPORT_TYPE: Record<string,{label:string;color:string}> = {
+  oneri:   {label:'💡 Öneri',   color:'var(--blue)'},
+  hata:    {label:'🐛 Hata',    color:'var(--red)'},
+  sikayet: {label:'😤 Şikayet', color:'var(--amber)'},
+  diger:   {label:'💬 Diğer',   color:'var(--tx3)'},
+}
+
   const clientDecided  = [...clientApproved, ...clientRevision].sort((a: any, b: any) => {
     const ta = a.portal_tokens?.[0]?.client_decided_at || ''
     const tb = b.portal_tokens?.[0]?.client_decided_at || ''
@@ -601,6 +612,39 @@ export default function DashboardPage() {
                   </div>
                 )}
               </div>
+
+              {/* Destek Talepleri — sadece admin/manager */}
+              {(myRole === 'admin' || myRole === 'manager') && (
+                <div className="card anim-fade" style={{ cursor: 'pointer' }} onClick={() => router.push('/dashboard/destek')}>
+                  <div className="card-h">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                      <LifeBuoy size={14} style={{ color: 'var(--ac)' }} strokeWidth={2} />
+                      <span className="card-title">Destek Talepleri</span>
+                    </div>
+                    <span className="card-meta">{support.length} açık · Tıkla</span>
+                  </div>
+                  {support.length === 0 ? (
+                    <div style={{ padding: '24px 18px', textAlign: 'center', color: 'var(--tx3)', fontSize: 13 }}>
+                      Açık talep yok 🎉
+                    </div>
+                  ) : (
+                    <div style={{ padding: '6px 0' }}>
+                      {support.map((t: any) => {
+                        const tp = SUPPORT_TYPE[t.type] || SUPPORT_TYPE.diger
+                        return (
+                          <div key={t.id} className="row" style={{ borderLeft: `3px solid ${tp.color}` }}>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <p style={{ fontSize: 12.5, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.title}</p>
+                              <p style={{ fontSize: 11, color: 'var(--tx3)', marginTop: 2 }}>{tp.label}</p>
+                            </div>
+                            <span style={{ fontSize: 10.5, color: 'var(--tx3)', flexShrink: 0 }}>{fmtRelative(t.created_at)}</span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Aktif Projeler */}
               <div className="card anim-fade">
