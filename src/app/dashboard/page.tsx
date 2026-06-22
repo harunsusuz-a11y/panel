@@ -306,7 +306,7 @@ export default function DashboardPage() {
       if (!user) return
       sb.from('profiles').select('full_name,role').eq('id', user.id).single().then(({ data }) => { setUserName(data?.full_name?.split(' ')[0] || ''); setMyRole(data?.role || '') })
     })
-    const [t, p, c, tr, ap, ap2] = await Promise.all([
+    const [t, p, c, tr, ap, sp, act] = await Promise.all([
       sb.from('tasks').select('id,title,status,priority,due_date,assigned_to,client_id'),
       sb.from('projects').select('id,name,status,progress,deadline,client_id'),
       sb.from('clients').select('id,name,status'),
@@ -316,7 +316,8 @@ export default function DashboardPage() {
       sb.from('activities').select('*, user:profiles!activities_user_id_fkey(full_name)').order('created_at',{ascending:false}).limit(8),
     ])
     setData({ tasks: t.data || [], projects: p.data || [], clients: c.data || [], transactions: tr.data || [], approvals: ap.data || [] })
-    setActivities(ap2?.data || [])
+    setSupport(sp.data || [])
+    setActivities(act.data || [])
     setLoading(false)
     setLastUpdate(new Date())
   }
