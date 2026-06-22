@@ -84,6 +84,9 @@ const PAGES = [
       'Göreve tıkla → Detay, Yorumlar, Süre Takibi sekmeleri',
       'Süre takibi otomatik — "Devam"a alınınca başlar, statü değişince durur',
       'Realtime: Başka sayfadan görev eklenince kanban anında güncellenir',
+      'Süre Takibi: Görev "Devam"a alınınca sayaç otomatik başlar, başka statüye geçince kapanır',
+      'Görev "Tamam"a alınınca tamamlanma zamanı otomatik kaydedilir',
+      'Süre sekmesi: Her çalışma oturumu ayrı ayrı listelenir, toplam süre gösterilir',
       'Member: Sadece kendi görevi; sadece Bekliyor→Devam ve Devam→Kontrol geçişi yapabilir',
       'Admin/Manager: Tüm geçişler ve silme yetkisi',
     ],
@@ -206,6 +209,18 @@ const PAGES = [
     note: 'Otomasyonlar çalışması için Ayarlar → Netgsm SMS bölümünden API bilgilerinin girilmiş olması gerekir.',
   },
   {
+    icon: Bell, name: 'Destek', color: 'var(--ac)', who: 'Herkes oluşturur, Emir+Mert görür',
+    desc: 'Ekip içi destek talebi sistemi. Her kullanıcı sağ alttaki mor 🛟 butonuyla talep açabilir. Sadece Emir ve Mert listeyi görür.',
+    features: [
+      'Sağ alttaki 🛟 butonu her sayfada görünür — tüm kullanıcılar erişebilir',
+      'Talep türleri: 💡 Öneri / 🐛 Hata / 😤 Şikayet / 💬 Diğer',
+      'Başlık + detay notu eklenebilir, tarih otomatik kaydedilir',
+      'Talep açılınca Emir ve Mert\'e in-app bildirim düşer',
+      'Emir/Mert: Destek sayfasından tüm talepleri listeler, durumu günceller (Açık → İnceleniyor → Çözüldü)',
+      'Dashboard\'da "Destek Talepleri" kartı — açık talepler anlık görünür',
+    ],
+  },
+  {
     icon: SlidersHorizontal, name: 'Ayarlar', color: 'var(--tx2)', who: 'Herkes (kısıtlı)',
     desc: 'Kişisel profil ve sistem yapılandırması.',
     features: [
@@ -241,6 +256,28 @@ const WORKFLOWS = [
       { who: 'Ekip', action: 'Müşteriler → Proje → Dosyalar → Teslim dosyası yüklenir' },
       { who: 'Mert', action: '"Müşteri Paneli" butonu → Link kopyala → WhatsApp\'tan gönder' },
       { who: 'Müşteri', action: 'Portalde tüm projeleri, dosyaları, onay geçmişini görebilir ve indirebilir' },
+    ]
+  },
+  {
+    title: 'Bildirim Akışı', color: 'var(--amber)',
+    steps: [
+      { who: 'Sistem (Otomatik)', action: 'Her 10 dakikada cron çalışır — deadline, gecikme, onay kontrolü yapar' },
+      { who: 'Sistem', action: 'Deadline yarin: Sorumluya + Admin/Manager push + in-app bildirim (8 saatte bir)' },
+      { who: 'Sistem', action: 'Deadline gecti: Sorumluya + Admin/Manager in-app + SMS (2 saatte bir)' },
+      { who: 'Sistem', action: 'Onay 24 saat bekliyor: Admin ve Manager hatirlatma (24 saatte bir)' },
+      { who: 'Kullanici', action: 'Can ikonuna tiklar, ilgili sayfaya yonlendirilir (Gorevler, Onay, Icerik vs.)' },
+      { who: 'Kullanici', action: 'Push bildirimi almak icin: Ayarlar → Bildirimler → Izin Ver' },
+    ]
+  },
+  {
+    title: 'Süre Takibi Akışı', color: 'var(--blue)',
+    steps: [
+      { who: 'Admin/Manager/Member', action: 'Gorev kanban uzerinden Devama alinir' },
+      { who: 'Sistem (Otomatik)', action: 'DB trigger ile time_logs tablosuna kayit acilir, saat damgasi baslar' },
+      { who: 'Kullanici', action: 'Gorev baska statue tasinirsa otomatik kapanir, dakika hesaplanir' },
+      { who: 'Sistem (Otomatik)', action: 'Tamama alindiginda completed_at set edilir, acik loglar kapanir' },
+      { who: 'Admin/Manager', action: 'Gorev detayi - Sure sekmesi: her oturumu, kimin ne kadar calistigini gorur' },
+      { who: 'Admin/Manager', action: 'Detay sekmesinde Olusturuldu / Tamamlandi / Harcanan Sure ozeti gorunur' },
     ]
   },
   {
