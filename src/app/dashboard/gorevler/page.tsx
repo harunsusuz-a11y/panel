@@ -126,8 +126,27 @@ export default function GorevlerPage() {
     const sb = createClient(); const { data: { user } } = await sb.auth.getUser()
     const { error } = await sb.from('tasks').insert({ title: form.title.trim(), status: 'todo', priority: form.priority, created_by: user?.id, project_id: form.project_id || null, client_id: form.client_id || null, assigned_to: form.assigned_to || null, due_date: form.due_date || null, description: form.description || null })
     setAdding(false)
-    if (error) showToast('Hata: ' + error.message)
-    else { showToast('Görev oluşturuldu!'); setModal(false); setForm({ title: '', client_id: '', project_id: '', assigned_to: '', priority: 'normal', due_date: '', description: '' }); load() }
+    if (error) { showToast('Hata: ' + error.message); return }
+    showToast('Görev oluşturuldu!')
+    setModal(false)
+    setForm({ title: '', client_id: '', project_id: '', assigned_to: '', priority: 'normal', due_date: '', description: '' })
+    load()
+    // Atanan kişiye push bildirimi gönder (kendine atanmadıysa)
+    if (form.assigned_to && form.assigned_to !== user?.id) {
+      try {
+        await fetch('/api/push/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: form.assigned_to,
+            title: '📋 Yeni Görev Atandı',
+            body: `"${form.title.trim()}" görevi sana atandı.${form.due_date ? ' Deadline: ' + form.due_date : ''}`,
+            url: '/dashboard/gorevler',
+            type: 'task_assigned',
+          }),
+        })
+      } catch {}
+    }
   }
 
   async function moveTask(id: string, status: string) {

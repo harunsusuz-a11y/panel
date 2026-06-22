@@ -240,11 +240,27 @@ export default function MusterilerPage() {
     const pr = profiles.find((x:any) => x.id===taskForm.assigned_to)
     const enriched = {...data, assignee:pr}
     setProjTasks(ts => [enriched, ...ts])
-    // Müşteri Görevler sekmesini de güncelle
     setClientTasks(ts => [enriched, ...ts])
     setTaskModal(false)
     setTaskForm({title:'',assigned_to:'',priority:'normal',due_date:'',description:''})
     showToast('Görev oluşturuldu!')
+
+    // Atanan kişiye push bildirimi gönder
+    if (taskForm.assigned_to && taskForm.assigned_to !== user?.id) {
+      try {
+        await fetch('/api/push/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: taskForm.assigned_to,
+            title: '📋 Yeni Görev Atandı',
+            body: `"${taskForm.title.trim()}" görevi sana atandı.${taskForm.due_date ? ' Deadline: ' + taskForm.due_date : ''}`,
+            url: '/dashboard/gorevler',
+            type: 'task_assigned',
+          }),
+        })
+      } catch {}
+    }
   }
 
   async function moveProjTask(id:string, status:string) {
