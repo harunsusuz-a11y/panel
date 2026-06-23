@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Users, CheckSquare, CalendarDays, LifeBuoy, CalendarClock,
   FileText, Activity, AlertCircle, ShieldCheck,
   Receipt, BarChart2, TrendingUp, UserCog, Workflow,
-  SlidersHorizontal, LogOut, Menu, X, BookOpen, LayoutTemplate
+  SlidersHorizontal, LogOut, Menu, X, BookOpen, LayoutTemplate, Wrench
 } from 'lucide-react'
 
 const NAV_ALL = [
@@ -34,6 +34,7 @@ const NAV_ALL = [
   { g: 'Sistem', items: [
     { href: '/dashboard/kullanicilar',   label: 'Kullanıcılar', Icon: UserCog,         roles: ['admin'] },
     { href: '/dashboard/sablonlar',      label: 'Şablonlar',    Icon: LayoutTemplate,  roles: ['admin','manager'] },
+    { href: '/dashboard/araclar',         label: 'Araçlar',      Icon: Wrench,           roles: ['admin','manager'] },
     { href: '/dashboard/otomasyonlar',   label: 'Otomasyonlar', Icon: Workflow,        roles: ['admin','manager'] },
     { href: '/dashboard/ayarlar',        label: 'Ayarlar',      Icon: SlidersHorizontal, roles: ['admin','manager','member'] },
     { href: '/dashboard/toplanti',       label: 'Toplantılar',  Icon: CalendarClock,   roles: ['admin','manager'] },
