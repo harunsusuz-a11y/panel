@@ -58,6 +58,7 @@ export default function SablonlarPage() {
     title: '',
     description: '',
     assigned_to: '',
+    assigned_users: [] as string[],
     client_id: '',
     project_id: '',
     priority: 'normal',
@@ -70,6 +71,7 @@ export default function SablonlarPage() {
     title: '',
     description: '',
     assigned_to: '',
+    assigned_users: [] as string[],
     client_id: '',
     project_id: '',
     priority: 'normal',
@@ -126,7 +128,8 @@ export default function SablonlarPage() {
     const { error } = await sb.from('task_templates').insert({
       title:                form.title.trim(),
       description:          form.description || null,
-      assigned_to:          form.assigned_to,
+      assigned_to:          form.assigned_to || null,
+      assigned_users:       form.assigned_users.length > 0 ? form.assigned_users : null,
       client_id:            form.client_id   || null,
       project_id:           form.project_id  || null,
       priority:             form.priority,
@@ -153,6 +156,7 @@ export default function SablonlarPage() {
       title:                t.title,
       description:          t.description || '',
       assigned_to:          t.assigned_to || '',
+      assigned_users:       t.assigned_users || [],
       client_id:            t.client_id   || '',
       project_id:           t.project_id  || '',
       priority:             t.priority    || 'normal',
@@ -169,7 +173,8 @@ export default function SablonlarPage() {
     const { error } = await createClient().from('task_templates').update({
       title:                editForm.title.trim(),
       description:          editForm.description || null,
-      assigned_to:          editForm.assigned_to,
+      assigned_to:          editForm.assigned_to || null,
+      assigned_users:       editForm.assigned_users.length > 0 ? editForm.assigned_users : null,
       client_id:            editForm.client_id   || null,
       project_id:           editForm.project_id  || null,
       priority:             editForm.priority,
@@ -199,7 +204,9 @@ export default function SablonlarPage() {
     const { data: { user } } = await sb.auth.getUser()
     const active = templates.filter(t => t.is_active)
     if (active.length === 0) { showToast('Aktif şablon yok'); setRunning(false); return }
-    const monday = getThisMonday()
+    const profileMap = Object.fromEntries(profiles.map(p => [p.id, p.full_name]))
+
+  const monday = getThisMonday()
     const { start, end } = getThisWeekRange()
     const activeIds = active.map(t => t.id)
     const { data: existing } = await sb
@@ -252,6 +259,8 @@ export default function SablonlarPage() {
     showToast(`${created} görev oluşturuldu, ${skipped} atlandı`)
     load()
   }
+
+  const profileMap = Object.fromEntries(profiles.map(p => [p.id, p.full_name]))
 
   const monday = getThisMonday()
   const mondayStr = monday.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })
@@ -331,7 +340,9 @@ export default function SablonlarPage() {
                     </div>
                     <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 7 }}>
                       {[
-                        { l: 'Sorumlu',  v: t.assignee?.full_name || '—' },
+                        { l: 'Sorumlu',  v: (t.assigned_users && t.assigned_users.length > 0)
+                            ? t.assigned_users.map((id: string) => profileMap[id] || id).filter(Boolean).join(', ')
+                            : (t.assignee?.full_name || '—') },
                         { l: 'Müşteri',  v: t.client?.name || '—' },
                         { l: 'Proje',    v: t.project?.name || '—' },
                         { l: 'Deadline', v: `Pazartesi + ${t.deadline_offset_days} gün → ${OFFSET_LABELS[t.deadline_offset_days] || '?'}` },
@@ -382,11 +393,33 @@ export default function SablonlarPage() {
                 <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} className="inp" rows={2} placeholder="Görev detayı..." />
               </div>
               <div>
-                <label className="label">Sorumlu *</label>
+                <label className="label">Sorumlu (tek kişi)</label>
                 <select value={form.assigned_to} onChange={e => setForm(f => ({ ...f, assigned_to: e.target.value }))} className="inp">
-                  <option value="">— Kişi Seçin —</option>
+                  <option value="">— Seçin —</option>
                   {profiles.map(p => <option key={p.id} value={p.id}>{p.full_name}</option>)}
                 </select>
+              </div>
+              <div>
+                <label className="label">Ortak Sorumlular (birden fazla kişi)</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: '8px 10px', background: 'var(--s2)', borderRadius: 8, border: '1px solid var(--bdr)' }}>
+                  {profiles.map(p => (
+                    <label key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, cursor: 'pointer' }}>
+                      <input type="checkbox" checked={form.assigned_users.includes(p.id)}
+                        onChange={e => setForm(f => ({
+                          ...f,
+                          assigned_users: e.target.checked
+                            ? [...f.assigned_users, p.id]
+                            : f.assigned_users.filter(id => id !== p.id)
+                        }))} />
+                      {p.full_name}
+                    </label>
+                  ))}
+                </div>
+                {form.assigned_users.length > 0 && (
+                  <p style={{ fontSize: 11, color: 'var(--blue)', marginTop: 4 }}>
+                    ✓ {form.assigned_users.length} kişi seçildi — her birine ayrı görev oluşturulur
+                  </p>
+                )}
               </div>
               <div className="modal-grid">
                 <div>
@@ -455,11 +488,33 @@ export default function SablonlarPage() {
                 <textarea value={editForm.description} onChange={e => setEditForm(f => ({ ...f, description: e.target.value }))} className="inp" rows={2} />
               </div>
               <div>
-                <label className="label">Sorumlu *</label>
+                <label className="label">Sorumlu (tek kişi)</label>
                 <select value={editForm.assigned_to} onChange={e => setEditForm(f => ({ ...f, assigned_to: e.target.value }))} className="inp">
-                  <option value="">— Kişi Seçin —</option>
+                  <option value="">— Seçin —</option>
                   {profiles.map(p => <option key={p.id} value={p.id}>{p.full_name}</option>)}
                 </select>
+              </div>
+              <div>
+                <label className="label">Ortak Sorumlular (birden fazla kişi)</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: '8px 10px', background: 'var(--s2)', borderRadius: 8, border: '1px solid var(--bdr)' }}>
+                  {profiles.map(p => (
+                    <label key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, cursor: 'pointer' }}>
+                      <input type="checkbox" checked={(editForm.assigned_users || []).includes(p.id)}
+                        onChange={e => setEditForm(f => ({
+                          ...f,
+                          assigned_users: e.target.checked
+                            ? [...(f.assigned_users || []), p.id]
+                            : (f.assigned_users || []).filter(id => id !== p.id)
+                        }))} />
+                      {p.full_name}
+                    </label>
+                  ))}
+                </div>
+                {(editForm.assigned_users || []).length > 0 && (
+                  <p style={{ fontSize: 11, color: 'var(--blue)', marginTop: 4 }}>
+                    ✓ {(editForm.assigned_users || []).length} kişi seçildi — her birine ayrı görev oluşturulur
+                  </p>
+                )}
               </div>
               <div className="modal-grid">
                 <div>
