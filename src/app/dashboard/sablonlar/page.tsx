@@ -76,13 +76,23 @@ export default function SablonlarPage() {
     if (user) setMyId(user.id)
     const [t, p, c, pr] = await Promise.all([
       sb.from('task_templates')
-        .select('*, assignee:profiles!task_templates_assigned_to_fkey(full_name), client:clients!task_templates_client_id_fkey(name), project:projects!task_templates_project_id_fkey(name)')
+        .select('*, assigned_to, client_id, project_id')
         .order('created_at', { ascending: false }),
       sb.from('profiles').select('id,full_name').not('full_name', 'is', null).order('full_name'),
       sb.from('clients').select('id,name').order('name'),
       sb.from('projects').select('id,name,client_id').order('name'),
     ])
-    setTemplates(t.data || [])
+    // Join'ları manuel yap — FK adı sorununu bypass et
+    const profileMap = Object.fromEntries((p.data || []).map((x: any) => [x.id, x.full_name]))
+    const clientMap  = Object.fromEntries((c.data  || []).map((x: any) => [x.id, x.name]))
+    const projectMap = Object.fromEntries((pr.data || []).map((x: any) => [x.id, x.name]))
+    const enriched = (t.data || []).map((tpl: any) => ({
+      ...tpl,
+      assignee: { full_name: profileMap[tpl.assigned_to] || null },
+      client:   { name: clientMap[tpl.client_id]         || null },
+      project:  { name: projectMap[tpl.project_id]       || null },
+    }))
+    setTemplates(enriched)
     setProfiles(p.data || [])
     setClients(c.data || [])
     setProjects(pr.data || [])
