@@ -360,7 +360,7 @@ export default function SablonlarPage() {
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', background: 'var(--s2)', borderRadius: 8 }}>
                 <input type="checkbox" id="is_active" checked={form.is_active} onChange={e => setForm(f => ({ ...f, is_active: e.target.checked }))} />
-                <label htmlFor="is_active" style={{ fontSize: 13, cursor: 'pointer' }}>Aktif — "Bu Haftayı Oluştur" butonunda dahil edilsin</label>
+                <label htmlFor="is_active" style={{ fontSize: 13, cursor: 'pointer' }}>Bu şablon aktif</label>
               </div>
               <button className="btn" onClick={create} disabled={creating || !form.title.trim() || !form.assigned_to}
                 style={{ width: '100%', justifyContent: 'center', padding: '10px' }}>
