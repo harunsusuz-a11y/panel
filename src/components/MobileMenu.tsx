@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Users, CheckSquare, CalendarDays, LifeBuoy, CalendarClock,
   FileText, Activity, AlertCircle, ShieldCheck,
   Receipt, BarChart2, TrendingUp, UserCog, Workflow,
-  SlidersHorizontal, LogOut, Menu, X, BookOpen
+  SlidersHorizontal, LogOut, Menu, X, BookOpen, LayoutTemplate
 } from 'lucide-react'
 
 const NAV_ALL = [
@@ -27,17 +27,18 @@ const NAV_ALL = [
     { href: '/dashboard/onay',           label: 'Onay',         Icon: ShieldCheck,     roles: ['admin','manager','member'] },
   ]},
   { g: 'Finans', items: [
-    { href: '/dashboard/muhasebe',       label: 'Muhasebe',     Icon: Receipt,         roles: ['admin','manager'] },
-    { href: '/dashboard/finans',         label: 'Finans',       Icon: BarChart2,       roles: ['admin','manager'] },
+    { href: '/dashboard/muhasebe',       label: 'Muhasebe',     Icon: Receipt,         roles: ['admin'] },
+    { href: '/dashboard/finans',         label: 'Finans',       Icon: BarChart2,       roles: ['admin'] },
     { href: '/dashboard/performans',     label: 'Performans',   Icon: TrendingUp,      roles: ['admin','manager'] },
   ]},
   { g: 'Sistem', items: [
     { href: '/dashboard/kullanicilar',   label: 'Kullanıcılar', Icon: UserCog,         roles: ['admin'] },
+    { href: '/dashboard/sablonlar',      label: 'Şablonlar',    Icon: LayoutTemplate,  roles: ['admin','manager'] },
     { href: '/dashboard/otomasyonlar',   label: 'Otomasyonlar', Icon: Workflow,        roles: ['admin','manager'] },
     { href: '/dashboard/ayarlar',        label: 'Ayarlar',      Icon: SlidersHorizontal, roles: ['admin','manager','member'] },
-    { href: '/dashboard/toplanti',        label: 'Toplantılar',  Icon: CalendarClock,      roles: ['admin','manager'] },
-    { href: '/dashboard/destek',          label: 'Destek',       Icon: LifeBuoy,           roles: ['admin','manager'] },
-    { href: '/dashboard/dokumantasyon',   label: 'Kılavuz',      Icon: BookOpen,           roles: ['admin','manager','member'] },
+    { href: '/dashboard/toplanti',       label: 'Toplantılar',  Icon: CalendarClock,   roles: ['admin','manager'] },
+    { href: '/dashboard/destek',         label: 'Destek',       Icon: LifeBuoy,        roles: ['admin','manager'] },
+    { href: '/dashboard/dokumantasyon',  label: 'Kılavuz',      Icon: BookOpen,        roles: ['admin','manager','member'] },
   ]},
 ]
 
@@ -115,7 +116,6 @@ export default function MobileMenu() {
             </div>
             <div className="mm-close" onClick={() => setOpen(false)}><X size={13} strokeWidth={2} /></div>
           </div>
-
           <nav className="mm-nav">
             {filteredNav.map(sec => (
               <div key={sec.g}>
@@ -129,7 +129,6 @@ export default function MobileMenu() {
               </div>
             ))}
           </nav>
-
           <div className="mm-user" onClick={logout}>
             <div className="mm-av">{init}</div>
             <div style={{ flex: 1, minWidth: 0 }}>
