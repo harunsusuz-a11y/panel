@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
 import ConfirmModal from '@/components/ConfirmModal'
-import { Plus, X, Play, Trash2, CheckCircle2, AlertCircle, LayoutTemplate } from 'lucide-react'
+import { Plus, X, Play, Trash2, CheckCircle2, AlertCircle, LayoutTemplate, Pencil } from 'lucide-react'
 
 const PRI: Record<string, any> = {
   critical: { label: 'Kritik',  c: 'var(--red)',   bg: 'var(--red2)'   },
@@ -52,6 +52,19 @@ export default function SablonlarPage() {
   const [myId,      setMyId]      = useState('')
   const [running,   setRunning]   = useState(false)
   const [runResult, setRunResult] = useState<{ created: number; skipped: number } | null>(null)
+  const [editModal,  setEditModal]  = useState(false)
+  const [editId,     setEditId]     = useState<string | null>(null)
+  const [editForm,   setEditForm]   = useState({
+    title: '',
+    description: '',
+    assigned_to: '',
+    client_id: '',
+    project_id: '',
+    priority: 'normal',
+    deadline_offset_days: 4,
+    is_active: true,
+  })
+  const [saving, setSaving] = useState(false)
 
   const [form, setForm] = useState({
     title: '',
@@ -68,6 +81,10 @@ export default function SablonlarPage() {
 
   const filteredProjects = form.client_id
     ? projects.filter(p => p.client_id === form.client_id)
+    : projects
+
+  const editFilteredProjects = editForm.client_id
+    ? projects.filter(p => p.client_id === editForm.client_id)
     : projects
 
   async function load() {
@@ -128,6 +145,43 @@ export default function SablonlarPage() {
   async function toggleActive(id: string, current: boolean) {
     await createClient().from('task_templates').update({ is_active: !current }).eq('id', id)
     setTemplates(ts => ts.map(t => t.id === id ? { ...t, is_active: !current } : t))
+  }
+
+  function openEdit(t: any) {
+    setEditId(t.id)
+    setEditForm({
+      title:                t.title,
+      description:          t.description || '',
+      assigned_to:          t.assigned_to || '',
+      client_id:            t.client_id   || '',
+      project_id:           t.project_id  || '',
+      priority:             t.priority    || 'normal',
+      deadline_offset_days: t.deadline_offset_days ?? 4,
+      is_active:            t.is_active   ?? true,
+    })
+    setEditModal(true)
+  }
+
+  async function saveEdit() {
+    if (!editForm.title.trim()) { showToast('Hata: Başlık zorunlu'); return }
+    if (!editForm.assigned_to)  { showToast('Hata: Sorumlu seçilmeli'); return }
+    setSaving(true)
+    const { error } = await createClient().from('task_templates').update({
+      title:                editForm.title.trim(),
+      description:          editForm.description || null,
+      assigned_to:          editForm.assigned_to,
+      client_id:            editForm.client_id   || null,
+      project_id:           editForm.project_id  || null,
+      priority:             editForm.priority,
+      deadline_offset_days: editForm.deadline_offset_days,
+      is_active:            editForm.is_active,
+    }).eq('id', editId!)
+    setSaving(false)
+    if (error) { showToast('Hata: ' + error.message); return }
+    showToast('Şablon güncellendi!')
+    setEditModal(false)
+    setEditId(null)
+    load()
   }
 
   async function confirmDelete() {
@@ -296,6 +350,9 @@ export default function SablonlarPage() {
                         style={{ flex: 1, justifyContent: 'center', fontSize: 12, color: t.is_active ? 'var(--amber)' : 'var(--green)' }}>
                         {t.is_active ? 'Pasife Al' : 'Aktife Al'}
                       </button>
+                      <button onClick={() => openEdit(t)} className="btn-ghost" style={{ color: 'var(--blue)', padding: '6px 10px' }}>
+                        <Pencil size={13} strokeWidth={2} />
+                      </button>
                       <button onClick={() => setConfirmId(t.id)} className="btn-ghost" style={{ color: 'var(--red)', padding: '6px 10px' }}>
                         <Trash2 size={13} strokeWidth={2} />
                       </button>
@@ -375,6 +432,79 @@ export default function SablonlarPage() {
               <button className="btn" onClick={create} disabled={creating || !form.title.trim() || !form.assigned_to}
                 style={{ width: '100%', justifyContent: 'center', padding: '10px' }}>
                 {creating ? 'Oluşturuluyor...' : 'Şablonu Kaydet'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editModal && (
+        <div className="overlay" onClick={e => { if (e.target === e.currentTarget) setEditModal(false) }}>
+          <div className="modal" style={{ maxWidth: 480 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <p className="modal-title" style={{ margin: 0 }}>Şablonu Düzenle</p>
+              <button onClick={() => setEditModal(false)} style={{ background: 'none', border: 'none', color: 'var(--tx3)', cursor: 'pointer' }}><X size={15} /></button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div>
+                <label className="label">Görev Başlığı *</label>
+                <input value={editForm.title} onChange={e => setEditForm(f => ({ ...f, title: e.target.value }))} className="inp" autoFocus />
+              </div>
+              <div>
+                <label className="label">Açıklama</label>
+                <textarea value={editForm.description} onChange={e => setEditForm(f => ({ ...f, description: e.target.value }))} className="inp" rows={2} />
+              </div>
+              <div>
+                <label className="label">Sorumlu *</label>
+                <select value={editForm.assigned_to} onChange={e => setEditForm(f => ({ ...f, assigned_to: e.target.value }))} className="inp">
+                  <option value="">— Kişi Seçin —</option>
+                  {profiles.map(p => <option key={p.id} value={p.id}>{p.full_name}</option>)}
+                </select>
+              </div>
+              <div className="modal-grid">
+                <div>
+                  <label className="label">Müşteri</label>
+                  <select value={editForm.client_id} onChange={e => setEditForm(f => ({ ...f, client_id: e.target.value, project_id: '' }))} className="inp">
+                    <option value="">— Seçin —</option>
+                    {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="label">Proje</label>
+                  <select value={editForm.project_id} onChange={e => setEditForm(f => ({ ...f, project_id: e.target.value }))} className="inp">
+                    <option value="">— Seçin —</option>
+                    {editFilteredProjects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="label">Öncelik</label>
+                  <select value={editForm.priority} onChange={e => setEditForm(f => ({ ...f, priority: e.target.value }))} className="inp">
+                    <option value="critical">Kritik</option>
+                    <option value="high">Yüksek</option>
+                    <option value="normal">Normal</option>
+                    <option value="low">Düşük</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="label">Deadline Günü</label>
+                  <select value={editForm.deadline_offset_days} onChange={e => setEditForm(f => ({ ...f, deadline_offset_days: Number(e.target.value) }))} className="inp">
+                    <option value={0}>Pazartesi</option>
+                    <option value={1}>Salı</option>
+                    <option value={2}>Çarşamba</option>
+                    <option value={3}>Perşembe</option>
+                    <option value={4}>Cuma</option>
+                    <option value={5}>Cumartesi</option>
+                    <option value={6}>Pazar</option>
+                  </select>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', background: 'var(--s2)', borderRadius: 8 }}>
+                <input type="checkbox" id="edit_is_active" checked={editForm.is_active} onChange={e => setEditForm(f => ({ ...f, is_active: e.target.checked }))} />
+                <label htmlFor="edit_is_active" style={{ fontSize: 13, cursor: 'pointer' }}>Bu şablon aktif</label>
+              </div>
+              <button className="btn" onClick={saveEdit} disabled={saving || !editForm.title.trim() || !editForm.assigned_to}
+                style={{ width: '100%', justifyContent: 'center', padding: '10px' }}>
+                {saving ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}
               </button>
             </div>
           </div>
