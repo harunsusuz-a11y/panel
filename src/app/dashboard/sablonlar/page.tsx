@@ -141,7 +141,7 @@ export default function SablonlarPage() {
     if (error) { showToast('Hata: ' + error.message); return }
     showToast('Şablon oluşturuldu!')
     setModal(false)
-    setForm({ title: '', description: '', assigned_to: '', client_id: '', project_id: '', priority: 'normal', deadline_offset_days: 4, is_active: true })
+    setForm({ title: '', description: '', assigned_to: '', assigned_users: [], client_id: '', project_id: '', priority: 'normal', deadline_offset_days: 4, is_active: true })
     load()
   }
 
