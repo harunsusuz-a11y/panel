@@ -76,7 +76,7 @@ export default function SablonlarPage() {
     if (user) setMyId(user.id)
     const [t, p, c, pr] = await Promise.all([
       sb.from('task_templates')
-        .select('*, assignee:profiles!task_templates_assigned_to_fkey(full_name), client:clients(name), project:projects(name)')
+        .select('*, assignee:profiles!task_templates_assigned_to_fkey(full_name), client:clients!task_templates_client_id_fkey(name), project:projects!task_templates_project_id_fkey(name)')
         .order('created_at', { ascending: false }),
       sb.from('profiles').select('id,full_name').not('full_name', 'is', null).order('full_name'),
       sb.from('clients').select('id,name').order('name'),
