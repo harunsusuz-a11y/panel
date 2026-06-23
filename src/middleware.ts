@@ -6,6 +6,7 @@ const ADMIN_ONLY = [
   '/dashboard/kullanicilar',
   '/dashboard/finans',
   '/dashboard/muhasebe',
+  '/dashboard/araclar',
 ]
 
 const MANAGER_PLUS = [
