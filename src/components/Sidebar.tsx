@@ -9,10 +9,9 @@ import {
   LayoutDashboard, Users, CheckSquare, CalendarDays, LifeBuoy, CalendarClock,
   FileText, Activity, AlertCircle, ShieldCheck,
   Receipt, BarChart2, TrendingUp, UserCog, Workflow,
-  SlidersHorizontal, LogOut, BookOpen
+  SlidersHorizontal, LogOut, BookOpen, LayoutTemplate
 } from 'lucide-react'
 
-// Daydream erişim matrisi
 const NAV_ALL = [
   { g: 'Genel', items: [
     { href: '/dashboard',                label: 'Dashboard',    Icon: LayoutDashboard, roles: ['admin','manager','member'] },
@@ -29,17 +28,18 @@ const NAV_ALL = [
     { href: '/dashboard/onay',           label: 'Onay',         Icon: ShieldCheck,     roles: ['admin','manager','member'] },
   ]},
   { g: 'Finans', items: [
-    { href: '/dashboard/muhasebe',       label: 'Muhasebe',     Icon: Receipt,         roles: ['admin','manager'] },
-    { href: '/dashboard/finans',         label: 'Finans',       Icon: BarChart2,       roles: ['admin','manager'] },
+    { href: '/dashboard/muhasebe',       label: 'Muhasebe',     Icon: Receipt,         roles: ['admin'] },
+    { href: '/dashboard/finans',         label: 'Finans',       Icon: BarChart2,       roles: ['admin'] },
     { href: '/dashboard/performans',     label: 'Performans',   Icon: TrendingUp,      roles: ['admin','manager'] },
   ]},
   { g: 'Sistem', items: [
     { href: '/dashboard/kullanicilar',   label: 'Kullanıcılar', Icon: UserCog,         roles: ['admin'] },
+    { href: '/dashboard/sablonlar',      label: 'Şablonlar',    Icon: LayoutTemplate,  roles: ['admin','manager'] },
     { href: '/dashboard/otomasyonlar',   label: 'Otomasyonlar', Icon: Workflow,        roles: ['admin','manager'] },
     { href: '/dashboard/ayarlar',        label: 'Ayarlar',      Icon: SlidersHorizontal, roles: ['admin','manager','member'] },
-    { href: '/dashboard/toplanti',        label: 'Toplantılar',  Icon: CalendarClock,      roles: ['admin','manager'] },
-    { href: '/dashboard/destek',          label: 'Destek',       Icon: LifeBuoy,           roles: ['admin','manager'] },
-    { href: '/dashboard/dokumantasyon',   label: 'Kılavuz',      Icon: BookOpen,           roles: ['admin','manager','member'] },
+    { href: '/dashboard/toplanti',       label: 'Toplantılar',  Icon: CalendarClock,   roles: ['admin','manager'] },
+    { href: '/dashboard/destek',         label: 'Destek',       Icon: LifeBuoy,        roles: ['admin','manager'] },
+    { href: '/dashboard/dokumantasyon',  label: 'Kılavuz',      Icon: BookOpen,        roles: ['admin','manager','member'] },
   ]},
 ]
 
@@ -74,7 +74,6 @@ export default function Sidebar() {
     window.location.href = '/login'
   }
 
-  // Role göre filtrele
   const filteredNav = NAV_ALL.map(sec => ({
     ...sec,
     items: sec.items.filter(item => item.roles.includes(role))
@@ -89,13 +88,9 @@ export default function Sidebar() {
           <p style={{ fontSize: 9.5, color: 'var(--tx3)', marginTop: 2 }}>Agency ERP</p>
         </div>
       </div>
-
-      {/* Global Search */}
       <div style={{ padding: '8px 10px', borderBottom: '1px solid var(--bdr)' }}>
         <GlobalSearch />
       </div>
-
-      {/* Rol badge */}
       <div style={{ padding: '6px 12px', borderBottom: '1px solid var(--bdr)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 8px', background: 'var(--s2)', borderRadius: 7 }}>
           <div style={{ width: 6, height: 6, borderRadius: '50%', background: role === 'admin' ? 'var(--ac)' : role === 'manager' ? 'var(--blue)' : 'var(--tx3)', flexShrink: 0 }} />
@@ -104,7 +99,6 @@ export default function Sidebar() {
           </span>
         </div>
       </div>
-
       <nav className="sb-nav">
         {filteredNav.map(sec => (
           <div key={sec.g}>
@@ -118,7 +112,6 @@ export default function Sidebar() {
           </div>
         ))}
       </nav>
-
       <div className="sb-user" onClick={logout}>
         <div className="sb-av">{init}</div>
         <div style={{ flex: 1, minWidth: 0 }}>
