@@ -59,7 +59,6 @@ export default function NotesPage() {
 
   useEffect(() => {
     fetchNotes()
-    // kullanıcının telefonu var mı kontrol et
     const sb = createClient()
     sb.auth.getUser().then(({ data: { user } }) => {
       if (!user) return
@@ -126,7 +125,7 @@ export default function NotesPage() {
         .inp:focus{border-color:var(--ac)}
         .inp::placeholder{color:var(--tx3)}
         .ta{resize:vertical;min-height:90px;font-family:inherit}
-        .sms-toggle{display:flex;align-items:center;gap:10;padding:10px 12px;background:var(--s2);border:1px solid var(--bdr);border-radius:8px;cursor:pointer;transition:border-color .15s}
+        .sms-toggle{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--s2);border:1px solid var(--bdr);border-radius:8px;cursor:pointer;transition:border-color .15s}
         .sms-toggle:hover{border-color:var(--ac)}
         @media(max-width:600px){.notes-grid{grid-template-columns:1fr}}
       `}</style>
@@ -145,7 +144,7 @@ export default function NotesPage() {
         {!hasPhone && (
           <div style={{ background:'rgba(242,87,87,.08)',border:'1px solid rgba(242,87,87,.25)',borderRadius:10,padding:'10px 14px',marginBottom:16,fontSize:12.5,color:'var(--red)',display:'flex',alignItems:'center',gap:8 }}>
             <MessageSquare size={13} strokeWidth={2} />
-            Profil sayfandan telefon numaranı eklersen hatırlatma SMS'i alabilirsin.
+            Profil sayfandan telefon numaranı eklersen hatırlatma SMS&apos;i alabilirsin.
           </div>
         )}
 
@@ -250,7 +249,7 @@ export default function NotesPage() {
                   if (!hasPhone) return
                   setForm(f => ({...f, sms_enabled: !f.sms_enabled}))
                 }}
-                style={{ opacity: hasPhone ? 1 : .5, cursor: hasPhone ? 'pointer' : 'not-allowed' }}
+                style={{ opacity: hasPhone ? 1 : 0.5, cursor: hasPhone ? 'pointer' : 'not-allowed' }}
               >
                 <div style={{ width:36,height:20,borderRadius:10,background:form.sms_enabled?'var(--green)':'var(--s4)',position:'relative',transition:'background .2s',flexShrink:0 }}>
                   <div style={{ width:16,height:16,borderRadius:'50%',background:'#fff',position:'absolute',top:2,left:form.sms_enabled?18:2,transition:'left .2s' }} />
