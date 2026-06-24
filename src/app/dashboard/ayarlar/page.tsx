@@ -527,6 +527,13 @@ export default function AyarlarPage() {
             </div>
           )}
 
+          {/* ── Bildirimler ── */}
+          {tab==='bildirim' && (
+            <div style={{display:'flex',flexDirection:'column',gap:16}}>
+              <NotificationSettings />
+            </div>
+          )}
+
           {/* ── Şirket ── */}
           {tab==='company' && (
             <div style={{display:'flex',flexDirection:'column',gap:14}}>
@@ -555,3 +562,4 @@ export default function AyarlarPage() {
     </>
   )
 }
+
