@@ -93,6 +93,8 @@ export default function MusterilerPage() {
 
   // Müşteri bazlı portal
   const [clientPortalModal, setClientPortalModal] = useState(false)
+  const [clientEditModal, setClientEditModal] = useState(false)
+  const [clientEditForm, setClientEditForm] = useState({ name:'', email:'', phone:'', company:'', status:'active', notes:'' })
   const [clientPortalLink,  setClientPortalLink]  = useState('')
   const [clientPortalCopied,setClientPortalCopied]= useState(false)
 
@@ -165,6 +167,20 @@ export default function MusterilerPage() {
     setClientModal(false)
     loadClients()
     setClientForm({name:'',email:'',phone:'',company:'',status:'active',notes:''})
+  }
+
+  function openEditClient() {
+    if (!sel) return
+    setClientEditForm({ name:sel.name||'', email:sel.email||'', phone:sel.phone||'', company:sel.company||'', status:sel.status||'active', notes:sel.notes||'' })
+    setClientEditModal(true)
+  }
+
+  async function saveEditClient() {
+    if (!sel || !clientEditForm.name.trim()) return
+    setSaving(true)
+    await updateClient(sel.id, clientEditForm)
+    setSaving(false)
+    setClientEditModal(false)
   }
 
   async function updateClient(id:string, data:any) {
@@ -467,6 +483,10 @@ export default function MusterilerPage() {
                 <select value={sel.status} onChange={e=>updateClient(sel.id,{status:e.target.value})} className="inp" style={{width:'auto',fontSize:11,padding:'3px 7px',height:'auto'}}>
                   <option value="active">Aktif</option><option value="passive">Pasif</option>
                 </select>
+                <button onClick={openEditClient}
+                  style={{display:'flex',alignItems:'center',gap:5,fontSize:11,padding:'5px 10px',background:'var(--s3)',border:'1px solid var(--bdr)',borderRadius:7,cursor:'pointer',color:'var(--tx2)',fontWeight:600,flexShrink:0}}>
+                  ✏️ Düzenle
+                </button>
                 <button onClick={openClientPortalModal}
                   style={{display:'flex',alignItems:'center',gap:5,fontSize:11,padding:'5px 10px',background:'var(--ac2)',border:'1px solid rgba(124,106,247,.3)',borderRadius:7,cursor:'pointer',color:'var(--ac)',fontWeight:600,flexShrink:0}}>
                   <Link2 size={11}/>Müşteri Paneli
@@ -918,6 +938,32 @@ export default function MusterilerPage() {
       )}
 
       {/* ── Müşteri Portal Modal ── */}
+      {clientEditModal && (
+        <div className="overlay" onClick={e=>{if(e.target===e.currentTarget)setClientEditModal(false)}}>
+          <div className="modal" style={{maxWidth:480}}>
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16}}>
+              <p className="modal-title" style={{margin:0}}>Müşteriyi Düzenle</p>
+              <button onClick={()=>setClientEditModal(false)} style={{background:'none',border:'none',color:'var(--tx3)',cursor:'pointer'}}><X size={15}/></button>
+            </div>
+            <div style={{display:'flex',flexDirection:'column',gap:12}}>
+              <div><label className="label">Müşteri Adı *</label><input value={clientEditForm.name} onChange={e=>setClientEditForm(p=>({...p,name:e.target.value}))} className="inp" autoFocus/></div>
+              <div className="modal-grid">
+                <div><label className="label">E-posta</label><input value={clientEditForm.email} onChange={e=>setClientEditForm(p=>({...p,email:e.target.value}))} className="inp"/></div>
+                <div><label className="label">Telefon</label><PhoneInput value={clientEditForm.phone} onChange={v=>setClientEditForm(p=>({...p,phone:v}))}/></div>
+                <div><label className="label">Şirket</label><input value={clientEditForm.company} onChange={e=>setClientEditForm(p=>({...p,company:e.target.value}))} className="inp"/></div>
+                <div><label className="label">Durum</label>
+                  <select value={clientEditForm.status} onChange={e=>setClientEditForm(p=>({...p,status:e.target.value}))} className="inp">
+                    <option value="active">Aktif</option><option value="passive">Pasif</option>
+                  </select>
+                </div>
+              </div>
+              <div><label className="label">Notlar</label><textarea value={clientEditForm.notes} onChange={e=>setClientEditForm(p=>({...p,notes:e.target.value}))} className="inp" rows={2}/></div>
+              <button className="btn" onClick={saveEditClient} disabled={saving} style={{width:'100%',justifyContent:'center',padding:'10px'}}>{saving?'Kaydediliyor...':'Kaydet'}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {clientPortalModal && (
         <div className="overlay" onClick={e=>{if(e.target===e.currentTarget){setClientPortalModal(false);setClientPortalCopied(false)}}}>
           <div className="modal" style={{maxWidth:440}}>
@@ -1000,3 +1046,4 @@ export default function MusterilerPage() {
     </>
   )
 }
+
