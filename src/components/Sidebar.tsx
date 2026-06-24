@@ -20,7 +20,7 @@ const NAV_ALL = [
     { href: '/dashboard/musteriler',     label: 'Müşteriler',   Icon: Users,           roles: ['admin','manager'] },
     { href: '/dashboard/gorevler',       label: 'Görevler',     Icon: CheckSquare,     roles: ['admin','manager','member'] },
     { href: '/dashboard/takvim',         label: 'Takvim',       Icon: CalendarDays,    roles: ['admin','manager','member'] },
-  { href: '/dashboard/notlar',         label: 'Notlarım',     Icon: StickyNote,      roles: ['admin','manager','member'] },
+    { href: '/dashboard/notlar',         label: 'Notlarım',     Icon: StickyNote,      roles: ['admin','manager','member'] },
   ]},
   { g: 'Operasyon', items: [
     { href: '/dashboard/icerik',         label: 'İçerik',       Icon: FileText,        roles: ['admin','manager','member'] },
@@ -36,7 +36,7 @@ const NAV_ALL = [
   { g: 'Sistem', items: [
     { href: '/dashboard/kullanicilar',   label: 'Kullanıcılar', Icon: UserCog,         roles: ['admin'] },
     { href: '/dashboard/sablonlar',      label: 'Şablonlar',    Icon: LayoutTemplate,  roles: ['admin','manager'] },
-    { href: '/dashboard/araclar',         label: 'Araçlar',      Icon: Wrench,           roles: ['admin'] },
+    { href: '/dashboard/araclar',        label: 'Araçlar',      Icon: Wrench,          roles: ['admin'] },
     { href: '/dashboard/otomasyonlar',   label: 'Otomasyonlar', Icon: Workflow,        roles: ['admin','manager'] },
     { href: '/dashboard/ayarlar',        label: 'Ayarlar',      Icon: SlidersHorizontal, roles: ['admin','manager','member'] },
     { href: '/dashboard/toplanti',       label: 'Toplantılar',  Icon: CalendarClock,   roles: ['admin','manager'] },
