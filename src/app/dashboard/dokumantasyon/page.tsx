@@ -284,7 +284,7 @@ const WORKFLOWS = [
 const TIPS = [
   { e: '🔴', q: 'Geciken görevleri nasıl takip ederim?', a: 'Dashboard → "Geciken Görev" kartına tıkla. Gecikmeler sayfasında kaç gün geciktiği, kim sorumlu olduğu ve öncelik sırasına göre listelenir. Buradan direkt tamamlandı yapılabilir.' },
   { e: '📤', q: 'Müşteriye içerik nasıl gönderilir?', a: 'Onay → Talep oluştur → İç onay al → "Portal Linki Oluştur" → Linki kopyala, WhatsApp\'tan ilet. Müşteri şifresiz portale girer, onay verir veya revizyon notu yazar.' },
-  { e: '📱', q: 'Telefona bildirim almak istiyorum', a: 'Ayarlar → Bildirimler sekmesi → "Bildirimlere İzin Ver" butonuna tıkla. Tarayıcı izin ister, kabul et. Uygulama kapalıyken bile bildirim alırsın.' },
+  { e: '📱', q: 'Telefona bildirim almak istiyorum', a: 'Ayarlar → Bildirimler sekmesine gir → "Bildirimleri Aktifleştir" butonuna tıkla. Tarayıcı izin sorar, kabul et. Uygulama kapalıyken bile bildirim alırsın.' },
   { e: '👤', q: 'Bazı sayfaları neden göremiyorum?', a: 'Rol kısıtlaması. Member rolü yalnızca kendine atanmış görevleri ve içerikleri görür. Admin rolünü değiştirebilir — Kullanıcılar sayfasından.' },
   { e: '📲', q: 'SMS sistemi çalışmıyor', a: 'Ayarlar → Netgsm SMS bölümünden API bilgilerinin girildiğini kontrol et. "Test SMS Gönder" ile anlık deneme yapabilirsin.' },
   { e: '🔄', q: 'Veri güncel mi bilmiyorum', a: 'Sağ üstteki "Canlı" göstergesi yeşilse veri gerçek zamanlı akıyor. Değişiklikler F5\'e gerek kalmadan anında yansır.' },
