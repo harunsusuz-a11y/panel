@@ -5,309 +5,296 @@ import {
   BookOpen, Users, CheckSquare, CalendarDays, FileText,
   Activity, ShieldCheck, Receipt, BarChart2, TrendingUp,
   UserCog, SlidersHorizontal, ChevronRight, ChevronDown,
-  LayoutDashboard, AlertCircle, Search, Bell, Workflow
+  LayoutDashboard, AlertCircle, Search, Bell, Workflow,
+  Zap, Globe, Lock, Clock, MessageSquare, Star, StickyNote,
+  Wrench, LayoutTemplate
 } from 'lucide-react'
 
-// ─────────────────────────────────────────────────────────
-// VERİ
-// ─────────────────────────────────────────────────────────
+// ─── NAV ───────────────────────────────────────────────────
+const SECTIONS = [
+  { id: 'nedir',    label: '🏢 Sistem Nedir?' },
+  { id: 'ozellik',  label: '✨ Öne Çıkan Özellikler' },
+  { id: 'roller',   label: '👥 Kullanıcı Rolleri' },
+  { id: 'moduller', label: '📦 Modüller' },
+  { id: 'akislar',  label: '🔄 İş Akışları' },
+  { id: 'musteri',  label: '🤝 Müşteri Deneyimi' },
+  { id: 'sorular',  label: '💡 Sık Sorular' },
+]
+
+// ─── VERİ ──────────────────────────────────────────────────
+
+const FEATURES = [
+  { e: '⚡', t: 'Gerçek Zamanlı', d: 'Ekip aynı anda çalışır, değişiklikler anında herkese yansır. F5\'e gerek yok.' },
+  { e: '📲', t: 'Push Bildirim + SMS', d: 'Görev gecikmesi, müşteri kararı, onay bildirimleri — telefona anlık ulaşır.' },
+  { e: '🤝', t: 'Müşteri Portali', d: 'Müşterinize özel link. Projelerini, onaylarını ve dosyalarını kendileri takip eder.' },
+  { e: '🔐', t: 'Rol Bazlı Erişim', d: 'Her kullanıcı yalnızca kendi alanını görür. Hem menüde hem sunucuda kontrol edilir.' },
+  { e: '📊', t: 'Performans Takibi', d: 'Ekip bazlı verimlilik skorları, tamamlanan/geciken oranları ve süre kayıtları.' },
+  { e: '🤖', t: 'Otomasyon', d: 'Geciken görevlerde, bekleyen onaylarda SMS/push otomatik gönderilir — sizin müdahaleniz gerekmez.' },
+  { e: '🌐', t: 'PWA — Her Cihazda', d: 'Tarayıcıdan ana ekrana eklenebilir. iOS ve Android\'de uygulama gibi çalışır.' },
+  { e: '📅', t: 'Takvim & Özel Günler', d: 'Deadline\'lar, yayın tarihleri ve ajans için önemli pazarlama günleri tek takvimde.' },
+  { e: '📝', t: 'Kişisel Notlar', d: 'Her ekip üyesi kendi notlarını yazar, hatırlatma ekler, SMS\'le anımsatma alır.' },
+  { e: '🛠️', t: 'Araç & Hesap Yönetimi', d: 'Ekibin kullandığı yazılımlar, abonelikler ve hesap bilgileri merkezi olarak tutulur.' },
+]
 
 const ROLES = [
   {
-    avatar: 'EA', name: 'Emir Alp', title: 'Founder / Admin',
+    avatar: 'AD', title: 'Admin (Founder)',
     color: 'var(--ac)', bg: 'var(--ac2)',
-    desc: 'Sistemin tam yöneticisi. Her sayfayı görür, her kararı onaylayabilir. Final onay ve müşteri ilişkileri yetkisi Emir\'dedir.',
-    pages: ['Dashboard','Müşteriler','Görevler','Takvim (Tüm Ekip)','İçerik','Operasyon','Gecikmeler','Onay','Muhasebe','Finans','Performans','Kullanıcılar','Otomasyonlar','Ayarlar','Kılavuz'],
-    tips: [
-      'Kullanıcılar sayfasından ekip rollerini ve şifrelerini değiştirebilirsin',
-      'Onay sayfasında "İç Onay → Müşteriye Gönder → Müşteri Onayı" 4 adımlı akışı yönetirsin',
-      'Performans sayfasında ekip bazlı verimlilik skorlarını görebilirsin',
-      'Otomasyonlar sayfasından geciken görev SMS bildirimlerini aktive edebilirsin',
-    ]
+    desc: 'Sistemin tüm yetkisine sahip kullanıcıdır. Finanstan kullanıcı yönetimine, onaylardan performans raporlarına kadar her modülü görür ve yönetir. Müşteri ilişkilerinde final karar yetkisi admindedir.',
+    caps: ['Tüm sayfalar ve veriler', 'Kullanıcı ekleme, rol ve şifre yönetimi', 'Finansal raporlar ve muhasebe', 'Otomasyon kuralları tanımlama', 'Sistem ayarları ve SMS entegrasyonu'],
   },
   {
-    avatar: 'ME', name: 'Mert', title: 'Operations Manager',
+    avatar: 'MG', title: 'Manager (Operasyon Müdürü)',
     color: 'var(--blue)', bg: 'var(--blue2)',
-    desc: 'Ajansın trafik yöneticisi. İşlerin doğru kişiye, doğru tarihe, doğru dosyayla müşteriye gitmesini sağlar. Yaratıcı karar vermez — koordinasyon yapar.',
-    pages: ['Dashboard','Müşteriler','Görevler','Takvim (Tüm Ekip)','İçerik','Operasyon','Gecikmeler','Onay','Muhasebe','Finans','Performans','Otomasyonlar','Ayarlar','Kılavuz'],
-    tips: [
-      'Operasyon sayfası senin ana çalışma alandır — ACİL 3 İŞ, pipeline durumu, ekip yükü',
-      'Takvimde "Tüm Ekip / Sadece Benim" toggle ile görünümü değiştirebilirsin',
-      'Gecikmeler sayfasında geciken görevleri direkt "Tamamlandı" yapabilirsin',
-      'Müşteriler → Proje → "Müşteri Paneli" butonu ile portal linki üretip WhatsApp\'tan gönderebilirsin',
-    ]
+    desc: 'Ajansın trafik kontrol kulesidir. Görev dağılımı, içerik akışı, müşteri iletişimi ve operasyonel süreçlerin yönetiminden sorumludur. Kullanıcı yönetimi ve finans raporları hariç her şeye erişir.',
+    caps: ['Müşteri ve proje yönetimi', 'Görev atama ve gecikme takibi', 'İçerik onay akışını yönetme', 'Müşteri portali link oluşturma', 'Operasyon ekranı ve raporlar'],
   },
   {
-    avatar: 'ÜY', name: 'Ekip Üyeleri', title: 'Member',
+    avatar: 'ÜY', title: 'Member (Ekip Üyesi)',
     color: 'var(--green)', bg: 'var(--green2)',
-    desc: 'Aslı, Gizem, Yasin, Caner, Batuhan, Kerem gibi ekip üyeleri bu role sahiptir. Her biri sadece kendine atanmış içerik ve görevleri görür.',
-    pages: ['Dashboard (Sadece kendi verileri)','Görevler (Sadece kendine atananlar)','Takvim (Sadece kendi)','İçerik (Sadece kendine atananlar)','Onay (Kendi talepleri)','Ayarlar','Kılavuz'],
-    tips: [
-      'Görevler sayfasında sadece sana atanmış görevler görünür',
-      'Görevi "Devam"a aldığında süre otomatik sayılmaya başlar',
-      'İçeriği onaya göndermek için İçerik → Detay → "Onaya Gönder" butonunu kullan',
-      'Kendi şifreni Ayarlar → Güvenlik sekmesinden değiştirebilirsin',
-    ]
+    desc: 'Grafiker, metin yazarı, sosyal medya uzmanı gibi üretim yapan ekip üyeleridir. Yalnızca kendilerine atanmış görevleri ve içerikleri görürler. Kendi çalışmalarını onaya gönderebilirler.',
+    caps: ['Sadece kendi görevleri', 'Sadece kendi içerikleri', 'Onaya gönderme yetkisi', 'Kişisel takvim ve notlar', 'Destek talebi açma'],
   },
 ]
 
-const PAGES = [
+const MODULES = [
   {
-    icon: LayoutDashboard, name: 'Dashboard', color: 'var(--ac)', who: 'Herkes',
-    desc: 'Sistemin ana ekranı. KPI kartları, gelir trendi, görev durumu, geciken görevler ve müşteri kararları anlık gösterilir.',
-    features: [
-      'KPI kartlarına tıklayarak ilgili sayfaya geçebilirsin',
-      'Müşteri Kararları kartı — onaylayan veya revizyon isteyen müşteriler listelenir',
-      'Özel günler bandı — haftaya giren pazarlama günleri üstte gösterilir',
-      'Veri gerçek zamanlı güncellenir — F5\'e gerek yok',
-      'Member rolü sadece kendi görevlerini ve verilerini görür',
+    icon: LayoutDashboard, name: 'Dashboard', color: 'var(--ac)',
+    tag: 'Herkes',
+    summary: 'Sistemin nabzını atan ana ekran. Ajansın anlık durumu tek bakışta görülür.',
+    items: [
+      'Gelir, gider, net kâr ve aktif proje sayısı KPI kartları',
+      'Aylık gelir trend grafiği ve görev durum dağılımı',
+      'Geciken görevler, bekleyen onaylar ve müşteri kararları',
+      'Bu haftaki özel pazarlama günleri bandı',
+      'Ekip aktivite akışı — kim ne zaman ne yaptı',
+      'Gerçek zamanlı bağlantı göstergesi',
     ],
   },
   {
-    icon: Users, name: 'Müşteriler', color: 'var(--blue)', who: 'Emir, Mert',
-    desc: 'Müşteri yönetimi ve proje takibinin tek sayfadan yapıldığı yerdir. Müşteri ekle, proje oluştur, aşama tanımla, dosya yükle — hepsi burada.',
-    features: [
-      'Sol listeden müşteriyi seç → 4 sekme: Projeler, Görevler, İçerik, Finans',
-      'Projeler sekmesi: Sol listeden proje seç → Detay, Aşamalar, Görevler (kanban), Dosyalar',
-      'Proje üst kısmındaki "Portal" butonu ile proje bazlı link oluşturulur',
-      '"Müşteri Paneli" butonu (müşteri header\'ında) — tüm projeleri kapsayan kalıcı link üretir',
-      'WhatsApp butonu: Müşterinin kayıtlı telefon numarasına otomatik mesaj gönderir',
-      'Müşteri eklenince portal tokeni otomatik oluşturulur',
-    ],
-    note: 'Müşteriye link gönderirken "Müşteri Paneli" linkini kullan — tüm proje geçmişini görür. Proje bazlı link sadece o projeyi gösterir.',
-  },
-  {
-    icon: CheckSquare, name: 'Görevler', color: 'var(--ac)', who: 'Herkes (rol bazlı)',
-    desc: 'Kanban tahtası. Bekliyor → Devam → Kontrol → Tamam sütunları. Göreve tıklayınca detay paneli açılır.',
-    features: [
-      'Yeni görev: Firma → Proje → Sorumlu → Öncelik → Deadline sırasıyla doldur',
-      'Göreve tıkla → Detay, Yorumlar, Süre Takibi sekmeleri',
-      'Süre takibi otomatik — "Devam"a alınınca başlar, statü değişince durur',
-      'Realtime: Başka sayfadan görev eklenince kanban anında güncellenir',
-      'Süre Takibi: Görev "Devam"a alınınca sayaç otomatik başlar, başka statüye geçince kapanır',
-      'Görev "Tamam"a alınınca tamamlanma zamanı otomatik kaydedilir',
-      'Süre sekmesi: Her çalışma oturumu ayrı ayrı listelenir, toplam süre gösterilir',
-      'Member: Sadece kendi görevi; sadece Bekliyor→Devam ve Devam→Kontrol geçişi yapabilir',
-      'Admin/Manager: Tüm geçişler ve silme yetkisi',
+    icon: Users, name: 'Müşteriler & Projeler', color: 'var(--blue)',
+    tag: 'Admin + Manager',
+    summary: 'Müşteri ve proje yönetiminin tek çatı altında toplandığı merkez.',
+    items: [
+      'Her müşteri için projeler, görevler, içerikler ve finansal kayıtlar',
+      'Proje aşamaları tanımlama — "Onay gerekiyor" işaretlenebilir',
+      'Kanban tabanlı görev akışı proje bazında',
+      'Dosya yükleme ve müşteriye teslim',
+      'Müşteri Paneli: Tüm projeleri kapsayan kalıcı portal linki üretme',
+      'WhatsApp ile doğrudan müşteriye link iletme',
     ],
   },
   {
-    icon: CalendarDays, name: 'Takvim', color: 'var(--blue)', who: 'Herkes (rol bazlı)',
-    desc: 'Görev deadline\'larını aylık takvim üzerinde gösterir. İçerik yayın tarihleri de takvimde görünür.',
-    features: [
-      'Member: Sadece kendine atanmış görevler',
-      'Admin/Manager: Tüm ekip görünür, toggle ile "Sadece Benim" filtrelenebilir',
-      'Güne tıkla → Sağ panelde o günün görevleri listelenir',
-      'Bu Hafta özeti: tamamlanan / devam eden / bekleyen sayılar',
-      'Sarı etiket: Yayın tarihi olan içerikler',
+    icon: CheckSquare, name: 'Görevler', color: 'var(--ac)',
+    tag: 'Herkes (rol bazlı)',
+    summary: 'Kanban tabanlı görev yönetimi. Ekibin her anı kayıt altında.',
+    items: [
+      '4 sütunlu kanban: Bekliyor → Devam → Kontrol → Tamamlandı',
+      'Öncelik seviyeleri: Kritik, Yüksek, Normal, Düşük',
+      'Otomatik süre takibi — "Devam"a alınınca sayaç başlar',
+      'Görev bazlı yorum ve notlar',
+      'Deadline yaklaştığında otomatik bildirim',
+      'Member: Sadece kendi görevi; sadece ilerletme yetkisi',
     ],
   },
   {
-    icon: FileText, name: 'İçerik', color: 'var(--amber)', who: 'Herkes (rol bazlı)',
-    desc: '5 aşamalı içerik üretim workflow\'u. Taslak → İç Onay → Müşteri Onayı → Revizyon → Yayında.',
-    features: [
-      'Workflow şeridi üstte her aşamada kaç içerik olduğunu gösterir',
-      'Karta tıkla → Sağ panelde durum değiştir, müşteri ata, onaya gönder',
-      '"Onaya Gönder" butonu: Taslak içeriklerde görünür, Onay sayfasına talep düşer',
-      'Müşteri bazlı filtreleme: Her müşterinin içeriklerini ayrı listele',
-      'Member: Sadece kendi içerikleri; sadece Taslak → Onay geçişi yapabilir',
+    icon: FileText, name: 'İçerik Yönetimi', color: 'var(--amber)',
+    tag: 'Herkes (rol bazlı)',
+    summary: '5 aşamalı içerik üretim workflow\'u. Taslaktan yayına kadar tam kontrol.',
+    items: [
+      'Taslak → İç Onay → Müşteri Onayı → Revizyon → Yayında',
+      'Her aşamada kaç içerik olduğu anlık görülür',
+      'Müşteri bazlı filtreleme',
+      'İçerik onaylanınca müşteri portali üzerinden gösterilir',
+      'Revizyon gelince içerik otomatik geri alınır',
     ],
   },
   {
-    icon: Activity, name: 'Operasyon', color: 'var(--ac)', who: 'Emir, Mert',
-    desc: 'Mert\'in ana çalışma ekranı. Anlık iş durumu, ekip yükü, müşteri pipeline\'ı ve gün sonu checklist.',
-    features: [
-      'ACİL 3 İŞ: Kritik/yüksek öncelikli gecikmiş görevler kırmızı bannerda',
-      'İçerik Pipeline: Hangi aşamada kaç içerik olduğu görülür',
-      'Ekip Yükü: Her kişinin taşıdığı aktif iş sayısı ve gecikme oranı',
-      'Müşteri Durumu: Her müşteri için açık/geciken/tamamlanan özet',
-      'Gün Sonu Kapanış Checklist: 6 maddelik kontrol listesi',
+    icon: ShieldCheck, name: 'Onay Sistemi', color: 'var(--amber)',
+    tag: 'Herkes (kısıtlı)',
+    summary: '4 adımlı onay akışı. Müşteri kararı anında ekibe bildirilir.',
+    items: [
+      '1. Talep oluştur → 2. İç onay → 3. Müşteriye gönder → 4. Müşteri kararı',
+      'İç onay yapılmadan müşteriye gönderilemez',
+      'Müşteri onaylayınca veya revizyon isteyince push bildirim',
+      'Revizyon notu ve gerekçe müşteri tarafından yazılabilir',
+      'Tüm onay geçmişi arşivlenir',
     ],
   },
   {
-    icon: AlertCircle, name: 'Gecikmeler', color: 'var(--red)', who: 'Emir, Mert',
-    desc: 'Deadline\'ı geçmiş tüm görevler. Öncelik sırasına göre listelenir. Buradan direkt "Tamamlandı" yapılabilir.',
-    features: [
-      'Kaç gün geciktiği her görevde belirtilir',
-      'Müşteri adı ve sorumlu kişi görünür',
-      '"Tamamlandı" butonu ile görev kapatılır',
-      'Otomasyonlar aktifse geciken görevler için SMS gönderilir',
+    icon: Activity, name: 'Operasyon Ekranı', color: 'var(--ac)',
+    tag: 'Admin + Manager',
+    summary: 'Ajansın trafik kontrol merkezi. Günlük operasyonun tamamı tek sayfada.',
+    items: [
+      'ACİL 3 İŞ bandı — kritik gecikmeler kırmızıda',
+      'İçerik pipeline özeti — hangi aşamada kaç içerik',
+      'Ekip yükü — kişi başına aktif iş ve gecikme oranı',
+      'Müşteri durumu özeti',
+      'Gün sonu kapanış checklisti',
     ],
   },
   {
-    icon: ShieldCheck, name: 'Onay', color: 'var(--amber)', who: 'Herkes (kısıtlı)',
-    desc: '4 adımlı onay akışı: Talep Oluştur → İç Onay → Müşteriye Gönder → Müşteri Onayı.',
-    features: [
-      '1. Talep Oluştur — herkes açabilir (İçerik sayfasından da otomatik düşer)',
-      '2. İç Onay — Emir veya Mert "Onayla" / "Reddet" eder; talebi açana bildirim gider',
-      '3. Müşteriye Gönder — "Portal Linki Oluştur" butonuyla link kopyalanır',
-      '4. Müşteri Onayı — Müşterinin portal kararı (onay/revizyon/not) burada görünür',
-      'Müşteri karar verince admin+manager\'a push + in-app bildirim gönderilir',
-      'Revizyon gelince ilgili içerik otomatik "Revizyon" durumuna çekilir',
+    icon: Bell, name: 'Bildirimler', color: 'var(--ac)',
+    tag: 'Herkes',
+    summary: 'Ajansın hiçbir anını kaçırmamanızı sağlar.',
+    items: [
+      'Görev gecikmesi → sorumluya + admin/manager\'a push + SMS',
+      'Müşteri kararı (onay/revizyon) → admin + manager\'a anlık push',
+      'İç onay bekleniyor → 24 saatte bir hatırlatma',
+      'Destek talebi açıldı → admin + manager\'a bildirim',
+      'Tüm bildirimler ilgili sayfaya yönlendirir',
     ],
-    note: 'İç onay olmadan "Portal Linki Oluştur" butonu aktif olmaz. Akış sırayı takip eder.',
   },
   {
-    icon: Receipt, name: 'Muhasebe', color: 'var(--green)', who: 'Emir, Mert',
-    desc: 'Gelir ve gider kayıtları. Müşteri ve proje bazlı filtrelenebilir.',
-    features: [
-      'Gelir / Gider sekmeli görünüm',
+    icon: TrendingUp, name: 'Performans & Raporlar', color: 'var(--ac)',
+    tag: 'Admin + Manager',
+    summary: 'Ekip ve müşteri bazlı verimlilik analizi.',
+    items: [
+      'Ekip bazlı performans skoru — tamamlanan/geciken oranı',
+      'Müşteri bazlı içerik durumu timeline',
+      'Süre kayıtları — kim hangi göreve ne kadar zaman harcadı',
+      'Tüm sistem aktivite logu',
+    ],
+  },
+  {
+    icon: Receipt, name: 'Finans & Muhasebe', color: 'var(--green)',
+    tag: 'Admin + Manager',
+    summary: 'Ajans gelir-gider takibi ve finansal özet.',
+    items: [
+      'Gelir ve gider kayıtları — müşteri/proje bağlantılı',
       'Ödendi / Bekliyor / Gecikti durumları',
-      'Müşteri ve proje bağlantısı kurulabilir',
-      'Kayıt silinince liste anında güncellenir',
+      'Son 6 aylık gelir trend grafiği',
+      'Net kâr ve bekleyen tahsilat özeti',
     ],
   },
   {
-    icon: BarChart2, name: 'Finans', color: 'var(--green)', who: 'Emir, Mert',
-    desc: 'Gelir-gider grafikleri ve finansal özet.',
-    features: [
-      'Son 6 aylık gelir bar chart',
-      'Net kâr / tahsilat bekleyen özeti',
-      'Son işlemler listesi',
+    icon: Workflow, name: 'Otomasyonlar', color: 'var(--blue)',
+    tag: 'Admin + Manager',
+    summary: 'Tekrar eden bildirimleri sistem otomatik gönderir.',
+    items: [
+      'Geciken görevde SMS + push otomasyonu',
+      'Onay 24 saat bekleyince hatırlatma',
+      'Proje tamamlandığında bildirim',
+      'Özel mesaj şablonları — {{görev}}, {{sorumlu}}, {{tarih}} değişkenleri',
+      'Her kural aktif/pasif yapılabilir',
     ],
   },
   {
-    icon: TrendingUp, name: 'Performans', color: 'var(--ac)', who: 'Emir, Mert',
-    desc: 'Ekip performans skorları, müşteri bazlı içerik timeline ve tüm sistem aktivite logu.',
-    features: [
-      'Her ekip üyesi için performans skoru (tamamlanan/geciken oranı)',
-      'Müşteri bazlı içerik durumu: taslak/yayın/revizyon sayıları',
-      '"Kim Ne Zaman Ne Yaptı" — tüm işlemler loglanır',
+    icon: CalendarDays, name: 'Takvim', color: 'var(--blue)',
+    tag: 'Herkes (rol bazlı)',
+    summary: 'Görev deadline\'ları ve içerik yayın tarihleri tek takvimde.',
+    items: [
+      'Aylık görünüm, tıklanınca o günün detayı',
+      'Özel pazarlama günleri dahil (Dünya Sosyal Medya Günü, Black Friday vb.)',
+      'Admin/Manager: Tüm ekip; Member: Sadece kendisi',
+      'İçerik yayın tarihleri sarı etiketle ayrışır',
     ],
   },
   {
-    icon: Bell, name: 'Bildirimler', color: 'var(--ac)', who: 'Herkes',
-    desc: 'Sağ üstteki çan ikonu. Tıklayınca ilgili sayfaya yönlendirir.',
-    features: [
-      'Onay talebiniz onaylandı/reddedildi → size bildirim',
-      'Müşteri onayladı veya revizyon istedi → admin+manager\'a bildirim',
-      'Görev gecikti → size ve admin+manager\'a bildirim',
-      'Push bildirimi: Telefon/tarayıcıya, uygulama kapalıyken bile gelir',
+    icon: StickyNote, name: 'Kişisel Notlar', color: 'var(--ac)',
+    tag: 'Herkes',
+    summary: 'Her ekip üyesinin kendine ait not ve hatırlatma alanı.',
+    items: [
+      'Not ekle, düzenle, sil — tamamen kişisel',
+      'Hatırlatma tarihi ve saati belirle',
+      'SMS hatırlatma — tam zamanında telefona gelir',
+      'Notlar yalnızca sana görünür',
     ],
   },
   {
-    icon: UserCog, name: 'Kullanıcılar', color: 'var(--ac)', who: 'Sadece Emir',
-    desc: 'Ekip üyelerini yönet. Rol, departman, telefon güncelle. Şifre sıfırla. Yeni kullanıcı davet et.',
-    features: [
-      'Kullanıcı rolünü değiştir: Admin / Manager / Member',
-      '"Şifre Değiştir" butonu — seçili kullanıcının şifresini sıfırla',
-      '"Sayfa Erişimi" sekmesi — o kullanıcının görebileceği sayfaları listeler',
-      'Yeni kullanıcı daveti: E-posta gönderilir, kişi /login\'den giriş yapar',
-      'Kendi rolünü değiştiremezsin',
+    icon: Globe, name: 'Müşteri Portali', color: 'var(--green)',
+    tag: 'Müşterilere özel',
+    summary: 'Müşterinizin kendi projesini takip ettiği, onay verdiği alan.',
+    items: [
+      'Şifresiz, link ile giriş — müşteriye ek hesap yükü yok',
+      'Tüm projeler, aşamalar ve dosyalar görünür',
+      'Onay / Revizyon kararı verebilir, not ekleyebilir',
+      'Dosyaları doğrudan indirebilir',
+      'Ajans onaylamadan içerik portale düşmez',
     ],
   },
   {
-    icon: Workflow, name: 'Otomasyonlar', color: 'var(--blue)', who: 'Emir, Mert',
-    desc: 'Otomatik SMS/e-posta kuralları. Cron her saat çalışır.',
-    features: [
-      'Tetikleyiciler: Görev geciktiğinde / Onay 24 saat bekleyince / Proje tamamlandığında',
-      'Aksiyonlar: SMS (Netgsm) / E-posta / Her ikisi',
-      'Mesaj şablonunda {{gorev}}, {{sorumlu}}, {{musteri}}, {{tarih}} placeholder\'ları kullanılabilir',
-      'Her kural açılıp kapatılabilir (aktif/pasif)',
-      'SMS Test butonu ile sistemin çalışıp çalışmadığını anlık test et',
-    ],
-    note: 'Otomasyonlar çalışması için Ayarlar → Netgsm SMS bölümünden API bilgilerinin girilmiş olması gerekir.',
-  },
-  {
-    icon: Bell, name: 'Destek', color: 'var(--ac)', who: 'Herkes oluşturur, Emir+Mert görür',
-    desc: 'Ekip içi destek talebi sistemi. Her kullanıcı sağ alttaki mor 🛟 butonuyla talep açabilir. Sadece Emir ve Mert listeyi görür.',
-    features: [
-      'Sağ alttaki 🛟 butonu her sayfada görünür — tüm kullanıcılar erişebilir',
-      'Talep türleri: 💡 Öneri / 🐛 Hata / 😤 Şikayet / 💬 Diğer',
-      'Başlık + detay notu eklenebilir, tarih otomatik kaydedilir',
-      'Talep açılınca Emir ve Mert\'e in-app bildirim düşer',
-      'Emir/Mert: Destek sayfasından tüm talepleri listeler, durumu günceller (Açık → İnceleniyor → Çözüldü)',
-      'Dashboard\'da "Destek Talepleri" kartı — açık talepler anlık görünür',
+    icon: Wrench, name: 'Araç & Hesap Yönetimi', color: 'var(--ac)',
+    tag: 'Sadece Admin',
+    summary: 'Ekibin kullandığı tüm yazılım ve hesap bilgileri merkezi.',
+    items: [
+      'Her araç için ad, URL, kullanıcı adı, şifre',
+      'Aylık/yıllık abonelik takibi',
+      'Kime ait, hangi proje için kullanılıyor',
+      'Yalnızca admin görür — güvenli saklama',
     ],
   },
   {
-    icon: SlidersHorizontal, name: 'Ayarlar', color: 'var(--tx2)', who: 'Herkes (kısıtlı)',
-    desc: 'Kişisel profil ve sistem yapılandırması.',
-    features: [
-      'Profil: Ad, telefon, departman güncelleme',
-      'Güvenlik: Kendi şifreni değiştirme',
-      'Netgsm SMS: API bilgileri + test gönderimi (Emir/Mert)',
-      'Bildirimler: Push bildirimini aktive et (tarayıcı izni gerekir)',
-      'Şirket bilgileri: Firma adı ve iletişim (Emir/Mert)',
+    icon: LayoutTemplate, name: 'Haftalık Şablonlar', color: 'var(--ac)',
+    tag: 'Admin + Manager',
+    summary: 'Tekrar eden haftalık görev listelerini tek tıkla oluştur.',
+    items: [
+      'Şablon oluştur — başlık, açıklama, öncelik, deadline ve sorumlu kişi',
+      'Birden fazla kişiye aynı anda atanabilir',
+      'Şablon çalıştırılınca görevler otomatik oluşturulur',
+      'Her çalıştırmada ilgili kişilere push bildirim gönderilir',
     ],
   },
 ]
 
 const WORKFLOWS = [
   {
-    title: 'İçerik Üretim Akışı', color: 'var(--amber)',
+    title: '📤 İçerik Üretim ve Müşteri Onayı', color: 'var(--amber)',
     steps: [
-      { who: 'Emir / Mert', action: 'Müşteriden brief alınır, proje/görev sisteme girilir' },
-      { who: 'Sorumlu Ekip', action: 'İçerik Sayfası → "İçerik Ekle" → Taslak oluşturulur, kişi atanır' },
-      { who: 'Sorumlu Kişi', action: 'İçerik hazırlanır → Detay paneli → "Onaya Gönder" tıklanır' },
-      { who: 'Emir / Mert', action: 'Onay sayfasında "Onayla" veya "Reddet" — talebi açana bildirim gider' },
-      { who: 'Mert', action: 'Onaylandıktan sonra "Portal Linki Oluştur" → Müşteriye WhatsApp/link gönderilir' },
-      { who: 'Müşteri', action: 'Portalde "Onaylıyorum" veya "Revizyon" — ekibe anlık bildirim düşer' },
-      { who: 'Mert / Emir', action: 'Dashboard → Müşteri Kararları kartında yanıtı görürler' },
+      { who: 'Manager', action: 'Brief alınır, içerik sisteme girilir ve sorumlu kişiye atanır' },
+      { who: 'Ekip Üyesi', action: 'İçeriği hazırlar → "Onaya Gönder" butonuna basar' },
+      { who: 'Admin / Manager', action: 'Onay sayfasında inceler, onaylar veya reddeder — ilgili kişiye bildirim gider' },
+      { who: 'Manager', action: 'Onaylanan içerik için "Portal Linki Oluştur" → Müşteriye WhatsApp\'tan gönderilir' },
+      { who: 'Müşteri', action: 'Kendi portaline girer, onaylar veya revizyon notu yazar' },
+      { who: 'Admin / Manager', action: 'Müşteri kararı anlık bildirimle gelir, dashboard\'da görünür' },
     ]
   },
   {
-    title: 'Proje Teslim Akışı', color: 'var(--blue)',
+    title: '📁 Proje Teslim Akışı', color: 'var(--blue)',
     steps: [
-      { who: 'Emir / Mert', action: 'Müşteriler → Müşteri seç → Projeler → "Yeni Proje" oluştur' },
-      { who: 'Mert', action: 'Proje → Aşamalar sekmesi → Aşamalar tanımla, gerekirse "Onay gerekiyor" işaretle' },
-      { who: 'Mert', action: 'Proje → Görevler sekmesi → Görev ekle, ekip üyelerine ata' },
-      { who: 'Ekip', action: 'Görevler sayfasında kanban üzerinden ilerletir: Devam → Kontrol → Tamam' },
-      { who: 'Ekip', action: 'Müşteriler → Proje → Dosyalar → Teslim dosyası yüklenir' },
-      { who: 'Mert', action: '"Müşteri Paneli" butonu → Link kopyala → WhatsApp\'tan gönder' },
-      { who: 'Müşteri', action: 'Portalde tüm projeleri, dosyaları, onay geçmişini görebilir ve indirebilir' },
+      { who: 'Admin / Manager', action: 'Müşteri oluşturulur, proje açılır, aşamalar tanımlanır' },
+      { who: 'Manager', action: 'Görevler oluşturulur, ekip üyelerine atanır, deadline belirlenir' },
+      { who: 'Ekip', action: 'Kanban üzerinden ilerler: Bekliyor → Devam → Kontrol → Tamamlandı' },
+      { who: 'Manager', action: 'Dosyalar proje detayından müşteri için yüklenir' },
+      { who: 'Manager', action: '"Müşteri Paneli" linki müşteriye iletilir' },
+      { who: 'Müşteri', action: 'Portalden projesini takip eder, dosyalarını indirir' },
     ]
   },
   {
-    title: 'Bildirim Akışı', color: 'var(--amber)',
+    title: '🔔 Otomatik Bildirim Akışı', color: 'var(--green)',
     steps: [
-      { who: 'Sistem (Otomatik)', action: 'Her 10 dakikada cron çalışır — deadline, gecikme, onay kontrolü yapar' },
-      { who: 'Sistem', action: 'Deadline yarin: Sorumluya + Admin/Manager push + in-app bildirim (8 saatte bir)' },
-      { who: 'Sistem', action: 'Deadline gecti: Sorumluya + Admin/Manager in-app + SMS (2 saatte bir)' },
-      { who: 'Sistem', action: 'Onay 24 saat bekliyor: Admin ve Manager hatirlatma (24 saatte bir)' },
-      { who: 'Kullanici', action: 'Can ikonuna tiklar, ilgili sayfaya yonlendirilir (Gorevler, Onay, Icerik vs.)' },
-      { who: 'Kullanici', action: 'Push bildirimi almak icin: Ayarlar → Bildirimler → Izin Ver' },
+      { who: 'Sistem', action: 'Her 10 dakikada arka planda çalışır — deadline ve onay kontrolleri yapılır' },
+      { who: 'Sistem', action: 'Deadline yarın: Sorumluya push bildirim gönderilir' },
+      { who: 'Sistem', action: 'Deadline geçti: Sorumluya push + SMS, admin/manager\'a bildirim' },
+      { who: 'Sistem', action: 'Onay 24 saat bekledi: Admin ve manager\'a hatırlatma' },
+      { who: 'Kullanıcı', action: 'Bildirimi tıklar, ilgili sayfaya yönlendirilir' },
     ]
   },
   {
-    title: 'Süre Takibi Akışı', color: 'var(--blue)',
+    title: '📝 Kişisel Not ve SMS Hatırlatma', color: 'var(--ac)',
     steps: [
-      { who: 'Admin/Manager/Member', action: 'Gorev kanban uzerinden Devama alinir' },
-      { who: 'Sistem (Otomatik)', action: 'DB trigger ile time_logs tablosuna kayit acilir, saat damgasi baslar' },
-      { who: 'Kullanici', action: 'Gorev baska statue tasinirsa otomatik kapanir, dakika hesaplanir' },
-      { who: 'Sistem (Otomatik)', action: 'Tamama alindiginda completed_at set edilir, acik loglar kapanir' },
-      { who: 'Admin/Manager', action: 'Gorev detayi - Sure sekmesi: her oturumu, kimin ne kadar calistigini gorur' },
-      { who: 'Admin/Manager', action: 'Detay sekmesinde Olusturuldu / Tamamlandi / Harcanan Sure ozeti gorunur' },
-    ]
-  },
-  {
-    title: 'Yeni Kullanıcı Ekleme Akışı', color: 'var(--green)',
-    steps: [
-      { who: 'Emir', action: 'Kullanıcılar sayfası → "Kullanıcı Ekle" → E-posta ile davet gönderilir' },
-      { who: 'Yeni Kullanıcı', action: 'panelson.vercel.app/login adresine gider, e-posta ile giriş yapar' },
-      { who: 'Emir', action: 'Kullanıcılar sayfasından kişiyi seç → Rol ata (Member/Manager/Admin)' },
-      { who: 'Emir', action: '"Şifre Değiştir" ile geçici şifre belirlenir ve kişiye iletilir' },
-      { who: 'Yeni Kullanıcı', action: 'Ayarlar → Güvenlik → Kendi şifresini değiştirir' },
+      { who: 'Ekip Üyesi', action: 'Notlarım sayfasından yeni not oluşturur' },
+      { who: 'Ekip Üyesi', action: 'Hatırlatma tarihi ve saati seçer, SMS toggle\'ını açar' },
+      { who: 'Sistem', action: 'Belirlenen saatte profilindeki numaraya SMS gönderilir' },
+      { who: 'Ekip Üyesi', action: 'Notun üzerinde "SMS gönderildi ✓" ibaresi görünür' },
     ]
   },
 ]
 
 const TIPS = [
-  { emoji: '🔴', q: 'Geciken görev nasıl takip edilir?', a: 'Dashboard → "Geciken Görev" kartına tıkla → Gecikmeler sayfası açılır. Buradan direkt "Tamamlandı" yapabilirsin.' },
-  { emoji: '📤', q: 'Müşteriye içerik nasıl gönderilir?', a: 'Onay → Talep oluştur → İç onay al → "Portal Linki Oluştur" → Kopyala ve müşteriye ilet. Veya Müşteriler → "Müşteri Paneli" ile kalıcı link.' },
-  { emoji: '📁', q: 'Müşteri portali ne gösterir?', a: 'Müşteriye ait tüm projeler, her projenin aşamaları, yüklenmiş dosyalar ve onay geçmişi. Dosyaları oradan indirebilir.' },
-  { emoji: '📲', q: 'Push bildirimi gelmiyor?', a: 'Ayarlar → Bildirimler sekmesi → "Bildirimlere İzin Ver" tıkla. Tarayıcı izin sorar, kabul et.' },
-  { emoji: '📱', q: 'SMS bildirimi çalışmıyor?', a: 'Ayarlar → Netgsm SMS → API bilgilerini kontrol et → "Test SMS Gönder" ile dene.' },
-  { emoji: '🔐', q: 'Kullanıcı şifresini unuttum?', a: 'Emir → Kullanıcılar → İlgili kişiyi seç → "Şifre Değiştir" butonu ile sıfırlar.' },
-  { emoji: '👤', q: 'Neden bazı sayfaları göremiyorum?', a: 'Rol kısıtlaması. Member rolündekiler Müşteriler, Finans, Operasyon gibi sayfalara giremez. Emir rolünü değiştirebilir.' },
-  { emoji: '🔄', q: 'Veri güncellendi mi nasıl anlarım?', a: 'Sağ üstteki "Canlı" göstergesi yeşilse veri gerçek zamanlı. F5\'e gerek yok — değişiklikler otomatik yansır.' },
+  { e: '🔴', q: 'Geciken görevleri nasıl takip ederim?', a: 'Dashboard → "Geciken Görev" kartına tıkla. Gecikmeler sayfasında kaç gün geciktiği, kim sorumlu olduğu ve öncelik sırasına göre listelenir. Buradan direkt tamamlandı yapılabilir.' },
+  { e: '📤', q: 'Müşteriye içerik nasıl gönderilir?', a: 'Onay → Talep oluştur → İç onay al → "Portal Linki Oluştur" → Linki kopyala, WhatsApp\'tan ilet. Müşteri şifresiz portale girer, onay verir veya revizyon notu yazar.' },
+  { e: '📱', q: 'Telefona bildirim almak istiyorum', a: 'Ayarlar → Bildirimler sekmesi → "Bildirimlere İzin Ver" butonuna tıkla. Tarayıcı izin ister, kabul et. Uygulama kapalıyken bile bildirim alırsın.' },
+  { e: '👤', q: 'Bazı sayfaları neden göremiyorum?', a: 'Rol kısıtlaması. Member rolü yalnızca kendine atanmış görevleri ve içerikleri görür. Admin rolünü değiştirebilir — Kullanıcılar sayfasından.' },
+  { e: '📲', q: 'SMS sistemi çalışmıyor', a: 'Ayarlar → Netgsm SMS bölümünden API bilgilerinin girildiğini kontrol et. "Test SMS Gönder" ile anlık deneme yapabilirsin.' },
+  { e: '🔄', q: 'Veri güncel mi bilmiyorum', a: 'Sağ üstteki "Canlı" göstergesi yeşilse veri gerçek zamanlı akıyor. Değişiklikler F5\'e gerek kalmadan anında yansır.' },
+  { e: '🤝', q: 'Müşteri portalini nasıl paylaşırım?', a: 'Müşteriler → Müşteri kartı → "Müşteri Paneli" butonu kalıcı link üretir. Proje bazlı link istiyorsan: Proje → "Portal" butonu. Kalıcı link tüm proje geçmişini gösterir.' },
+  { e: '🛠️', q: 'Yeni ekip üyesi nasıl eklenir?', a: 'Kullanıcılar sayfası → "Kullanıcı Ekle" → E-posta ile davet gönderilir. Kişi giriş yaptıktan sonra admin rolünü ve şifresini belirler.' },
 ]
 
-// ─────────────────────────────────────────────────────────
-// BİLEŞENLER
-// ─────────────────────────────────────────────────────────
+// ─── BİLEŞENLER ────────────────────────────────────────────
 
-function Accordion({ title, color, Icon, children }: { title: string; color: string; Icon: any; children: React.ReactNode }) {
+function Accordion({ title, color, Icon, tag, children }: { title: string; color: string; Icon: any; tag: string; children: React.ReactNode }) {
   const [open, setOpen] = useState(false)
   return (
     <div style={{ border: `1px solid ${open ? color + '55' : 'var(--bdr)'}`, borderRadius: 10, overflow: 'hidden', marginBottom: 8, transition: 'border-color .15s' }}>
@@ -316,7 +303,8 @@ function Accordion({ title, color, Icon, children }: { title: string; color: str
           <Icon size={13} style={{ color }} strokeWidth={2} />
         </div>
         <span style={{ flex: 1, fontSize: 13.5, fontWeight: 600, color: 'var(--tx)', textAlign: 'left' }}>{title}</span>
-        {open ? <ChevronDown size={14} style={{ color: 'var(--tx3)' }} /> : <ChevronRight size={14} style={{ color: 'var(--tx3)' }} />}
+        <span style={{ fontSize: 10, fontWeight: 700, color, background: `${color}18`, padding: '2px 8px', borderRadius: 4, flexShrink: 0 }}>{tag}</span>
+        {open ? <ChevronDown size={14} style={{ color: 'var(--tx3)', flexShrink: 0 }} /> : <ChevronRight size={14} style={{ color: 'var(--tx3)', flexShrink: 0 }} />}
       </button>
       {open && (
         <div style={{ padding: '14px 16px', background: 'var(--s1)', borderTop: '1px solid var(--bdr)' }}>
@@ -329,31 +317,21 @@ function Accordion({ title, color, Icon, children }: { title: string; color: str
 
 function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
-    <section id={id} style={{ marginBottom: 44, scrollMarginTop: 80 }}>
+    <section id={id} style={{ marginBottom: 48, scrollMarginTop: 80 }}>
       <h2 style={{ fontSize: 17, fontWeight: 700, color: 'var(--tx)', marginBottom: 16, paddingBottom: 10, borderBottom: '2px solid var(--bdr)' }}>{title}</h2>
       {children}
     </section>
   )
 }
 
-const SECTIONS = [
-  { id: 'giris',    label: '🏠 Giriş' },
-  { id: 'roller',   label: '👥 Roller' },
-  { id: 'sayfalar', label: '📄 Sayfalar' },
-  { id: 'akislar',  label: '🔄 İş Akışları' },
-  { id: 'sorular',  label: '💡 Sık Sorular' },
-]
-
-// ─────────────────────────────────────────────────────────
-// ANA SAYFA
-// ─────────────────────────────────────────────────────────
+// ─── ANA SAYFA ─────────────────────────────────────────────
 
 export default function DokumantasyonPage() {
   const [search, setSearch] = useState('')
 
-  const filteredPages = search
-    ? PAGES.filter(p => p.name.toLowerCase().includes(search.toLowerCase()) || p.desc.toLowerCase().includes(search.toLowerCase()))
-    : PAGES
+  const filtered = search
+    ? MODULES.filter(m => m.name.toLowerCase().includes(search.toLowerCase()) || m.summary.toLowerCase().includes(search.toLowerCase()))
+    : MODULES
 
   function scrollTo(id: string) {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
@@ -363,30 +341,32 @@ export default function DokumantasyonPage() {
     <>
       <style>{`
         .doc-wrap{display:flex;flex:1;overflow:hidden}
-        .doc-sb{width:190px;flex-shrink:0;border-right:1px solid var(--bdr);overflow-y:auto;padding:16px 10px;background:var(--s1)}
-        .doc-body{flex:1;overflow-y:auto;padding:28px 28px 80px}
+        .doc-sb{width:200px;flex-shrink:0;border-right:1px solid var(--bdr);overflow-y:auto;padding:16px 10px;background:var(--s1)}
+        .doc-body{flex:1;overflow-y:auto;padding:28px 32px 100px}
         .doc-nav{display:flex;align-items:center;gap:7px;padding:8px 10px;border-radius:8px;font-size:12.5px;color:var(--tx2);cursor:pointer;border:none;background:none;width:100%;text-align:left;margin-bottom:2px;transition:all .12s}
         .doc-nav:hover{color:var(--tx);background:var(--s2)}
-        .dot{width:5px;height:5px;border-radius:50%;background:var(--bdr2);flex-shrink:0}
-        .role-card{background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:16px;margin-bottom:10px}
-        .page-feat{display:flex;align-items:flex-start;gap:8px;margin-bottom:7px}
-        .tip-card{display:flex;align-items:flex-start;gap:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:10px;padding:14px;margin-bottom:8px}
-        .step-row{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--bdr)}
+        .feat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:20px}
+        .feat-card{background:var(--s1);border:1px solid var(--bdr);border-radius:10px;padding:14px}
+        .role-card{background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:18px;margin-bottom:12px}
+        .step-row{display:flex;align-items:flex-start;gap:12px;padding:11px 0;border-bottom:1px solid var(--bdr)}
         .step-row:last-child{border-bottom:none}
-        @media(max-width:768px){.doc-sb{display:none}.doc-body{padding:18px 16px 80px}}
+        .tip-card{display:flex;align-items:flex-start;gap:14px;background:var(--s1);border:1px solid var(--bdr);border-radius:10px;padding:14px;margin-bottom:8px}
+        .bullet{width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:7px}
+        @media(max-width:768px){.doc-sb{display:none}.doc-body{padding:18px 16px 100px}.feat-grid{grid-template-columns:1fr 1fr}}
+        @media(max-width:480px){.feat-grid{grid-template-columns:1fr}}
       `}</style>
 
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
         <TopBar
-          title="Kılavuz"
-          subtitle="Daydream Production — Sistem Kullanım Kılavuzu"
+          title="Sistem Tanıtımı"
+          subtitle="Daydream Production — Agency ERP"
           action={
             <div style={{ position: 'relative' }}>
               <Search size={12} style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', color: 'var(--tx3)' }} />
               <input
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                placeholder="Sayfa ara..."
+                placeholder="Modül ara..."
                 style={{ padding: '6px 10px 6px 28px', background: 'var(--s2)', border: '1px solid var(--bdr)', borderRadius: 8, color: 'var(--tx)', fontSize: 12, outline: 'none', width: 150 }}
               />
             </div>
@@ -394,134 +374,125 @@ export default function DokumantasyonPage() {
         />
 
         <div className="doc-wrap">
-          {/* Sidebar */}
+          {/* Sol Menü */}
           <div className="doc-sb">
             <p style={{ fontSize: 9.5, fontWeight: 700, color: 'var(--tx3)', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 10, padding: '0 4px' }}>İçindekiler</p>
             {SECTIONS.map(s => (
               <button key={s.id} className="doc-nav" onClick={() => scrollTo(s.id)}>
-                <span className="dot" />
+                <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--bdr2)', flexShrink: 0 }} />
                 {s.label}
               </button>
             ))}
-            <div style={{ marginTop: 24, padding: '10px 12px', background: 'var(--ac2)', borderRadius: 9, border: '1px solid rgba(124,106,247,.15)' }}>
-              <p style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--ac)', marginBottom: 3 }}>Daydream Production</p>
-              <p style={{ fontSize: 10.5, color: 'var(--tx3)', lineHeight: 1.5 }}>Agency ERP v1.0<br />panelson.vercel.app</p>
+            <div style={{ marginTop: 24, padding: '12px', background: 'var(--ac2)', borderRadius: 9, border: '1px solid rgba(124,106,247,.15)' }}>
+              <p style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--ac)', marginBottom: 4 }}>Daydream Production</p>
+              <p style={{ fontSize: 10.5, color: 'var(--tx3)', lineHeight: 1.6 }}>Agency ERP<br />daydreamsocial.online</p>
             </div>
           </div>
 
           {/* İçerik */}
           <div className="doc-body">
 
-            {/* ── GİRİŞ ── */}
-            <Section id="giris" title="🏠 Bu Sistem Ne?">
-              <div style={{ background: 'linear-gradient(135deg,var(--ac2),var(--blue2))', border: '1px solid rgba(124,106,247,.2)', borderRadius: 12, padding: '20px 22px', marginBottom: 16 }}>
-                <p style={{ fontSize: 15, fontWeight: 700, marginBottom: 8 }}>Daydream Production — Agency ERP</p>
-                <p style={{ fontSize: 13.5, color: 'var(--tx2)', lineHeight: 1.8 }}>
-                  Ajansın tüm iş süreçlerini tek ekrandan yönetmek için tasarlandı.
-                  Müşteri takibinden içerik onayına, proje aşamalarından finansa kadar her şey burada.
+            {/* ── SİSTEM NEDİR ── */}
+            <Section id="nedir" title="🏢 Bu Sistem Nedir?">
+              <div style={{ background: 'linear-gradient(135deg,var(--ac2),var(--blue2))', border: '1px solid rgba(124,106,247,.2)', borderRadius: 14, padding: '24px 26px', marginBottom: 20 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                  <Star size={18} style={{ color: 'var(--ac)' }} strokeWidth={2} />
+                  <p style={{ fontSize: 16, fontWeight: 800, color: 'var(--tx)' }}>Daydream Production — Agency ERP</p>
+                </div>
+                <p style={{ fontSize: 14, color: 'var(--tx2)', lineHeight: 1.9 }}>
+                  Daydream Production için baştan sona özel geliştirilen bir ajans yönetim sistemidir.
+                  Müşteri takibinden içerik onayına, proje yönetiminden ekip performansına, finanstan
+                  otomasyona kadar ajansın tüm operasyonel süreçleri tek çatı altında toplanmıştır.
                 </p>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 10, marginBottom: 18 }}>
-                {[
-                  { e: '🎯', t: 'Rol Bazlı Erişim', d: 'Her kişi sadece kendi alanını görür' },
-                  { e: '⚡', t: 'Gerçek Zamanlı', d: 'Veri değişince F5\'e gerek yok' },
-                  { e: '📲', t: 'Push Bildirim', d: 'Telefona anlık uyarı — uygulama kapalıyken bile' },
-                  { e: '🤝', t: 'Müşteri Portali', d: 'Müşteri kendi projesini takip eder' },
-                ].map(c => (
-                  <div key={c.t} style={{ background: 'var(--s1)', border: '1px solid var(--bdr)', borderRadius: 10, padding: 14 }}>
-                    <div style={{ fontSize: 22, marginBottom: 8 }}>{c.e}</div>
-                    <p style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>{c.t}</p>
-                    <p style={{ fontSize: 12, color: 'var(--tx3)', lineHeight: 1.5 }}>{c.d}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div style={{ background: 'var(--s2)', borderRadius: 10, padding: '14px 16px', border: '1px solid var(--bdr)' }}>
-                <p style={{ fontSize: 12.5, fontWeight: 700, marginBottom: 8 }}>🔐 Sisteme Nasıl Giriş Yapılır?</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-                  {[
-                    'Tarayıcıdan panelson.vercel.app adresine git',
-                    'E-posta ve şifrenle giriş yap (ilk şifre: 12345 — hemen değiştir)',
-                    'Ayarlar → Güvenlik sekmesinden yeni şifreni belirle',
-                    'Rolüne göre menü otomatik filtrelenir',
-                  ].map((s, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 9 }}>
-                      <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'var(--ac2)', color: 'var(--ac)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 800, flexShrink: 0 }}>{i + 1}</div>
-                      <p style={{ fontSize: 12.5, color: 'var(--tx2)', lineHeight: 1.5, paddingTop: 2 }}>{s}</p>
-                    </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 14 }}>
+                  {['Özel Geliştirme', 'Gerçek Zamanlı', 'PWA — Her Cihazda', 'Müşteri Portali', 'SMS & Push Bildirim', 'Rol Bazlı Erişim'].map(t => (
+                    <span key={t} style={{ fontSize: 11.5, fontWeight: 600, background: 'rgba(124,106,247,.15)', color: 'var(--ac)', padding: '3px 10px', borderRadius: 6, border: '1px solid rgba(124,106,247,.2)' }}>{t}</span>
                   ))}
                 </div>
               </div>
+
+              <div style={{ background: 'var(--s1)', border: '1px solid var(--bdr)', borderRadius: 12, padding: '18px 20px' }}>
+                <p style={{ fontSize: 13.5, fontWeight: 700, marginBottom: 12 }}>💼 Hangi Sorunu Çözüyor?</p>
+                {[
+                  { e: '❌', b: 'Eskiden:', t: 'WhatsApp\'ta boğulan onaylar, Excel\'de kaybolan görevler, unutulan deadlineler, müşteriye manuel iletilen linkler' },
+                  { e: '✅', b: 'Artık:', t: 'Tek platform — görev atama, içerik onayı, müşteri portali, otomatik bildirim ve performans takibi hepsi burada' },
+                ].map(r => (
+                  <div key={r.e} style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
+                    <span style={{ fontSize: 18, flexShrink: 0 }}>{r.e}</span>
+                    <p style={{ fontSize: 13, color: 'var(--tx2)', lineHeight: 1.7 }}><strong style={{ color: 'var(--tx)' }}>{r.b}</strong> {r.t}</p>
+                  </div>
+                ))}
+              </div>
             </Section>
 
-            {/* ── ROLLER ── */}
-            <Section id="roller" title="👥 Kim Kim? — Roller ve Yetkiler">
+            {/* ── ÖNE ÇIKAN ÖZELLİKLER ── */}
+            <Section id="ozellik" title="✨ Öne Çıkan Özellikler">
+              <div className="feat-grid">
+                {FEATURES.map(f => (
+                  <div key={f.t} className="feat-card">
+                    <div style={{ fontSize: 24, marginBottom: 10 }}>{f.e}</div>
+                    <p style={{ fontSize: 13, fontWeight: 700, marginBottom: 5 }}>{f.t}</p>
+                    <p style={{ fontSize: 12, color: 'var(--tx3)', lineHeight: 1.6 }}>{f.d}</p>
+                  </div>
+                ))}
+              </div>
+            </Section>
+
+            {/* ── KULLANICI ROLLERİ ── */}
+            <Section id="roller" title="👥 Kullanıcı Rolleri">
               <div style={{ background: 'var(--s2)', border: '1px solid var(--bdr)', borderRadius: 10, padding: '12px 16px', marginBottom: 16 }}>
-                <p style={{ fontSize: 12.5, color: 'var(--tx2)', lineHeight: 1.7 }}>
-                  Sistemde 3 rol var: <strong style={{ color: 'var(--ac)' }}>Admin</strong> (her şey), <strong style={{ color: 'var(--blue)' }}>Manager</strong> (Kullanıcılar hariç her şey), <strong style={{ color: 'var(--green)' }}>Member</strong> (sadece kendine atananlar).
-                  URL manipülasyonu da engellendi — rol kısıtlaması hem menüde hem sunucuda çalışır.
+                <p style={{ fontSize: 13, color: 'var(--tx2)', lineHeight: 1.7 }}>
+                  Sistemde 3 kullanıcı tipi vardır. Her rol yalnızca kendi yetkisi dahilindeki sayfalara ve verilere erişebilir.
+                  Bu kısıtlama sadece menüde değil, sunucu tarafında da geçerlidir — URL manipülasyonu çalışmaz.
                 </p>
               </div>
               {ROLES.map(r => (
-                <div key={r.name} className="role-card">
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 12 }}>
-                    <div style={{ width: 40, height: 40, borderRadius: '50%', background: r.bg, color: r.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, flexShrink: 0 }}>{r.avatar}</div>
+                <div key={r.title} className="role-card">
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 14 }}>
+                    <div style={{ width: 44, height: 44, borderRadius: '50%', background: r.bg, color: r.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, flexShrink: 0, border: `2px solid ${r.color}40` }}>{r.avatar}</div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
-                        <p style={{ fontSize: 14, fontWeight: 700 }}>{r.name}</p>
-                        <span style={{ fontSize: 10.5, fontWeight: 700, padding: '2px 8px', borderRadius: 5, background: r.bg, color: r.color }}>{r.title}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                        <p style={{ fontSize: 14.5, fontWeight: 700 }}>{r.title}</p>
                       </div>
-                      <p style={{ fontSize: 12.5, color: 'var(--tx2)', lineHeight: 1.6 }}>{r.desc}</p>
+                      <p style={{ fontSize: 13, color: 'var(--tx2)', lineHeight: 1.7 }}>{r.desc}</p>
                     </div>
                   </div>
-
-                  <div style={{ marginBottom: 10 }}>
-                    <p style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--tx3)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 7 }}>Erişilen Sayfalar</p>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                      {r.pages.map(p => <span key={p} className="badge badge-muted" style={{ fontSize: 10.5 }}>{p}</span>)}
+                  <div style={{ background: 'var(--s2)', borderRadius: 8, padding: '12px 14px' }}>
+                    <p style={{ fontSize: 10.5, fontWeight: 700, color: r.color, textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 10 }}>Yetkiler</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      {r.caps.map((c, i) => (
+                        <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                          <ChevronRight size={12} style={{ color: r.color, flexShrink: 0, marginTop: 2 }} strokeWidth={2.5} />
+                          <p style={{ fontSize: 12.5, color: 'var(--tx2)', lineHeight: 1.5 }}>{c}</p>
+                        </div>
+                      ))}
                     </div>
-                  </div>
-
-                  <div style={{ background: 'var(--s2)', borderRadius: 8, padding: '10px 12px', border: '1px solid var(--bdr)' }}>
-                    <p style={{ fontSize: 10.5, fontWeight: 700, color: r.color, marginBottom: 7, textTransform: 'uppercase', letterSpacing: '.05em' }}>💡 İpuçları</p>
-                    {r.tips.map((t, i) => (
-                      <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 7, marginBottom: i < r.tips.length - 1 ? 5 : 0 }}>
-                        <ChevronRight size={11} style={{ color: r.color, flexShrink: 0, marginTop: 3 }} strokeWidth={2.5} />
-                        <p style={{ fontSize: 12, color: 'var(--tx2)', lineHeight: 1.5 }}>{t}</p>
-                      </div>
-                    ))}
                   </div>
                 </div>
               ))}
             </Section>
 
-            {/* ── SAYFALAR ── */}
-            <Section id="sayfalar" title="📄 Sayfalar — Ne İşe Yarar?">
-              {search && (
+            {/* ── MODÜLLER ── */}
+            <Section id="moduller" title="📦 Modüller — Ne İşe Yarar?">
+              {search && filtered.length < MODULES.length && (
                 <div style={{ marginBottom: 12, padding: '8px 12px', background: 'var(--blue2)', borderRadius: 8, fontSize: 12.5, color: 'var(--blue)' }}>
-                  "{search}" için {filteredPages.length} sayfa
+                  &quot;{search}&quot; için {filtered.length} modül
                 </div>
               )}
-              {filteredPages.length === 0 && (
+              {filtered.length === 0 && (
                 <p style={{ color: 'var(--tx3)', fontSize: 13, padding: '20px 0' }}>Sonuç bulunamadı.</p>
               )}
-              {filteredPages.map(p => (
-                <Accordion key={p.name} title={`${p.name}  —  ${p.who}`} color={p.color} Icon={p.icon}>
-                  <p style={{ fontSize: 13, color: 'var(--tx2)', lineHeight: 1.7, marginBottom: 12 }}>{p.desc}</p>
-                  <div style={{ marginBottom: p.note ? 12 : 0 }}>
-                    {p.features.map((f, i) => (
-                      <div key={i} className="page-feat">
-                        <div style={{ width: 5, height: 5, borderRadius: '50%', background: p.color, flexShrink: 0, marginTop: 6 }} />
-                        <p style={{ fontSize: 12.5, color: 'var(--tx2)', lineHeight: 1.5 }}>{f}</p>
+              {filtered.map(m => (
+                <Accordion key={m.name} title={m.name} color={m.color} Icon={m.icon} tag={m.tag}>
+                  <p style={{ fontSize: 13, color: 'var(--tx2)', lineHeight: 1.7, marginBottom: 12 }}>{m.summary}</p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                    {m.items.map((item, i) => (
+                      <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 9 }}>
+                        <div className="bullet" style={{ background: m.color }} />
+                        <p style={{ fontSize: 12.5, color: 'var(--tx2)', lineHeight: 1.5 }}>{item}</p>
                       </div>
                     ))}
                   </div>
-                  {p.note && (
-                    <div style={{ background: `${p.color}12`, border: `1px solid ${p.color}30`, borderRadius: 8, padding: '9px 12px' }}>
-                      <p style={{ fontSize: 12, color: p.color, lineHeight: 1.6 }}>📌 {p.note}</p>
-                    </div>
-                  )}
                 </Accordion>
               ))}
             </Section>
@@ -530,16 +501,16 @@ export default function DokumantasyonPage() {
             <Section id="akislar" title="🔄 İş Akışları — Adım Adım">
               {WORKFLOWS.map(wf => (
                 <div key={wf.title} style={{ background: 'var(--s1)', border: '1px solid var(--bdr)', borderRadius: 12, overflow: 'hidden', marginBottom: 14 }}>
-                  <div style={{ padding: '12px 16px', background: `${wf.color}10`, borderBottom: '1px solid var(--bdr)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: wf.color }} />
+                  <div style={{ padding: '13px 18px', background: `${wf.color}10`, borderBottom: '1px solid var(--bdr)', display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: wf.color, flexShrink: 0 }} />
                     <span style={{ fontSize: 14, fontWeight: 700 }}>{wf.title}</span>
                   </div>
-                  <div style={{ padding: '8px 16px 14px' }}>
+                  <div style={{ padding: '10px 18px 16px' }}>
                     {wf.steps.map((step, i) => (
                       <div key={i} className="step-row">
-                        <div style={{ width: 24, height: 24, borderRadius: '50%', background: `${wf.color}20`, color: wf.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 800, flexShrink: 0, border: `1px solid ${wf.color}40` }}>{i + 1}</div>
-                        <div style={{ flex: 1, paddingTop: 2 }}>
-                          <span style={{ fontSize: 11, fontWeight: 700, color: wf.color, background: `${wf.color}15`, padding: '1px 7px', borderRadius: 4, marginRight: 8 }}>{step.who}</span>
+                        <div style={{ width: 26, height: 26, borderRadius: '50%', background: `${wf.color}20`, color: wf.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, flexShrink: 0, border: `1px solid ${wf.color}35` }}>{i + 1}</div>
+                        <div style={{ flex: 1, paddingTop: 3 }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: wf.color, background: `${wf.color}15`, padding: '2px 8px', borderRadius: 4, marginRight: 8 }}>{step.who}</span>
                           <span style={{ fontSize: 13, color: 'var(--tx2)' }}>{step.action}</span>
                         </div>
                       </div>
@@ -549,11 +520,41 @@ export default function DokumantasyonPage() {
               ))}
             </Section>
 
+            {/* ── MÜŞTERİ DENEYİMİ ── */}
+            <Section id="musteri" title="🤝 Müşteri Deneyimi — Müşteriniz Sistemi Nasıl Görür?">
+              <div style={{ background: 'linear-gradient(135deg,var(--green2),var(--blue2))', border: '1px solid rgba(34,211,160,.2)', borderRadius: 14, padding: '22px 24px', marginBottom: 16 }}>
+                <p style={{ fontSize: 14.5, fontWeight: 700, marginBottom: 10 }}>🌐 Müşteri Portali</p>
+                <p style={{ fontSize: 13.5, color: 'var(--tx2)', lineHeight: 1.9, marginBottom: 14 }}>
+                  Müşterinize ajans yönetim sistemine hesap açmanıza gerek yok. Onlara özel üretilen
+                  bir link ile kendi portallerine şifresiz girerler. Tüm proje geçmişini, dosyalarını
+                  ve onay süreçlerini buradan takip ederler.
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 10 }}>
+                  {[
+                    { e: '🔗', t: 'Şifresiz Erişim', d: 'Sadece link — ek hesap yükü yok' },
+                    { e: '📁', t: 'Tüm Dosyalar', d: 'İndirebilir, arşivleyebilir' },
+                    { e: '✅', t: 'Onay / Revizyon', d: 'Kararını not ile birlikte iletir' },
+                    { e: '🏗️', t: 'Proje Aşamaları', d: 'İlerlemeyi anlık görür' },
+                  ].map(c => (
+                    <div key={c.t} style={{ background: 'rgba(255,255,255,.06)', borderRadius: 9, padding: '12px 14px', border: '1px solid rgba(255,255,255,.1)' }}>
+                      <div style={{ fontSize: 20, marginBottom: 6 }}>{c.e}</div>
+                      <p style={{ fontSize: 12.5, fontWeight: 700, marginBottom: 3 }}>{c.t}</p>
+                      <p style={{ fontSize: 11.5, color: 'var(--tx3)' }}>{c.d}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div style={{ background: 'var(--s2)', borderRadius: 10, padding: '14px 16px', border: '1px solid var(--bdr)', fontSize: 13, color: 'var(--tx2)', lineHeight: 1.8 }}>
+                <strong style={{ color: 'var(--tx)' }}>📌 Önemli:</strong> Ajansın iç onayını vermediği hiçbir içerik müşteri portalinde görünmez.
+                Müşteri yalnızca size hazır dediğiniz içerikleri görür. Tüm kararlar (onay/revizyon) kayıt altında tutulur ve ekibe anlık bildirilir.
+              </div>
+            </Section>
+
             {/* ── SIK SORULAR ── */}
-            <Section id="sorular" title="💡 Sık Sorular">
+            <Section id="sorular" title="💡 Sık Sorulan Sorular">
               {TIPS.map((tip, i) => (
                 <div key={i} className="tip-card">
-                  <div style={{ fontSize: 22, flexShrink: 0 }}>{tip.emoji}</div>
+                  <div style={{ fontSize: 22, flexShrink: 0 }}>{tip.e}</div>
                   <div>
                     <p style={{ fontSize: 13.5, fontWeight: 700, marginBottom: 5 }}>{tip.q}</p>
                     <p style={{ fontSize: 13, color: 'var(--tx2)', lineHeight: 1.6 }}>{tip.a}</p>
@@ -561,11 +562,12 @@ export default function DokumantasyonPage() {
                 </div>
               ))}
 
-              <div style={{ marginTop: 20, background: 'var(--ac2)', border: '1px solid rgba(124,106,247,.2)', borderRadius: 12, padding: '18px 20px', textAlign: 'center' }}>
-                <p style={{ fontSize: 14, fontWeight: 700, marginBottom: 6 }}>🛠️ Sorun mu var?</p>
-                <p style={{ fontSize: 13, color: 'var(--tx2)', lineHeight: 1.7 }}>
-                  Sistemde bir problem yaşıyorsan <strong>Mert</strong>'e ilet.<br />
-                  Teknik bir sorunsa Mert, <strong>Emir</strong>'i bilgilendirir.
+              <div style={{ marginTop: 20, background: 'var(--ac2)', border: '1px solid rgba(124,106,247,.2)', borderRadius: 14, padding: '22px 24px', textAlign: 'center' }}>
+                <Zap size={24} style={{ color: 'var(--ac)', margin: '0 auto 10px' }} strokeWidth={2} />
+                <p style={{ fontSize: 15, fontWeight: 800, marginBottom: 8 }}>Sistem tamamen size özel geliştirildi</p>
+                <p style={{ fontSize: 13, color: 'var(--tx2)', lineHeight: 1.8 }}>
+                  Yeni modül, özellik veya entegrasyon ihtiyacı için<br />
+                  <strong style={{ color: 'var(--ac)' }}>Mert</strong> ile iletişime geçin.
                 </p>
               </div>
             </Section>
