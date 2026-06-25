@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Download, Smartphone } from 'lucide-react'
 import DaydreamLogo from '@/components/DaydreamLogo'
 
 export default function LoginPage() {
@@ -10,11 +10,24 @@ export default function LoginPage() {
   const [loading,  setLoading]  = useState(false)
   const [error,    setError]    = useState('')
   const [checking, setChecking] = useState(true)
+  const [installPrompt, setInstallPrompt] = useState<any>(null)
+  const [installed, setInstalled] = useState(false)
   const redirected = useRef(false)
 
   useEffect(() => {
+    // PWA install prompt yakala
+    const handler = (e: any) => {
+      e.preventDefault()
+      setInstallPrompt(e)
+    }
+    window.addEventListener('beforeinstallprompt', handler)
+
+    // Zaten yüklü mü?
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setInstalled(true)
+    }
+
     const sb = createClient()
-    // Tek seferlik session kontrolü
     sb.auth.getSession().then(({ data: { session } }) => {
       if (session && !redirected.current) {
         redirected.current = true
@@ -23,15 +36,27 @@ export default function LoginPage() {
         setChecking(false)
       }
     })
-    // Auth state değişimini dinle (giriş sonrası)
     const { data: { subscription } } = sb.auth.onAuthStateChange((event, session) => {
       if ((event === 'SIGNED_IN') && session && !redirected.current) {
         redirected.current = true
         window.location.href = '/dashboard'
       }
     })
-    return () => subscription.unsubscribe()
+    return () => {
+      subscription.unsubscribe()
+      window.removeEventListener('beforeinstallprompt', handler)
+    }
   }, [])
+
+  async function handleInstall() {
+    if (!installPrompt) return
+    installPrompt.prompt()
+    const { outcome } = await installPrompt.userChoice
+    if (outcome === 'accepted') {
+      setInstallPrompt(null)
+      setInstalled(true)
+    }
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
@@ -43,10 +68,8 @@ export default function LoginPage() {
       setError('E-posta veya şifre hatalı.')
       setLoading(false)
     }
-    // Başarılı giriş → onAuthStateChange halleder
   }
 
-  // Oturum kontrolü yapılırken boş ekran göster (yenileme önleme)
   if (checking) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)' }}>
@@ -67,15 +90,16 @@ export default function LoginPage() {
         .logo-in{animation:logo-in .5s cubic-bezier(.22,1,.36,1) .05s both}
         @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
         .logo-float{animation:float 4s ease-in-out infinite}
+        .install-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:10px;background:var(--s2);border:1px solid var(--bdr);border-radius:9px;color:var(--tx2);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;margin-top:10px}
+        .install-btn:hover{border-color:var(--ac);color:var(--ac);background:var(--ac2)}
+        @keyframes spin{to{transform:rotate(360deg)}}
       `}</style>
 
-      {/* dot grid bg */}
       <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 0)', backgroundSize: '28px 28px' }} />
       <div style={{ position: 'fixed', top: '15%', left: '50%', transform: 'translateX(-50%)', width: 600, height: 300, pointerEvents: 'none', background: 'radial-gradient(ellipse, rgba(124,106,247,0.12) 0%, transparent 70%)' }} />
 
       <div style={{ position: 'relative', width: '100%', maxWidth: 360 }}>
 
-        {/* Logo */}
         <div className="logo-in" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 28 }}>
           <div className="logo-float">
             <DaydreamLogo size={72} />
@@ -126,6 +150,22 @@ export default function LoginPage() {
                 }
               </button>
             </form>
+
+            {/* PWA Install Butonu */}
+            {!installed && installPrompt && (
+              <button className="install-btn" onClick={handleInstall}>
+                <Smartphone size={14} strokeWidth={2} />
+                Uygulamayı Telefona Yükle
+                <Download size={13} strokeWidth={2} />
+              </button>
+            )}
+
+            {installed && (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 10, fontSize: 12, color: 'var(--green)' }}>
+                <Smartphone size={13} strokeWidth={2} />
+                Uygulama yüklü ✓
+              </div>
+            )}
           </div>
         </div>
 
@@ -133,8 +173,6 @@ export default function LoginPage() {
           Daydream Production © 2026
         </p>
       </div>
-
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   )
 }
