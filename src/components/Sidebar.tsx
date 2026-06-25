@@ -20,7 +20,7 @@ const NAV_ALL = [
     { href: '/dashboard/musteriler',     label: 'Müşteriler',   Icon: Users,           roles: ['admin','manager'] },
     { href: '/dashboard/gorevler',       label: 'Görevler',     Icon: CheckSquare,     roles: ['admin','manager','member'] },
     { href: '/dashboard/takvim',         label: 'Takvim',       Icon: CalendarDays,    roles: ['admin','manager','member'] },
-    { href: '/dashboard/notlar',         label: 'Notlarım',     Icon: StickyNote,      roles: ['admin','manager','member'] },
+    { href: '/dashboard/notlar',         label: 'Notlarım',     Icon: StickyNote,      roles: ['admin','manager','member','muhasebe'] },
   ]},
   { g: 'Operasyon', items: [
     { href: '/dashboard/icerik',         label: 'İçerik',       Icon: FileText,        roles: ['admin','manager','member'] },
@@ -29,8 +29,8 @@ const NAV_ALL = [
     { href: '/dashboard/onay',           label: 'Onay',         Icon: ShieldCheck,     roles: ['admin','manager','member'] },
   ]},
   { g: 'Finans', items: [
-    { href: '/dashboard/muhasebe',       label: 'Muhasebe',     Icon: Receipt,         roles: ['admin'] },
-    { href: '/dashboard/finans',         label: 'Finans',       Icon: BarChart2,       roles: ['admin'] },
+    { href: '/dashboard/muhasebe',       label: 'Muhasebe',     Icon: Receipt,         roles: ['admin','muhasebe'] },
+    { href: '/dashboard/finans',         label: 'Finans',       Icon: BarChart2,       roles: ['admin','muhasebe'] },
     { href: '/dashboard/performans',     label: 'Performans',   Icon: TrendingUp,      roles: ['admin','manager'] },
   ]},
   { g: 'Sistem', items: [
@@ -38,7 +38,7 @@ const NAV_ALL = [
     { href: '/dashboard/sablonlar',      label: 'Şablonlar',    Icon: LayoutTemplate,  roles: ['admin','manager'] },
     { href: '/dashboard/araclar',        label: 'Araçlar',      Icon: Wrench,          roles: ['admin'] },
     { href: '/dashboard/otomasyonlar',   label: 'Otomasyonlar', Icon: Workflow,        roles: ['admin','manager'] },
-    { href: '/dashboard/ayarlar',        label: 'Ayarlar',      Icon: SlidersHorizontal, roles: ['admin','manager','member'] },
+    { href: '/dashboard/ayarlar',        label: 'Ayarlar',      Icon: SlidersHorizontal, roles: ['admin','manager','member','muhasebe'] },
     { href: '/dashboard/toplanti',       label: 'Toplantılar',  Icon: CalendarClock,   roles: ['admin','manager'] },
     { href: '/dashboard/destek',         label: 'Destek',       Icon: LifeBuoy,        roles: ['admin','manager'] },
     { href: '/dashboard/dokumantasyon',  label: 'Kılavuz',      Icon: BookOpen,        roles: ['admin','manager','member'] },
@@ -46,7 +46,7 @@ const NAV_ALL = [
 ]
 
 const ROLE_L: Record<string, string> = {
-  admin: 'Yönetici', manager: 'Operasyon Müdürü', member: 'Ekip'
+  admin: 'Yönetici', manager: 'Operasyon Müdürü', member: 'Ekip', muhasebe: 'Muhasebe'
 }
 
 export default function Sidebar() {
@@ -95,7 +95,7 @@ export default function Sidebar() {
       </div>
       <div style={{ padding: '6px 12px', borderBottom: '1px solid var(--bdr)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 8px', background: 'var(--s2)', borderRadius: 7 }}>
-          <div style={{ width: 6, height: 6, borderRadius: '50%', background: role === 'admin' ? 'var(--ac)' : role === 'manager' ? 'var(--blue)' : 'var(--tx3)', flexShrink: 0 }} />
+          <div style={{ width: 6, height: 6, borderRadius: '50%', background: role === 'admin' ? 'var(--ac)' : role === 'manager' ? 'var(--blue)' : role === 'muhasebe' ? 'var(--green)' : 'var(--tx3)', flexShrink: 0 }} />
           <span style={{ fontSize: 10.5, color: role === 'admin' ? 'var(--ac)' : role === 'manager' ? 'var(--blue)' : 'var(--tx3)', fontWeight: 600 }}>
             {ROLE_L[role] || role}
           </span>
@@ -127,3 +127,4 @@ export default function Sidebar() {
     </aside>
   )
 }
+
