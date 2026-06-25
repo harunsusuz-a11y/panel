@@ -4,9 +4,14 @@ import { createServerClient } from '@supabase/ssr'
 
 const ADMIN_ONLY = [
   '/dashboard/kullanicilar',
+  '/dashboard/araclar',
+]
+
+const MUHASEBE_ALLOWED = [
   '/dashboard/finans',
   '/dashboard/muhasebe',
-  '/dashboard/araclar',
+  '/dashboard/ayarlar',
+  '/dashboard/notlar',
 ]
 
 const MANAGER_PLUS = [
@@ -82,6 +87,12 @@ export async function middleware(request: NextRequest) {
 
     if (role === 'admin') return response
 
+    if (role === 'muhasebe') {
+      const allowed = MUHASEBE_ALLOWED.some(p => pathname.startsWith(p))
+      if (!allowed) return NextResponse.redirect(new URL('/dashboard/finans', request.url))
+      return response
+    }
+
     if (ADMIN_ONLY.some(p => pathname.startsWith(p))) {
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
@@ -109,4 +120,5 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: ['/', '/login', '/dashboard/:path*'],
 }
+
 
