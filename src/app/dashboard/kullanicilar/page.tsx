@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
-import { UserCog, Plus, X, Shield, Check, Clock, Activity, LogIn, AlertCircle, KeyRound, Eye, EyeOff } from 'lucide-react'
+import { UserCog, Plus, X, Shield, Check, Clock, Activity, LogIn, AlertCircle, KeyRound, Eye, EyeOff, Bell, Send, Users } from 'lucide-react'
 import PhoneInput from '@/components/PhoneInput'
 import { fmtDateTime, fmtRelative } from '@/lib/utils'
 
@@ -43,13 +43,16 @@ export default function KullanicilarPage() {
   const [saving,   setSaving]   = useState(false)
   const [toast,    setToast]    = useState('')
   const [modal,    setModal]    = useState(false)
-  const [view,     setView]     = useState<'edit'|'access'|'logs'>('edit')
+  const [view,     setView]     = useState<'edit'|'access'|'logs'|'notif'>('edit')
   const [myRole,   setMyRole]   = useState('')
   const [myId,     setMyId]     = useState('')
   const [pwdModal, setPwdModal] = useState(false)
   const [pwdForm,  setPwdForm]  = useState({ pw1: '', pw2: '' })
   const [pwdShow,  setPwdShow]  = useState(false)
   const [pwdSaving,setPwdSaving]= useState(false)
+  const [notifModal, setNotifModal] = useState(false)
+  const [notifForm, setNotifForm] = useState({ target: 'all', userId: '', title: '', body: '', url: '/dashboard' })
+  const [notifSending, setNotifSending] = useState(false)
 
   const [form, setForm] = useState({ full_name:'', role:'member', department:'', phone:'' })
   const [inv,  setInv]  = useState({ email:'', full_name:'', role:'member', department:'' })
@@ -132,7 +135,45 @@ export default function KullanicilarPage() {
     setPwdForm({ pw1: '', pw2: '' })
   }
 
+  async function sendNotification() {
+    if (!notifForm.title.trim()) { showToast('Hata: Başlık zorunlu'); return }
+    setNotifSending(true)
+    const sb = createClient()
+    let targets: string[] = []
+    if (notifForm.target === 'all') {
+      targets = users.map((u: any) => u.id)
+    } else if (notifForm.target === 'user' && notifForm.userId) {
+      targets = [notifForm.userId]
+    }
+    let sent = 0
+    for (const uid of targets) {
+      const res = await fetch('/api/push/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: uid, title: notifForm.title, body: notifForm.body, url: notifForm.url, type: 'manual' })
+      })
+      const json = await res.json()
+      sent += json.sent || 0
+      // notifications tablosuna da kaydet
+      try {
+        await sb.from('notifications').insert({
+          user_id: uid,
+          title: notifForm.title,
+          body: notifForm.body,
+          type: 'manual',
+          url: notifForm.url,
+          read: false,
+        })
+      } catch {}
+    }
+    setNotifSending(false)
+    setNotifModal(false)
+    setNotifForm({ target: 'all', userId: '', title: '', body: '', url: '/dashboard' })
+    showToast(`✓ ${sent} cihaza bildirim gönderildi`)
+  }
+
   const isAdmin = myRole === 'admin'
+  const canNotify = myRole === 'admin' || myRole === 'manager'
 
   return (
     <>
@@ -155,11 +196,20 @@ export default function KullanicilarPage() {
         <TopBar
           title="Kullanıcılar"
           subtitle={`${users.length} kişi`}
-          action={isAdmin ? (
-            <button className="btn" onClick={() => setModal(true)}>
-              <Plus size={14} strokeWidth={2} />Kullanıcı Ekle
-            </button>
-          ) : undefined}
+          action={
+            <div style={{ display: 'flex', gap: 8 }}>
+              {canNotify && (
+                <button className="btn" style={{ background: 'var(--s3)', color: 'var(--tx)', border: '1px solid var(--bdr)' }} onClick={() => setNotifModal(true)}>
+                  <Bell size={14} strokeWidth={2} />Bildirim Gönder
+                </button>
+              )}
+              {isAdmin && (
+                <button className="btn" onClick={() => setModal(true)}>
+                  <Plus size={14} strokeWidth={2} />Kullanıcı Ekle
+                </button>
+              )}
+            </div>
+          }
         />
         {toast && <div className={`toast ${toast.startsWith('Hata') ? 'toast-err' : 'toast-ok'}`}>{toast}</div>}
 
@@ -238,6 +288,7 @@ export default function KullanicilarPage() {
                   { k: 'edit',   l: 'Profil',        Icon: UserCog  },
                   { k: 'access', l: 'Sayfa Erişimi',  Icon: Shield   },
                   { k: 'logs',   l: `Giriş Logları (${loginLogs.length})`, Icon: Activity },
+                  ...(canNotify ? [{ k: 'notif', l: 'Bildirim Gönder', Icon: Bell }] : []),
                 ].map(({ k, l, Icon }) => (
                   <button key={k} className={`subtab${view === k ? ' on' : ''}`} onClick={() => setView(k as any)}>
                     <Icon size={12} strokeWidth={1.8} />{l}
@@ -353,6 +404,38 @@ export default function KullanicilarPage() {
                   </div>
                 </div>
               )}
+
+              {/* ── Bildirim Gönder (tek kişiye) ── */}
+              {view === 'notif' && canNotify && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div style={{ background: 'var(--ac2)', borderRadius: 10, padding: '12px 14px', border: '1px solid rgba(124,106,247,.15)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Bell size={14} style={{ color: 'var(--ac)', flexShrink: 0 }} strokeWidth={2} />
+                    <p style={{ fontSize: 12.5, color: 'var(--tx2)' }}>
+                      <strong style={{ color: 'var(--ac)' }}>{sel.full_name}</strong> adlı kullanıcıya push bildirimi gönder
+                    </p>
+                  </div>
+                  <div>
+                    <label className="label">Başlık *</label>
+                    <input className="inp" placeholder="Bildirim başlığı" value={notifForm.title} onChange={e => setNotifForm(p => ({...p, title: e.target.value}))} />
+                  </div>
+                  <div>
+                    <label className="label">Mesaj</label>
+                    <textarea className="inp" rows={3} placeholder="Bildirim içeriği..." value={notifForm.body} onChange={e => setNotifForm(p => ({...p, body: e.target.value}))} style={{ resize: 'vertical' }} />
+                  </div>
+                  <div>
+                    <label className="label">Yönlendirme URL</label>
+                    <input className="inp" placeholder="/dashboard" value={notifForm.url} onChange={e => setNotifForm(p => ({...p, url: e.target.value}))} />
+                  </div>
+                  <button className="btn" disabled={notifSending || !notifForm.title.trim()} style={{ alignSelf: 'flex-start', padding: '9px 20px', opacity: notifSending || !notifForm.title.trim() ? 0.6 : 1 }}
+                    onClick={() => {
+                      setNotifForm(p => ({...p, target: 'user', userId: sel.id}))
+                      setTimeout(() => sendNotification(), 50)
+                    }}>
+                    <Send size={13} strokeWidth={2} />
+                    {notifSending ? 'Gönderiliyor...' : 'Gönder'}
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--tx3)', fontSize: 13, flexDirection: 'column', gap: 8 }}>
@@ -362,6 +445,61 @@ export default function KullanicilarPage() {
           )}
         </div>
       </div>
+
+      {/* Toplu Bildirim Modal */}
+      {notifModal && (
+        <div className="overlay" onClick={e => { if (e.target === e.currentTarget) setNotifModal(false) }}>
+          <div className="modal" style={{ maxWidth: 460 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+              <p className="modal-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Bell size={16} strokeWidth={2} style={{ color: 'var(--ac)' }} /> Bildirim Gönder
+              </p>
+              <button onClick={() => setNotifModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx3)' }}><X size={15} /></button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div>
+                <label className="label">Alıcı</label>
+                <select className="inp" value={notifForm.target} onChange={e => setNotifForm(p => ({...p, target: e.target.value, userId: ''}))}>
+                  <option value="all">Tüm Kullanıcılar</option>
+                  <option value="user">Belirli Kullanıcı</option>
+                </select>
+              </div>
+              {notifForm.target === 'user' && (
+                <div>
+                  <label className="label">Kullanıcı Seç</label>
+                  <select className="inp" value={notifForm.userId} onChange={e => setNotifForm(p => ({...p, userId: e.target.value}))}>
+                    <option value="">— Seçin —</option>
+                    {users.map((u: any) => (
+                      <option key={u.id} value={u.id}>{u.full_name || u.email}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              <div>
+                <label className="label">Başlık *</label>
+                <input className="inp" placeholder="Bildirim başlığı" value={notifForm.title} onChange={e => setNotifForm(p => ({...p, title: e.target.value}))} autoFocus />
+              </div>
+              <div>
+                <label className="label">Mesaj</label>
+                <textarea className="inp" rows={3} placeholder="Bildirim içeriği..." value={notifForm.body} onChange={e => setNotifForm(p => ({...p, body: e.target.value}))} style={{ resize: 'vertical' }} />
+              </div>
+              <div>
+                <label className="label">Yönlendirme URL</label>
+                <input className="inp" placeholder="/dashboard" value={notifForm.url} onChange={e => setNotifForm(p => ({...p, url: e.target.value}))} />
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button onClick={() => setNotifModal(false)} style={{ flex: 1, padding: '10px', background: 'var(--s3)', border: 'none', borderRadius: 8, cursor: 'pointer', color: 'var(--tx2)', fontSize: 13 }}>İptal</button>
+                <button className="btn" disabled={notifSending || !notifForm.title.trim() || (notifForm.target === 'user' && !notifForm.userId)}
+                  style={{ flex: 2, justifyContent: 'center', padding: '10px', opacity: notifSending ? 0.6 : 1 }}
+                  onClick={sendNotification}>
+                  <Send size={13} strokeWidth={2} />
+                  {notifSending ? 'Gönderiliyor...' : `Gönder${notifForm.target === 'all' ? ` (${users.length} kişi)` : ''}`}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Davet Modal */}
       {modal && (
@@ -461,3 +599,4 @@ export default function KullanicilarPage() {
     </>
   )
 }
+
