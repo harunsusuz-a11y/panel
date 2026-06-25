@@ -3,8 +3,11 @@ import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
 const ADMIN_ONLY = [
-  '/dashboard/kullanicilar',
   '/dashboard/araclar',
+]
+
+const ADMIN_MANAGER = [
+  '/dashboard/kullanicilar',
 ]
 
 const MUHASEBE_ALLOWED = [
@@ -95,6 +98,10 @@ export async function middleware(request: NextRequest) {
     }
 
     if (ADMIN_ONLY.some(p => pathname.startsWith(p))) {
+      return NextResponse.redirect(new URL('/dashboard', request.url))
+    }
+
+    if (ADMIN_MANAGER.some(p => pathname.startsWith(p))) {
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
 
