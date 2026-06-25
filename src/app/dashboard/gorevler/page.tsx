@@ -62,7 +62,7 @@ export default function GorevlerPage() {
 
     // Member → sadece kendine atanmış görevler
     let taskQuery = sb.from('tasks').select('id,title,status,priority,due_date,assigned_to,project_id,client_id,completed_at,description,created_at').order('created_at', { ascending: false })
-    if (role === 'member') {
+    if (role !== 'admin' && role !== 'manager') {
       taskQuery = taskQuery.eq('assigned_to', user.id)
     }
     const { data: t } = await taskQuery
@@ -151,7 +151,7 @@ export default function GorevlerPage() {
 
   async function moveTask(id: string, status: string) {
     // Member: sadece kendi görevi, sadece todo→in_progress veya in_progress→review
-    if (myRole === 'member') {
+    if (myRole !== 'admin' && myRole !== 'manager') {
       const task = tasks.find(t => t.id === id)
       if (!task || task.assigned_to !== myId) { showToast('Hata: Bu görevi taşıyamazsınız'); return }
       const allowed = (task.status === 'todo' && status === 'in_progress') ||
@@ -473,3 +473,4 @@ export default function GorevlerPage() {
     </>
   )
 }
+
