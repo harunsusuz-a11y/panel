@@ -18,7 +18,7 @@ const NAV_ALL = [
   ]},
   { g: 'İş Yönetimi', items: [
     { href: '/dashboard/musteriler',     label: 'Müşteriler',   Icon: Users,           roles: ['admin','manager'] },
-    { href: '/dashboard/gorevler',       label: 'Görevler',     Icon: CheckSquare,     roles: ['admin','manager','member'] },
+    { href: '/dashboard/gorevler',       label: 'Görevler',     Icon: CheckSquare,     roles: ['admin','manager','member','muhasebe'] },
     { href: '/dashboard/takvim',         label: 'Takvim',       Icon: CalendarDays,    roles: ['admin','manager','member'] },
     { href: '/dashboard/notlar',         label: 'Notlarım',     Icon: StickyNote,      roles: ['admin','manager','member','muhasebe'] },
   ]},
