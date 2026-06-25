@@ -291,6 +291,7 @@ export default function DashboardPage() {
   const [activities, setActivities] = useState<any[]>([])
   const [support,     setSupport]     = useState<any[]>([])
   const [myRole,      setMyRole]      = useState('')
+  const [myUserId,    setMyUserId]    = useState('')
   const [loading, setLoading] = useState(true)
   const [now, setNow] = useState(new Date())
   const [userName, setUserName] = useState('')
@@ -304,6 +305,7 @@ export default function DashboardPage() {
     const sb = createClient()
     sb.auth.getUser().then(({ data: { user } }) => {
       if (!user) return
+      setMyUserId(user.id)
       sb.from('profiles').select('full_name,role').eq('id', user.id).single().then(({ data }) => { setUserName(data?.full_name?.split(' ')[0] || ''); setMyRole(data?.role || '') })
     })
     const [t, p, c, tr, ap, sp, act] = await Promise.all([
@@ -350,8 +352,10 @@ export default function DashboardPage() {
   const income  = transactions.filter((t: any) => t.type === 'income').reduce((s: number, t: any) => s + Number(t.amount), 0)
   const expense = transactions.filter((t: any) => t.type === 'expense').reduce((s: number, t: any) => s + Number(t.amount), 0)
   const net     = income - expense
-  const done    = tasks.filter((t: any) => t.status === 'done')
-  const overdue = tasks.filter((t: any) => t.status !== 'done' && t.due_date && new Date(t.due_date) < now)
+  const isMember = myRole === 'member'
+  const myTasks  = isMember ? tasks.filter((t: any) => t.assigned_to === myUserId) : tasks
+  const done     = myTasks.filter((t: any) => t.status === 'done')
+  const overdue  = myTasks.filter((t: any) => t.status !== 'done' && t.due_date && new Date(t.due_date) < now)
   const pending = approvals.filter((a: any) => a.status === 'pending')
   const clientPending = approvals.filter((a: any) => a.client_status === 'sent')
   const clientApproved = approvals.filter((a: any) => a.client_status === 'client_approved')
@@ -395,7 +399,7 @@ const SUPPORT_TYPE: Record<string,{label:string;color:string}> = {
   }).slice(0, 5)
 
   const weekEnd = new Date(now.getTime() + 7 * 86400000)
-  const weekTasks = tasks.filter((t: any) => t.due_date && t.status !== 'done' && new Date(t.due_date) >= now && new Date(t.due_date) <= weekEnd)
+  const weekTasks = myTasks.filter((t: any) => t.due_date && t.status !== 'done' && new Date(t.due_date) >= now && new Date(t.due_date) <= weekEnd)
     .sort((a: any, b: any) => String(a.due_date).localeCompare(String(b.due_date))).slice(0, 5)
 
   const timeSince = Math.floor((now.getTime() - lastUpdate.getTime()) / 1000)
@@ -503,13 +507,13 @@ const SUPPORT_TYPE: Record<string,{label:string;color:string}> = {
                 iconBg={net >= 0 ? 'var(--ac3)' : 'var(--red2)'} Icon={Wallet}
                 delay={40} onClick={() => router.push('/dashboard/muhasebe')} />}
 
-              <KPI label="Aktif Proje" value={String(activeP.length)}
-                sub={`${clients.filter((c: any) => c.status === 'active').length} aktif müşteri`}
+              <KPI label="Aktif Proje" value={isMember ? String(new Set(myTasks.filter((t:any)=>t.status!=='done').map((t:any)=>t.client_id)).size) : String(activeP.length)}
+                sub={isMember ? `${myTasks.filter((t:any)=>t.status!=='done').length} aktif görevim` : `${clients.filter((c: any) => c.status === 'active').length} aktif müşteri`}
                 color="var(--blue)" iconBg="var(--blue2)" Icon={FolderOpen}
                 delay={80} onClick={() => router.push('/dashboard/musteriler')} />
 
               <KPI label="Geciken Görev" value={String(overdue.length)}
-                sub={overdue.length > 0 ? `${overdue.filter((t:any)=>t.priority==='critical').length} kritik` : 'Temiz 👌'}
+                sub={overdue.length > 0 ? `${overdue.filter((t:any)=>t.priority==='critical').length} kritik${isMember?' (benim)':''}` : 'Temiz 👌'}
                 color={overdue.length > 0 ? 'var(--red)' : 'var(--green)'}
                 iconBg={overdue.length > 0 ? 'var(--red2)' : 'var(--green2)'} Icon={Clock}
                 delay={120} onClick={() => router.push('/dashboard/gecikmeler')} />
@@ -555,7 +559,7 @@ const SUPPORT_TYPE: Record<string,{label:string;color:string}> = {
               <div className="card anim-fade" style={{ cursor: 'pointer' }} onClick={() => router.push('/dashboard/gorevler')}>
                 <div className="card-h">
                   <span className="card-title">Görev Durumu</span>
-                  <span className="card-meta">{tasks.length} toplam · Tıkla</span>
+                  <span className="card-meta">{myTasks.length} toplam · Tıkla</span>
                 </div>
                 <div style={{ padding: '18px' }}>
                   <Donut segs={donutSegs} />
