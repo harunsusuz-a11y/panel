@@ -384,10 +384,10 @@ const SUPPORT_TYPE: Record<string,{label:string;color:string}> = {
   })
 
   const donutSegs = [
-    { v: tasks.filter((t: any) => t.status === 'todo').length,        color: 'var(--s5)',   label: 'Bekliyor' },
-    { v: tasks.filter((t: any) => t.status === 'in_progress').length, color: 'var(--blue)', label: 'Devam' },
-    { v: tasks.filter((t: any) => t.status === 'review').length,      color: 'var(--amber)',label: 'İnceleme' },
-    { v: done.length,                                                  color: 'var(--green)',label: 'Tamamlandı' },
+    { v: myTasks.filter((t: any) => t.status === 'todo').length,        color: 'var(--s5)',   label: 'Bekliyor' },
+    { v: myTasks.filter((t: any) => t.status === 'in_progress').length, color: 'var(--blue)', label: 'Devam' },
+    { v: myTasks.filter((t: any) => t.status === 'review').length,      color: 'var(--amber)',label: 'İnceleme' },
+    { v: done.length,                                                    color: 'var(--green)',label: 'Tamamlandı' },
   ]
 
   const fmt = (v: number) => v >= 1000000 ? `₺${(v/1000000).toFixed(1)}M` : v >= 1000 ? `₺${Math.round(v/1000)}K` : `₺${v}`
@@ -840,4 +840,5 @@ const SUPPORT_TYPE: Record<string,{label:string;color:string}> = {
     </>
   )
 }
+
 
