@@ -10,6 +10,7 @@ const ADMIN_ONLY = [
 const MUHASEBE_ALLOWED = [
   '/dashboard/finans',
   '/dashboard/muhasebe',
+  '/dashboard/gorevler',
   '/dashboard/ayarlar',
   '/dashboard/notlar',
 ]
