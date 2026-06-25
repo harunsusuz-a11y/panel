@@ -554,7 +554,7 @@ export default function DashboardPage() {
                     ))}
                   </div>
                 </div>
-              </div>
+              </div>}
 
               <div className="card anim-fade" style={{ cursor: 'pointer' }} onClick={() => router.push('/dashboard/gorevler')}>
                 <div className="card-h">
