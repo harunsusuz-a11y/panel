@@ -126,7 +126,9 @@ export default function GorevlerPage() {
     if (!form.title.trim()) { showToast('Hata: Başlık zorunlu'); return }
     setAdding(true)
     const sb = createClient(); const { data: { user } } = await sb.auth.getUser()
-    const { error } = await sb.from('tasks').insert({ title: form.title.trim(), status: 'todo', priority: form.priority, created_by: user?.id, project_id: form.project_id || null, client_id: form.client_id || null, assigned_to: form.assigned_to || null, due_date: form.due_date || null, description: form.description || null })
+    const isAdminOrManager = myRole === 'admin' || myRole === 'manager'
+    const assignedTo = isAdminOrManager ? (form.assigned_to || null) : user?.id
+    const { error } = await sb.from('tasks').insert({ title: form.title.trim(), status: 'todo', priority: form.priority, created_by: user?.id, project_id: form.project_id || null, client_id: form.client_id || null, assigned_to: assignedTo, due_date: form.due_date || null, description: form.description || null })
     setAdding(false)
     if (error) { showToast('Hata: ' + error.message); return }
     showToast('Görev oluşturuldu!')
@@ -284,9 +286,7 @@ export default function GorevlerPage() {
       `}</style>
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
         <TopBar title="Görev Yönetimi" subtitle="Kanban" action={
-          (myRole === 'admin' || myRole === 'manager') ? (
-            <button className="btn" onClick={() => setModal(true)}><Plus size={14} strokeWidth={2} />Yeni Görev</button>
-          ) : undefined
+          <button className="btn" onClick={() => setModal(true)}><Plus size={14} strokeWidth={2} />Yeni Görev</button>
         } />
         {toast && <div className={`toast ${toast.startsWith('Hata') ? 'toast-err' : 'toast-ok'}`}>{toast}</div>}
 
@@ -381,12 +381,20 @@ export default function GorevlerPage() {
                     {filteredProjects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                   </select>
                 </div>
-                <div><label className="label">Sorumlu</label>
-                  <select value={form.assigned_to} onChange={e => setForm(f => ({ ...f, assigned_to: e.target.value }))} className="inp">
-                    <option value="">— Seçin —</option>
-                    {profiles.map(p => <option key={p.id} value={p.id}>{p.full_name}</option>)}
-                  </select>
-                </div>
+                {(myRole === 'admin' || myRole === 'manager') ? (
+                  <div><label className="label">Sorumlu</label>
+                    <select value={form.assigned_to} onChange={e => setForm(f => ({ ...f, assigned_to: e.target.value }))} className="inp">
+                      <option value="">— Seçin —</option>
+                      {profiles.map(p => <option key={p.id} value={p.id}>{p.full_name}</option>)}
+                    </select>
+                  </div>
+                ) : (
+                  <div><label className="label">Sorumlu</label>
+                    <div className="inp" style={{ color: 'var(--tx2)', background: 'var(--s2)', cursor: 'default' }}>
+                      {profiles.find(p => p.id === myId)?.full_name || 'Sen'}
+                    </div>
+                  </div>
+                )}
                 <div><label className="label">Öncelik</label>
                   <select value={form.priority} onChange={e => setForm(f => ({ ...f, priority: e.target.value }))} className="inp">
                     <option value="critical">Kritik</option><option value="high">Yüksek</option><option value="normal">Normal</option><option value="low">Düşük</option>
@@ -642,3 +650,4 @@ export default function GorevlerPage() {
     </>
   )
 }
+
