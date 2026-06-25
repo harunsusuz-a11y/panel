@@ -27,6 +27,7 @@ const MEMBER_ALLOWED = [
   '/dashboard/onay',
   '/dashboard/ayarlar',
   '/dashboard/dokumantasyon',
+  '/dashboard/notlar',
   '/dashboard',
 ]
 
@@ -108,3 +109,4 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: ['/', '/login', '/dashboard/:path*'],
 }
+
