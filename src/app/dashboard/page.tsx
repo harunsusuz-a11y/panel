@@ -752,7 +752,7 @@ export default function DashboardPage() {
             </div>
 
             {/* ── AKTİVİTE FEED ── */}
-            {activities.length > 0 && (
+            {myRole === 'admin' && activities.length > 0 && (
               <div className="card anim-fade" style={{ marginTop: 14 }}>
                 <div className="card-h">
                   <span className="card-title">Son İşlemler</span>
@@ -840,6 +840,7 @@ export default function DashboardPage() {
     </>
   )
 }
+
 
 
 
