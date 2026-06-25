@@ -87,7 +87,7 @@ export default function KullanicilarPage() {
 
   function select(u: any) {
     setSel(u)
-    setForm({ full_name: u.full_name || '', role: u.role || 'member', department: u.department || '', phone: '' })
+    setForm({ full_name: u.full_name || '', role: u.role || 'member', department: u.department || '', phone: u.phone || '' })
     setView('edit')
     loadLogs(u.id)
   }
@@ -95,7 +95,13 @@ export default function KullanicilarPage() {
   async function save() {
     if (!sel) return
     setSaving(true)
-    const { error } = await createClient().from('profiles').update(form).eq('id', sel.id)
+    const updateData: Record<string, string> = {
+      full_name: form.full_name,
+      role: form.role,
+      department: form.department,
+    }
+    if (form.phone) updateData.phone = form.phone
+    const { error } = await createClient().from('profiles').update(updateData).eq('id', sel.id)
     setSaving(false)
     if (error) showToast('Hata: ' + error.message)
     else {
