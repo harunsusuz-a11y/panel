@@ -135,12 +135,14 @@ export default function KullanicilarPage() {
     setPwdForm({ pw1: '', pw2: '' })
   }
 
-  async function sendNotification() {
+  async function sendNotification(overrideUserId?: string) {
     if (!notifForm.title.trim()) { showToast('Hata: Başlık zorunlu'); return }
     setNotifSending(true)
     const sb = createClient()
     let targets: string[] = []
-    if (notifForm.target === 'all') {
+    if (overrideUserId) {
+      targets = [overrideUserId]
+    } else if (notifForm.target === 'all') {
       targets = users.map((u: any) => u.id)
     } else if (notifForm.target === 'user' && notifForm.userId) {
       targets = [notifForm.userId]
@@ -428,8 +430,7 @@ export default function KullanicilarPage() {
                   </div>
                   <button className="btn" disabled={notifSending || !notifForm.title.trim()} style={{ alignSelf: 'flex-start', padding: '9px 20px', opacity: notifSending || !notifForm.title.trim() ? 0.6 : 1 }}
                     onClick={() => {
-                      setNotifForm(p => ({...p, target: 'user', userId: sel.id}))
-                      setTimeout(() => sendNotification(), 50)
+                      sendNotification(sel.id)
                     }}>
                     <Send size={13} strokeWidth={2} />
                     {notifSending ? 'Gönderiliyor...' : 'Gönder'}
@@ -491,7 +492,7 @@ export default function KullanicilarPage() {
                 <button onClick={() => setNotifModal(false)} style={{ flex: 1, padding: '10px', background: 'var(--s3)', border: 'none', borderRadius: 8, cursor: 'pointer', color: 'var(--tx2)', fontSize: 13 }}>İptal</button>
                 <button className="btn" disabled={notifSending || !notifForm.title.trim() || (notifForm.target === 'user' && !notifForm.userId)}
                   style={{ flex: 2, justifyContent: 'center', padding: '10px', opacity: notifSending ? 0.6 : 1 }}
-                  onClick={sendNotification}>
+                  onClick={() => sendNotification()}>
                   <Send size={13} strokeWidth={2} />
                   {notifSending ? 'Gönderiliyor...' : `Gönder${notifForm.target === 'all' ? ` (${users.length} kişi)` : ''}`}
                 </button>
