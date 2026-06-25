@@ -285,6 +285,13 @@ const CAT_COLOR: Record<string,string> = {
 }
 
 
+const SUPPORT_TYPE: Record<string,{label:string;color:string}> = {
+  oneri:   {label:'💡 Öneri',   color:'var(--blue)'},
+  hata:    {label:'🐛 Hata',    color:'var(--red)'},
+  sikayet: {label:'😤 Şikayet', color:'var(--amber)'},
+  diger:   {label:'💬 Diğer',   color:'var(--tx3)'},
+}
+
 export default function DashboardPage() {
   const router = useRouter()
   const [data, setData] = useState<any>({ tasks: [], projects: [], clients: [], transactions: [], approvals: [] })
@@ -360,13 +367,6 @@ export default function DashboardPage() {
   const clientPending = approvals.filter((a: any) => a.client_status === 'sent')
   const clientApproved = approvals.filter((a: any) => a.client_status === 'client_approved')
   const clientRevision = approvals.filter((a: any) => a.client_status === 'client_rejected')
-
-const SUPPORT_TYPE: Record<string,{label:string;color:string}> = {
-  oneri:   {label:'💡 Öneri',   color:'var(--blue)'},
-  hata:    {label:'🐛 Hata',    color:'var(--red)'},
-  sikayet: {label:'😤 Şikayet', color:'var(--amber)'},
-  diger:   {label:'💬 Diğer',   color:'var(--tx3)'},
-}
 
   const clientDecided  = [...clientApproved, ...clientRevision].sort((a: any, b: any) => {
     const ta = a.portal_tokens?.[0]?.client_decided_at || ''
@@ -840,5 +840,6 @@ const SUPPORT_TYPE: Record<string,{label:string;color:string}> = {
     </>
   )
 }
+
 
 
