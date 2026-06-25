@@ -493,15 +493,15 @@ const SUPPORT_TYPE: Record<string,{label:string;color:string}> = {
           ) : (<>
             {/* KPI — her biri tıklanabilir */}
             <div className="db-kpi">
-              <KPI label="Toplam Gelir" value={fmt(income)} sub={`Gider: ${fmt(expense)}`}
+              {myRole === 'admin' && <KPI label="Toplam Gelir" value={fmt(income)} sub={`Gider: ${fmt(expense)}`}
                 color="var(--green)" iconBg="var(--green2)" Icon={TrendingUp}
                 trend={{ v: '+12%', up: true }} delay={0} pulse={connected}
-                onClick={() => router.push('/dashboard/finans')} />
+                onClick={() => router.push('/dashboard/finans')} />}
 
-              <KPI label="Net Kar" value={fmt(net)} sub={net >= 0 ? 'Kârlı dönem' : 'Zarar'}
+              {myRole === 'admin' && <KPI label="Net Kar" value={fmt(net)} sub={net >= 0 ? 'Kârlı dönem' : 'Zarar'}
                 color={net >= 0 ? 'var(--ac)' : 'var(--red)'}
                 iconBg={net >= 0 ? 'var(--ac3)' : 'var(--red2)'} Icon={Wallet}
-                delay={40} onClick={() => router.push('/dashboard/muhasebe')} />
+                delay={40} onClick={() => router.push('/dashboard/muhasebe')} />}
 
               <KPI label="Aktif Proje" value={String(activeP.length)}
                 sub={`${clients.filter((c: any) => c.status === 'active').length} aktif müşteri`}
@@ -528,7 +528,7 @@ const SUPPORT_TYPE: Record<string,{label:string;color:string}> = {
 
             {/* Orta */}
             <div className="db-mid">
-              <div className="card anim-fade" style={{ cursor: 'pointer' }} onClick={() => router.push('/dashboard/finans')}>
+              {myRole === 'admin' && <div className="card anim-fade" style={{ cursor: 'pointer' }} onClick={() => router.push('/dashboard/finans')}>
                 <div className="card-h">
                   <span className="card-title">Aylık Gelir Trendi</span>
                   <span className="card-meta">Son 6 ay · Tıkla</span>
@@ -836,3 +836,4 @@ const SUPPORT_TYPE: Record<string,{label:string;color:string}> = {
     </>
   )
 }
+
