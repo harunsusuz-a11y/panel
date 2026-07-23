@@ -18,7 +18,7 @@ const ST: Record<string, any> = {
 }
 
 const emptyForm = {
-  title: '', drive_link: '', client_id: '', scheduled_at: '',
+  title: '', drive_link: '', scheduled_at: '',
   platforms: [] as string[],
   youtube_description: '', youtube_tags: '', youtube_category: '', youtube_privacy: 'public',
   instagram_caption: '', instagram_type: 'post',
@@ -27,7 +27,6 @@ const emptyForm = {
 
 export default function PaylasimPage() {
   const [items,   setItems]   = useState<any[]>([])
-  const [clients, setClients] = useState<any[]>([])
   const [filter,  setFilter]  = useState('all')
   const [modal,   setModal]   = useState(false)
   const [sel,     setSel]     = useState<any>(null)
@@ -41,13 +40,8 @@ export default function PaylasimPage() {
     const sb = createClient()
     const { data: { user } } = await sb.auth.getUser()
     if (!user) return
-    const [a, c] = await Promise.all([
-      sb.from('shares').select('*').order('created_at', { ascending: false }),
-      sb.from('clients').select('id,name').order('name'),
-    ])
-    const cm: Record<string, any> = {}; (c.data || []).forEach((x: any) => { cm[x.id] = x })
-    setItems((a.data || []).map((x: any) => ({ ...x, client: cm[x.client_id] })))
-    setClients(c.data || [])
+    const { data } = await sb.from('shares').select('*').order('created_at', { ascending: false })
+    setItems(data || [])
     setLoading(false)
   }
   useEffect(() => { load() }, [])
@@ -62,7 +56,6 @@ export default function PaylasimPage() {
     const { data: { user } } = await sb.auth.getUser()
     const { error } = await sb.from('shares').insert({
       title: form.title, drive_link: form.drive_link,
-      client_id: form.client_id || null,
       scheduled_at: form.scheduled_at || null,
       platforms: form.platforms,
       youtube_description: form.platforms.includes('youtube') ? form.youtube_description || null : null,
@@ -148,9 +141,6 @@ export default function PaylasimPage() {
                     </div>
                     <p style={{ fontSize: 13, fontWeight: 600, lineHeight: 1.4, marginBottom: 8, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{item.title}</p>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                      {item.client && (
-                        <div style={{ fontSize: 11.5, color: 'var(--tx3)' }}>{item.client.name}</div>
-                      )}
                       {item.scheduled_at && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11.5, color: 'var(--tx3)' }}>
                           <Calendar size={10} strokeWidth={2} />{fmtDateTime(item.scheduled_at)}
@@ -206,7 +196,6 @@ export default function PaylasimPage() {
               <p style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--tx3)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 8 }}>Detaylar</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 16 }}>
                 {[
-                  { l: 'Müşteri', v: sel.client?.name || '—' },
                   { l: 'Zamanlanan', v: sel.scheduled_at ? fmtDateTime(sel.scheduled_at) : '—' },
                   { l: 'Yayınlanma', v: sel.published_at ? fmtDateTime(sel.published_at) : '—' },
                   { l: 'Oluşturuldu', v: fmtDateTime(sel.created_at) },
@@ -242,16 +231,8 @@ export default function PaylasimPage() {
               <div><label className="label">Drive Linki *</label>
                 <input value={form.drive_link} onChange={e => setForm(p => ({ ...p, drive_link: e.target.value }))} className="inp" placeholder="https://drive.google.com/..." />
               </div>
-              <div className="modal-grid">
-                <div><label className="label">Müşteri</label>
-                  <select value={form.client_id} onChange={e => setForm(p => ({ ...p, client_id: e.target.value }))} className="inp">
-                    <option value="">— Seçin —</option>
-                    {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </select>
-                </div>
-                <div><label className="label">Yayın Zamanı</label>
-                  <input type="datetime-local" value={form.scheduled_at} onChange={e => setForm(p => ({ ...p, scheduled_at: e.target.value }))} className="inp" />
-                </div>
+              <div><label className="label">Yayın Zamanı</label>
+                <input type="datetime-local" value={form.scheduled_at} onChange={e => setForm(p => ({ ...p, scheduled_at: e.target.value }))} className="inp" />
               </div>
 
               <div><label className="label">Platformlar *</label>
