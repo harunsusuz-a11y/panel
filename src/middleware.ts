@@ -33,6 +33,7 @@ const MEMBER_ALLOWED = [
   '/dashboard/gorevler',
   '/dashboard/takvim',
   '/dashboard/icerik',
+  '/dashboard/paylasim',
   '/dashboard/onay',
   '/dashboard/ayarlar',
   '/dashboard/dokumantasyon',
