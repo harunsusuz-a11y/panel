@@ -169,8 +169,9 @@ export default function KullanicilarPage() {
           title: notifForm.title,
           body: notifForm.body,
           type: 'manual',
-          url: notifForm.url,
-          read: false,
+          entity_type: null,
+          entity_id: null,
+          is_read: false,
         })
       } catch {}
     }

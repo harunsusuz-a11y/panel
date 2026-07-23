@@ -288,13 +288,16 @@ export default function AyarlarPage() {
       const {data:p} = await sb.from('profiles').select('*').eq('id',user.id).single()
       setProfile(p)
       setPf({full_name:p?.full_name||'',phone:p?.phone||'',department:p?.department||''})
-    })
-    sb.from('system_settings').select('key,value').then(({data})=>{
-      const m:Record<string,string>={}
-      ;(data||[]).forEach((x:any)=>{m[x.key]=x.value||''})
-      setNg({netgsm_username:m.netgsm_username||'',netgsm_password:m.netgsm_password||'',netgsm_header:m.netgsm_header||'AJANSPANEL'})
-      setSm({smtp_host:m.smtp_host||'',smtp_port:m.smtp_port||'587',smtp_user:m.smtp_user||'',smtp_pass:m.smtp_pass||'',smtp_from_name:m.smtp_from_name||'Agency ERP',smtp_from_email:m.smtp_from_email||''})
-      setCo({company_name:m.company_name||'',company_email:m.company_email||'',company_phone:m.company_phone||'',company_address:m.company_address||''})
+
+      // Netgsm/SMTP şifreleri hassas — sadece admin/manager çeksin
+      if (p?.role === 'admin' || p?.role === 'manager') {
+        const { data } = await sb.from('system_settings').select('key,value')
+        const m:Record<string,string>={}
+        ;(data||[]).forEach((x:any)=>{m[x.key]=x.value||''})
+        setNg({netgsm_username:m.netgsm_username||'',netgsm_password:m.netgsm_password||'',netgsm_header:m.netgsm_header||'AJANSPANEL'})
+        setSm({smtp_host:m.smtp_host||'',smtp_port:m.smtp_port||'587',smtp_user:m.smtp_user||'',smtp_pass:m.smtp_pass||'',smtp_from_name:m.smtp_from_name||'Agency ERP',smtp_from_email:m.smtp_from_email||''})
+        setCo({company_name:m.company_name||'',company_email:m.company_email||'',company_phone:m.company_phone||'',company_address:m.company_address||''})
+      }
     })
   },[])
 

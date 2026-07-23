@@ -1,14 +1,17 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { sendPushToUser } from '@/lib/push'
+
+function svc() {
+  return createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  )
+}
 
 async function sendPush(userId: string, title: string, body: string, url: string) {
-  try {
-    await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'https://panelson.vercel.app'}/api/push/send`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, title, body, url, type: 'client_response' }),
-    })
-  } catch {}
+  try { await sendPushToUser(userId, title, body, url, 'client_response') } catch {}
 }
 
 export async function POST(req: Request) {
@@ -16,32 +19,32 @@ export async function POST(req: Request) {
     const { token, decision, note } = await req.json()
     if (!token || !decision) return NextResponse.json({ error: 'Missing params' }, { status: 400 })
 
-    const sb = await createClient()
+    // Bu endpoint kasıtlı olarak oturumsuz (müşteri portalı, giriş gerekmez) —
+    // gerçek yetkilendirme token'ın kendisi, bu yüzden service role ile RLS'i bypass ediyoruz.
+    const sb = svc()
 
-    // Token'ı bul
     const { data: tokenRow, error: te } = await sb
       .from('client_portal_tokens')
-      .select('id, approval_id, client_id, project_id, is_client_token')
+      .select('id, approval_id, client_id, project_id, is_client_token, expires_at')
       .eq('token', token)
       .single()
 
     if (te || !tokenRow) return NextResponse.json({ error: 'Invalid token' }, { status: 404 })
+    if (tokenRow.expires_at && new Date(tokenRow.expires_at) < new Date()) {
+      return NextResponse.json({ error: 'Token expired' }, { status: 410 })
+    }
 
-    // Token kararını güncelle
     await sb.from('client_portal_tokens').update({
       client_decision: decision,
       client_note: note || null,
       client_decided_at: new Date().toISOString(),
     }).eq('id', tokenRow.id)
 
-    // Approval_id varsa direkt güncelle
-    // is_client_token=true ise müşterinin tüm son onaylarını güncelle
     if (tokenRow.approval_id) {
       await sb.from('approvals').update({
         client_status: decision === 'approved' ? 'client_approved' : 'client_rejected',
       }).eq('id', tokenRow.approval_id)
     } else if (tokenRow.is_client_token && tokenRow.client_id) {
-      // Müşteriye ait en son gönderilmiş onayı güncelle
       const { data: latestApproval } = await sb
         .from('approvals')
         .select('id, content_id, requested_by, title')
@@ -54,19 +57,16 @@ export async function POST(req: Request) {
         await sb.from('approvals').update({
           client_status: decision === 'approved' ? 'client_approved' : 'client_rejected',
         }).eq('id', latestApproval.id)
-        // Revizyon → içeriği geri çek
         if (decision === 'revision' && latestApproval.content_id) {
           await sb.from('contents').update({ status: 'revision' }).eq('id', latestApproval.content_id)
         }
       }
     }
 
-    // Müşteri adını çek
     const { data: client } = await sb
       .from('clients').select('name').eq('id', tokenRow.client_id).single()
     const clientName = client?.name || 'Müşteri'
 
-    // Onay bilgisini çek (title ve requested_by için)
     let approvalTitle = ''
     let requestedBy: string | null = null
     if (tokenRow.approval_id) {
@@ -78,13 +78,11 @@ export async function POST(req: Request) {
       approvalTitle = appr?.title || ''
       requestedBy = appr?.requested_by || null
 
-      // Revizyon → içeriği geri çek
       if (decision === 'revision' && appr?.content_id) {
         await sb.from('contents').update({ status: 'revision' }).eq('id', appr.content_id)
       }
     }
 
-    // Bildirim metinleri
     const notifTitle = decision === 'approved'
       ? `✅ ${clientName} onayladı`
       : `🔄 ${clientName} revizyon istedi`
@@ -92,13 +90,11 @@ export async function POST(req: Request) {
       ? `"${approvalTitle}"${note ? ` — Not: "${note}"` : ''}`
       : note ? `Not: "${note}"` : decision === 'approved' ? 'Müşteri onay verdi.' : 'Revizyon talebi gönderildi.'
 
-    // Admin + manager'lara bildirim + push
     const { data: adminUsers } = await sb
       .from('profiles').select('id').in('role', ['admin', 'manager'])
 
     const adminIds = (adminUsers || []).map((u: any) => u.id)
 
-    // İlgili personele de bildirim (talebi oluşturan, admin/manager değilse)
     const extraIds: string[] = []
     if (requestedBy && !adminIds.includes(requestedBy)) {
       extraIds.push(requestedBy)
@@ -107,7 +103,6 @@ export async function POST(req: Request) {
     const allRecipients = [...adminIds, ...extraIds]
 
     if (allRecipients.length > 0) {
-      // DB bildirimi
       await sb.from('notifications').insert(
         allRecipients.map(uid => ({
           user_id: uid,
@@ -120,7 +115,6 @@ export async function POST(req: Request) {
         }))
       )
 
-      // Push bildirimi — her alıcıya ayrı gönder
       await Promise.allSettled(
         allRecipients.map(uid =>
           sendPush(uid, notifTitle, notifBody, '/dashboard/onay')

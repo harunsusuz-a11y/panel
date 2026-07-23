@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { createClient as createServerClient } from '@/lib/supabase/server'
 
 export async function POST(req: NextRequest) {
   try {
+    // Çağıranın kimliğini ve rolünü doğrula — sadece admin başkasının şifresini resetleyebilir
+    const sessionClient = await createServerClient()
+    const { data: { user } } = await sessionClient.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const { data: profile } = await sessionClient.from('profiles').select('role').eq('id', user.id).single()
+    if (!profile || profile.role !== 'admin') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     const { userId, password } = await req.json()
     if (!userId || !password || password.length < 6) {
       return NextResponse.json({ error: 'userId ve en az 6 karakter şifre gerekli' }, { status: 400 })

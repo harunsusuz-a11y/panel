@@ -263,14 +263,22 @@ export default function MusterilerPage() {
 
     // Atanan kişiye push bildirimi gönder
     if (taskForm.assigned_to && taskForm.assigned_to !== user?.id) {
+      const notifTitle = '📋 Yeni Görev Atandı'
+      const notifBody = `"${taskForm.title.trim()}" görevi sana atandı.${taskForm.due_date ? ' Deadline: ' + taskForm.due_date : ''}`
+      try {
+        await sb.from('notifications').insert({
+          user_id: taskForm.assigned_to, type: 'task_assigned', title: notifTitle, body: notifBody,
+          entity_type: 'tasks', entity_id: data?.id || null, is_read: false,
+        })
+      } catch {}
       try {
         await fetch('/api/push/send', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             userId: taskForm.assigned_to,
-            title: '📋 Yeni Görev Atandı',
-            body: `"${taskForm.title.trim()}" görevi sana atandı.${taskForm.due_date ? ' Deadline: ' + taskForm.due_date : ''}`,
+            title: notifTitle,
+            body: notifBody,
             url: '/dashboard/gorevler',
             type: 'task_assigned',
           }),

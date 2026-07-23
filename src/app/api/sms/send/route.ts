@@ -4,8 +4,15 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(req: Request) {
   try {
-    const { phone, message, logId } = await req.json()
     const sb = await createClient()
+    const { data: { user } } = await sb.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { data: profile } = await sb.from('profiles').select('role').eq('id', user.id).single()
+    if (!profile || !['admin', 'manager'].includes(profile.role)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    const { phone, message, logId } = await req.json()
     const { data: settings } = await sb.from('system_settings').select('key,value').in('key', ['netgsm_username','netgsm_password','netgsm_header'])
     const cfg: Record<string,string> = {}
     settings?.forEach((s: any) => { cfg[s.key] = s.value })

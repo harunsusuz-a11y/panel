@@ -2,9 +2,18 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 export const dynamic = 'force-dynamic'
 
+// NOT: Bu route şu an hiçbir cron/tetikleyici tarafından çağrılmıyor.
+// Gerçek SMS kuyruğu işleme public.send_queued_sms() (pg_cron) üzerinden yapılıyor.
 export async function GET() {
   try {
     const sb = await createClient()
+    const { data: { user } } = await sb.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { data: profile } = await sb.from('profiles').select('role').eq('id', user.id).single()
+    if (!profile || !['admin', 'manager'].includes(profile.role)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     const { data: settings } = await sb.from('system_settings').select('key,value').in('key',['netgsm_username','netgsm_password','netgsm_header'])
     const cfg: Record<string,string> = {}
     settings?.forEach((s: any) => { cfg[s.key] = s.value })

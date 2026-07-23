@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createServiceRoleClient } from '@/lib/supabase/service'
 import { notFound } from 'next/navigation'
 import { Download, FolderOpen, Clock, CheckCircle2, AlertCircle } from 'lucide-react'
 import ClientActions from './ClientActions'
@@ -20,7 +20,7 @@ const STATUS: Record<string,{l:string;color:string}> = {
 
 export default async function PortalPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params
-  const sb = await createClient()
+  const sb = createServiceRoleClient()
 
   // Token doğrula
   // Client decision güncelleme için action parametresi kontrol

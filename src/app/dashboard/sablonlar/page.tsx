@@ -238,14 +238,22 @@ export default function SablonlarPage() {
       if (!error) {
         created++
         if (tpl.assigned_to && tpl.assigned_to !== user?.id) {
+          const notifTitle = '📋 Haftalık Görev Atandı'
+          const notifBody = `"${tpl.title}" görevi bu hafta için oluşturuldu. Deadline: ${OFFSET_LABELS[tpl.deadline_offset_days]}`
+          try {
+            await sb.from('notifications').insert({
+              user_id: tpl.assigned_to, type: 'task_assigned', title: notifTitle, body: notifBody,
+              entity_type: 'tasks', entity_id: null, is_read: false,
+            })
+          } catch {}
           try {
             await fetch('/api/push/send', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 userId: tpl.assigned_to,
-                title:  '📋 Haftalık Görev Atandı',
-                body:   `"${tpl.title}" görevi bu hafta için oluşturuldu. Deadline: ${OFFSET_LABELS[tpl.deadline_offset_days]}`,
+                title:  notifTitle,
+                body:   notifBody,
                 url:    '/dashboard/gorevler',
                 type:   'task_assigned',
               }),

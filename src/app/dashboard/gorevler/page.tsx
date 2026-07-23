@@ -136,10 +136,18 @@ export default function GorevlerPage() {
     setForm({ title: '', client_id: '', project_id: '', assigned_to: '', priority: 'normal', due_date: '', description: '' })
     load()
     if (form.assigned_to && form.assigned_to !== user?.id) {
+      const notifTitle = '📋 Yeni Görev Atandı'
+      const notifBody = `"${form.title.trim()}" görevi sana atandı.${form.due_date ? ' Deadline: ' + form.due_date : ''}`
+      try {
+        await sb.from('notifications').insert({
+          user_id: form.assigned_to, type: 'task_assigned', title: notifTitle, body: notifBody,
+          entity_type: 'tasks', entity_id: null, is_read: false,
+        })
+      } catch {}
       try {
         await fetch('/api/push/send', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: form.assigned_to, title: '📋 Yeni Görev Atandı', body: `"${form.title.trim()}" görevi sana atandı.${form.due_date ? ' Deadline: ' + form.due_date : ''}`, url: '/dashboard/gorevler', type: 'task_assigned' }),
+          body: JSON.stringify({ userId: form.assigned_to, title: notifTitle, body: notifBody, url: '/dashboard/gorevler', type: 'task_assigned' }),
         })
       } catch {}
     }
