@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
-import { Plus, X, Link2, Camera, Briefcase, Music2, AlertTriangle, CheckCircle2, Clock, ExternalLink, Pencil, Trash2 } from 'lucide-react'
+import { Plus, X, Link2, Camera, Briefcase, Music2, CheckCircle2, Clock, ExternalLink, Pencil, Trash2 } from 'lucide-react'
 import { fmtDateTime } from '@/lib/utils'
 
 const PLATFORMS = [
@@ -14,7 +14,6 @@ const PLATFORMS = [
 const ST: Record<string, any> = {
   pending:   { l: 'Bekliyor',   cls: 'badge-amber', color: 'var(--amber)', Icon: Clock },
   published: { l: 'Yayınlandı', cls: 'badge-green', color: 'var(--green)', Icon: CheckCircle2 },
-  failed:    { l: 'Hata',       cls: 'badge-red',    color: 'var(--red)',   Icon: AlertTriangle },
 }
 
 const emptyForm = {
@@ -113,7 +112,7 @@ export default function PaylasimPage() {
     return { ...i, _pos: pos }
   })
 
-  const counts: Record<string, number> = { pending: 0, published: 0, failed: 0 }
+  const counts: Record<string, number> = { pending: 0, published: 0 }
   items.forEach(i => { counts[i.status] = (counts[i.status] || 0) + 1 })
   const platCounts: Record<string, number> = {}
   PLATFORMS.forEach(p => { platCounts[p.id] = items.filter(i => (i.platforms || []).includes(p.id)).length })
@@ -213,9 +212,6 @@ export default function PaylasimPage() {
                       <span className={`badge ${st.cls}`} style={{ fontSize: 10, display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 9px' }}>
                         <StIcon size={10} strokeWidth={2.5} />{st.l}
                       </span>
-                      {item.status === 'failed' && item.error_message && (
-                        <div style={{ fontSize: 10.5, color: 'var(--red)', marginTop: 4, maxWidth: 220 }}>{item.error_message}</div>
-                      )}
                     </td>
                     <td>
                       <a href={item.drive_link} target="_blank" rel="noreferrer" style={{ color: 'var(--ac)', display: 'inline-flex', alignItems: 'center', gap: 4, fontWeight: 600 }}>
