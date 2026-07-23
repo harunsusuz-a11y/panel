@@ -24,7 +24,6 @@ const NAV_ALL = [
   ]},
   { g: 'Operasyon', items: [
     { href: '/dashboard/icerik',         label: 'İçerik',       Icon: FileText,        roles: ['admin','manager','member'] },
-    { href: '/dashboard/paylasim',       label: 'Paylaşım',     Icon: Share2,          roles: ['admin','manager','member'] },
     { href: '/dashboard/operasyon',      label: 'Operasyon',    Icon: Activity,        roles: ['admin','manager'] },
     { href: '/dashboard/gecikmeler',     label: 'Gecikmeler',   Icon: AlertCircle,     roles: ['admin','manager'] },
     { href: '/dashboard/onay',           label: 'Onay',         Icon: ShieldCheck,     roles: ['admin','manager','member'] },
@@ -43,6 +42,9 @@ const NAV_ALL = [
     { href: '/dashboard/toplanti',       label: 'Toplantılar',  Icon: CalendarClock,   roles: ['admin','manager'] },
     { href: '/dashboard/destek',         label: 'Destek',       Icon: LifeBuoy,        roles: ['admin','manager'] },
     { href: '/dashboard/dokumantasyon',  label: 'Kılavuz',      Icon: BookOpen,        roles: ['admin','manager','member'] },
+  ]},
+  { g: 'Paylaşım', items: [
+    { href: '/dashboard/paylasim',       label: 'Paylaşım',     Icon: Share2,          roles: ['admin','manager','member'] },
   ]},
 ]
 
