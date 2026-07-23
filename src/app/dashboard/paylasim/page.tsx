@@ -121,14 +121,20 @@ export default function PaylasimPage() {
   return (
     <>
       <style>{`
+        .pt-wrap{margin:14px 16px 80px;background:var(--s1);border:1px solid var(--bdr);border-radius:12px;overflow:hidden}
         .pt-table{width:100%;border-collapse:collapse}
-        .pt-table th{text-align:left;font-size:10.5px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;padding:9px 12px;border-bottom:1px solid var(--bdr);white-space:nowrap}
-        .pt-table td{padding:10px 12px;border-bottom:1px solid var(--bdr);font-size:12.5px;vertical-align:middle}
-        .pt-table tr:hover td{background:var(--s2)}
-        .pt-plat{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-        .pt-pos{width:22px;height:22px;border-radius:50%;background:var(--ac2);color:var(--ac);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-        .pt-act{background:none;border:none;cursor:pointer;color:var(--tx3);padding:5px;border-radius:6px;transition:all .12s}
+        .pt-table th{text-align:left;font-size:10.5px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;padding:12px 16px;background:var(--s2);border-bottom:1px solid var(--bdr)}
+        .pt-table td{padding:14px 16px;border-bottom:1px solid var(--bdr);font-size:13px;vertical-align:middle}
+        .pt-table tbody tr{transition:background .12s}
+        .pt-table tbody tr:last-child td{border-bottom:none}
+        .pt-table tbody tr:hover{background:var(--s2)}
+        .pt-avatar{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--ac),#5b4de0);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+        .pt-plat-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 9px 4px 6px;border-radius:20px;font-size:11px;font-weight:600}
+        .pt-plat-ic{width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .pt-pos{width:24px;height:24px;border-radius:50%;background:var(--ac2);color:var(--ac);font-size:11.5px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .pt-act{background:none;border:none;cursor:pointer;color:var(--tx3);padding:6px;border-radius:7px;transition:all .12s;display:inline-flex}
         .pt-act:hover{background:var(--s3);color:var(--tx)}
+        .pt-empty{padding:60px 20px;text-align:center;color:var(--tx3)}
       `}</style>
 
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
@@ -137,7 +143,7 @@ export default function PaylasimPage() {
         } />
         {toast && <div className={`toast ${toast.startsWith('Hata') ? 'toast-err' : 'toast-ok'}`}>{toast}</div>}
 
-        <div style={{ display: 'flex', gap: 6, padding: '10px 16px', borderBottom: '1px solid var(--bdr)', overflowX: 'auto', flexShrink: 0, background: 'var(--s1)' }}>
+        <div style={{ display: 'flex', gap: 6, padding: '12px 16px 0', overflowX: 'auto', flexShrink: 0 }}>
           <button onClick={() => setPlatFilt('all')} className={platFilt === 'all' ? 'btn' : 'btn-ghost'} style={{ fontSize: 11.5, padding: '4px 11px', flexShrink: 0 }}>
             Tümü ({items.length})
           </button>
@@ -154,19 +160,24 @@ export default function PaylasimPage() {
           ))}
         </div>
 
-        <div style={{ flex: 1, overflow: 'auto', padding: '0 16px 80px' }}>
-          {loading ? <p style={{ color: 'var(--tx3)', fontSize: 13, padding: '20px 0' }}>Yükleniyor...</p>
-          : rows.length === 0 ? <div style={{ padding: '40px 0', textAlign: 'center', color: 'var(--tx3)', fontSize: 13 }}>Paylaşım bulunamadı.</div>
-          : <table className="pt-table">
+        <div style={{ flex: 1, overflow: 'auto' }}>
+          <div className="pt-wrap">
+          {loading ? <p style={{ color: 'var(--tx3)', fontSize: 13, padding: '24px' }}>Yükleniyor...</p>
+          : rows.length === 0 ? (
+            <div className="pt-empty">
+              <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>Henüz paylaşım yok</p>
+              <p style={{ fontSize: 12 }}>Yukarıdan "Paylaşım Ekle" ile ilk planı oluştur.</p>
+            </div>
+          ) : <table className="pt-table">
             <thead>
               <tr>
-                {platFilt !== 'all' && <th>Sıra</th>}
+                {platFilt !== 'all' && <th style={{ width: 56 }}>Sıra</th>}
                 <th>Başlık</th>
                 <th>Platformlar</th>
                 <th>Durum</th>
                 <th>Drive</th>
                 <th>Oluşturuldu</th>
-                <th></th>
+                <th style={{ width: 90 }}></th>
               </tr>
             </thead>
             <tbody>
@@ -178,28 +189,36 @@ export default function PaylasimPage() {
                     {platFilt !== 'all' && (
                       <td>{item._pos ? <div className="pt-pos">{item._pos}</div> : <span style={{ color: 'var(--tx3)' }}>—</span>}</td>
                     )}
-                    <td style={{ fontWeight: 600, maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.title}</td>
                     <td>
-                      <div style={{ display: 'flex', gap: 4 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div className="pt-avatar">{(item.title || '?').trim().slice(0, 2).toUpperCase()}</div>
+                        <span style={{ fontWeight: 600, maxWidth: 240, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.title}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
                         {(item.platforms || []).map((p: string) => {
                           const plat = PLATFORMS.find(x => x.id === p)
                           if (!plat) return null
-                          return <div key={p} className="pt-plat" style={{ background: `${plat.color}18` }} title={plat.label}>
-                            <plat.Icon size={12} strokeWidth={2} style={{ color: plat.color }} />
-                          </div>
+                          return (
+                            <span key={p} className="pt-plat-pill" style={{ background: `${plat.color}15`, color: plat.color }}>
+                              <span className="pt-plat-ic" style={{ background: `${plat.color}22` }}><plat.Icon size={11} strokeWidth={2.2} /></span>
+                              {plat.label}
+                            </span>
+                          )
                         })}
                       </div>
                     </td>
                     <td>
-                      <span className={`badge ${st.cls}`} style={{ fontSize: 9.5, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-                        <StIcon size={9} strokeWidth={2.5} />{st.l}
+                      <span className={`badge ${st.cls}`} style={{ fontSize: 10, display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 9px' }}>
+                        <StIcon size={10} strokeWidth={2.5} />{st.l}
                       </span>
                       {item.status === 'failed' && item.error_message && (
-                        <div style={{ fontSize: 10.5, color: 'var(--red)', marginTop: 3, maxWidth: 200 }}>{item.error_message}</div>
+                        <div style={{ fontSize: 10.5, color: 'var(--red)', marginTop: 4, maxWidth: 220 }}>{item.error_message}</div>
                       )}
                     </td>
                     <td>
-                      <a href={item.drive_link} target="_blank" rel="noreferrer" style={{ color: 'var(--ac)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      <a href={item.drive_link} target="_blank" rel="noreferrer" style={{ color: 'var(--ac)', display: 'inline-flex', alignItems: 'center', gap: 4, fontWeight: 600 }}>
                         <Link2 size={12} strokeWidth={2} />Aç
                       </a>
                     </td>
@@ -207,10 +226,10 @@ export default function PaylasimPage() {
                     <td>
                       <div style={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
                         {item.platform_post_urls && Object.keys(item.platform_post_urls).length > 0 && (
-                          <a href={Object.values(item.platform_post_urls)[0] as string} target="_blank" rel="noreferrer" className="pt-act"><ExternalLink size={13} /></a>
+                          <a href={Object.values(item.platform_post_urls)[0] as string} target="_blank" rel="noreferrer" className="pt-act"><ExternalLink size={14} /></a>
                         )}
-                        <button className="pt-act" onClick={() => openEdit(item)}><Pencil size={13} /></button>
-                        <button className="pt-act" onClick={() => remove(item.id)} style={{ color: 'var(--red)' }}><Trash2 size={13} /></button>
+                        <button className="pt-act" onClick={() => openEdit(item)}><Pencil size={14} /></button>
+                        <button className="pt-act" onClick={() => remove(item.id)} style={{ color: 'var(--red)' }}><Trash2 size={14} /></button>
                       </div>
                     </td>
                   </tr>
@@ -218,6 +237,7 @@ export default function PaylasimPage() {
               })}
             </tbody>
           </table>}
+          </div>
         </div>
       </div>
 
