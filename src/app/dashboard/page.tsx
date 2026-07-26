@@ -7,7 +7,7 @@ import { fmtDeadline, fmtRelative } from '@/lib/utils'
 import {
   TrendingUp, Wallet, FolderOpen, Clock, ClipboardCheck, LifeBuoy,
   ArrowUpRight, ArrowDownRight, ArrowRight, CheckCircle2,
-  Wifi, WifiOff, CalendarHeart, ChevronRight, Bell
+  Wifi, WifiOff, CalendarHeart, ChevronRight, Bell, FileBarChart
 } from 'lucide-react'
 
 function BarChart({ bars }: { bars: { label: string; v: number; hi?: boolean }[] }) {
@@ -528,6 +528,10 @@ export default function DashboardPage() {
                 color={clientRevision.length > 0 ? 'var(--red)' : clientApproved.length > 0 ? 'var(--green)' : 'var(--tx3)'}
                 iconBg={clientRevision.length > 0 ? 'var(--red2)' : clientApproved.length > 0 ? 'var(--green2)' : 'var(--s3)'}
                 Icon={CheckCircle2} delay={200} onClick={() => router.push('/dashboard/onay')} />
+
+              {myRole === 'admin' && <KPI label="Günlük Rapor" value="AI" sub="Kim ne yaptı, gün sonu checklist"
+                color="var(--ac)" iconBg="var(--ac3)" Icon={FileBarChart}
+                delay={240} onClick={() => router.push('/dashboard/rapor')} />}
             </div>
 
             {/* Orta */}

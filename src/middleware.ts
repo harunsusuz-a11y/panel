@@ -4,6 +4,7 @@ import { createServerClient } from '@supabase/ssr'
 
 const ADMIN_ONLY = [
   '/dashboard/araclar',
+  '/dashboard/rapor',
 ]
 
 const ADMIN_MANAGER = [

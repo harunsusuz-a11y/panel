@@ -45,9 +45,21 @@ export default function OperasyonPage() {
   const [myRole,      setMyRole]      = useState('')
   const [myName,      setMyName]      = useState('')
   const [checklist,   setChecklist]   = useState<Record<string,boolean>>({})
+  const [myId,        setMyId]        = useState('')
   const channelsRef = useRef<any[]>([])
 
   useEffect(() => { const id = setInterval(() => setNow(new Date()), 1000); return () => clearInterval(id) }, [])
+
+  async function toggleChecklistItem(item: string) {
+    if (!myId) return
+    const next = { ...checklist, [item]: !checklist[item] }
+    setChecklist(next)
+    const today = new Date().toISOString().slice(0, 10)
+    await createClient().from('daily_checklist').upsert(
+      { user_id: myId, date: today, items: next, updated_at: new Date().toISOString() },
+      { onConflict: 'user_id,date' }
+    )
+  }
 
   async function load() {
     const sb = createClient()
@@ -56,6 +68,10 @@ export default function OperasyonPage() {
       const { data: prof } = await sb.from('profiles').select('role,full_name').eq('id', me.user.id).single()
       setMyRole(prof?.role || '')
       setMyName(prof?.full_name?.split(' ')[0] || '')
+      setMyId(me.user.id)
+      const today = new Date().toISOString().slice(0, 10)
+      const { data: cl } = await sb.from('daily_checklist').select('items').eq('user_id', me.user.id).eq('date', today).single()
+      if (cl?.items) setChecklist(cl.items)
     }
 
     const [t, p, c, pr, ct, ap] = await Promise.all([
@@ -354,7 +370,7 @@ export default function OperasyonPage() {
                 </div>
                 <div style={{ padding: '4px 0' }}>
                   {CHECKLIST_ITEMS.map((item, i) => (
-                    <div key={i} className="check-item" onClick={() => setChecklist(prev => ({ ...prev, [item]: !prev[item] }))}>
+                    <div key={i} className="check-item" onClick={() => toggleChecklistItem(item)}>
                       <div style={{ width: 20, height: 20, borderRadius: 5, border: `2px solid ${checklist[item] ? 'var(--green)' : 'var(--bdr2)'}`, background: checklist[item] ? 'var(--green2)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all .15s' }}>
                         {checklist[item] && <CheckCircle2 size={12} style={{ color: 'var(--green)' }} strokeWidth={2.5} />}
                       </div>
