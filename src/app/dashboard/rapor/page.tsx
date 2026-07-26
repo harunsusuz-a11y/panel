@@ -76,15 +76,29 @@ export default function RaporPage() {
 
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
         <TopBar title="Günlük Operasyon Raporu" subtitle={dateLabel} action={
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <input type="date" value={date} onChange={e => setDate(e.target.value)} className="inp" style={{ width: 150 }} max={new Date().toISOString().slice(0, 10)} />
-            <button className="btn" onClick={() => window.print()}><Printer size={13} strokeWidth={2} />PDF İndir</button>
-          </div>
+          <button className="btn" onClick={() => window.print()}><Printer size={13} strokeWidth={2} />PDF İndir</button>
         } />
+
+        <div className="rp-noprint" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', borderBottom: '1px solid var(--bdr)' }}>
+          <span style={{ fontSize: 12, color: 'var(--tx3)' }}>Tarih:</span>
+          <input type="date" value={date} onChange={e => setDate(e.target.value)} className="inp" style={{ width: 160 }} max={new Date().toISOString().slice(0, 10)} />
+        </div>
 
         <div style={{ flex: 1, overflow: 'auto', padding: 16 }}>
           {loading ? <p style={{ color: 'var(--tx3)', fontSize: 13 }}>Rapor hazırlanıyor...</p> : !report ? null : (
             <div className="rp-print-area">
+              {report.ai_summary && (
+                <div className="rp-card" style={{ background: 'linear-gradient(135deg,var(--ac2),var(--s1))', border: '1px solid var(--ac)' }}>
+                  <div className="rp-card-h" style={{ color: 'var(--ac)' }}>✨ ChatGPT Günlük Özeti</div>
+                  <p style={{ fontSize: 13, lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>{report.ai_summary}</p>
+                </div>
+              )}
+              {report.ai_error && (
+                <div className="rp-card rp-noprint" style={{ borderColor: 'var(--red)' }}>
+                  <p style={{ fontSize: 12, color: 'var(--red)' }}>⚠ AI özeti oluşturulamadı: {report.ai_error}</p>
+                </div>
+              )}
+
               {/* Genel özet */}
               <div className="rp-card">
                 <div className="rp-card-h"><Calendar size={14} />Genel Özet — {dateLabel}</div>

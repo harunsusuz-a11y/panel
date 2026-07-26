@@ -155,7 +155,7 @@ export async function GET(req: NextRequest) {
       ).length,
     }
 
-    return NextResponse.json({
+    const result = {
       date,
       generated_at: new Date().toISOString(),
       summary,
@@ -163,7 +163,34 @@ export async function GET(req: NextRequest) {
       templates_applied: templatesApplied,
       templates_not_applied: templatesNotApplied,
       checklist_items: CHECKLIST_ITEMS,
-    })
+    }
+
+    // ChatGPT ile doğal dilde yönetici özeti (opsiyonel — key yoksa sessizce atlanır)
+    const { data: aiKeyRow } = await sb.from('system_settings').select('value').eq('key', 'openai_api_key').single()
+    if (aiKeyRow?.value) {
+      try {
+        const prompt = `Aşağıda bir ajansın günlük operasyon verisi JSON olarak veriliyor. Bunu okuyup, ajans sahibine hitaben, Türkçe, kısa ve öz (maksimum 180 kelime) bir "günlük durum özeti" yaz. Ton: profesyonel ama sıcak, madde işaretleri kullanabilirsin. Öne çıkan başarıları, dikkat edilmesi gereken noktaları (örn. uygulanmayan şablonlar, checklist tamamlanmamışsa) ve genel bir değerlendirme içersin. Sadece özeti yaz, başka açıklama ekleme.\n\nVERİ:\n${JSON.stringify(result)}`
+
+        const aiRes = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${aiKeyRow.value}` },
+          body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            messages: [{ role: 'user', content: prompt }],
+            temperature: 0.4,
+            max_tokens: 500,
+          }),
+        })
+        const aiData = await aiRes.json()
+        const aiText = aiData?.choices?.[0]?.message?.content
+        if (aiText) (result as any).ai_summary = aiText
+        else if (aiData?.error) (result as any).ai_error = aiData.error.message
+      } catch (e: any) {
+        (result as any).ai_error = e?.message
+      }
+    }
+
+    return NextResponse.json(result)
   } catch (e: any) {
     console.error('Daily report error:', e?.message)
     return NextResponse.json({ error: e?.message || 'Unknown error' }, { status: 500 })
