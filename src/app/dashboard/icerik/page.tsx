@@ -89,7 +89,23 @@ export default function IcerikPage() {
       if (!item || item.assigned_to !== myId) { showToast('Hata: Bu içeriği düzenleyemezsiniz'); return }
       if (!(item.status === 'draft' && status === 'pending')) { showToast('Hata: Bu değişikliğe yetkiniz yok'); return }
     }
-    const {error} = await createClient().from('contents').update({status}).eq('id',id)
+    const sb = createClient()
+    // Hangi yoldan gelirse gelsin, 'pending'e geçişte onay kaydı MUTLAKA oluşsun
+    // (aksi halde içerik "onay bekliyor" görünür ama Onay sayfasında/ana sayfada hiç düşmez)
+    if (status === 'pending') {
+      const item = items.find(x => x.id === id) || sel
+      const { data: existing } = await sb.from('approvals')
+        .select('id,status').eq('content_id', id).order('created_at', { ascending: false }).limit(1)
+      if (!existing || existing.length === 0 || existing[0].status !== 'pending') {
+        const { data: { user } } = await sb.auth.getUser()
+        await sb.from('approvals').insert({
+          title: item?.title || 'İçerik', type: 'content', status: 'pending',
+          client_id: item?.client_id || null, content_id: id,
+          requested_by: user?.id, notes: item?.notes || null,
+        })
+      }
+    }
+    const {error} = await sb.from('contents').update({status}).eq('id',id)
     if (error) { showToast('Hata: '+error.message); return }
     setItems(prev => prev.map(x => x.id===id ? {...x,status} : x))
     if (sel?.id===id) setSel((s:any) => s ? {...s,status} : null)
@@ -97,37 +113,6 @@ export default function IcerikPage() {
   }
 
   async function sendToApproval(item: any) {
-    const sb = createClient()
-    const { data: { user } } = await sb.auth.getUser()
-    // Daha önce bu içerik için onay talebi var mı?
-    const { data: existing } = await sb.from('approvals')
-      .select('id,status').eq('content_id', item.id).order('created_at', { ascending: false }).limit(1)
-    if (existing && existing.length > 0 && existing[0].status === 'pending') {
-      showToast('Hata: Bu içerik zaten onay bekliyor')
-      return
-    }
-    const { error } = await sb.from('approvals').insert({
-      title: item.title,
-      type: 'content',
-      status: 'pending',
-      client_id: item.client_id || null,
-      content_id: item.id,
-      requested_by: user?.id,
-      notes: item.notes || null,
-    })
-    if (error) {
-      // content_id kolonu yoksa basit insert
-      const { error: e2 } = await sb.from('approvals').insert({
-        title: item.title,
-        type: 'content',
-        status: 'pending',
-        client_id: item.client_id || null,
-        requested_by: user?.id,
-        notes: item.notes || null,
-      })
-      if (e2) { showToast('Hata: ' + e2.message); return }
-    }
-    // İçerik durumunu pending'e çek
     await changeStatus(item.id, 'pending')
     showToast('✓ Onay talebi oluşturuldu! Onay sayfasından takip edin.')
   }
