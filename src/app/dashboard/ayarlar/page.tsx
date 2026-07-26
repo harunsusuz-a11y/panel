@@ -3,7 +3,7 @@ import React from 'react'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
-import { User, Lock, MessageSquare, Mail, Building2, Send, CheckCircle2, Bell, BellOff } from 'lucide-react'
+import { User, Lock, MessageSquare, Mail, Building2, Send, CheckCircle2, Bell, BellOff, Sparkles } from 'lucide-react'
 import PhoneInput from '@/components/PhoneInput'
 
 const ALL_TABS = [
@@ -13,8 +13,9 @@ const ALL_TABS = [
   { k:'netgsm',   l:'Netgsm SMS', Icon:MessageSquare, roles:['admin','manager'] },
   { k:'smtp',     l:'E-posta',    Icon:Mail,          roles:['admin','manager'] },
   { k:'company',  l:'Şirket',     Icon:Building2,     roles:['admin','manager'] },
+  { k:'ai',       l:'ChatGPT',    Icon:Sparkles,      roles:['admin'] },
 ] as const
-type Tab = 'profile' | 'security' | 'netgsm' | 'smtp' | 'company' | 'bildirim'
+type Tab = 'profile' | 'security' | 'netgsm' | 'smtp' | 'company' | 'bildirim' | 'ai'
 
 
 function QuickNotifTest() {
@@ -276,6 +277,7 @@ export default function AyarlarPage() {
   const [ng, setNg] = useState({ netgsm_username:'', netgsm_password:'', netgsm_header:'AJANSPANEL' })
   const [sm, setSm] = useState({ smtp_host:'', smtp_port:'587', smtp_user:'', smtp_pass:'', smtp_from_name:'Agency ERP', smtp_from_email:'' })
   const [co, setCo] = useState({ company_name:'', company_email:'', company_phone:'', company_address:'' })
+  const [ai, setAi] = useState({ openai_api_key:'' })
   const [testPhone, setTestPhone] = useState('')
 
   const showToast = (m:string) => { setToast(m); setTimeout(()=>setToast(''),4000) }
@@ -297,6 +299,7 @@ export default function AyarlarPage() {
         setNg({netgsm_username:m.netgsm_username||'',netgsm_password:m.netgsm_password||'',netgsm_header:m.netgsm_header||'AJANSPANEL'})
         setSm({smtp_host:m.smtp_host||'',smtp_port:m.smtp_port||'587',smtp_user:m.smtp_user||'',smtp_pass:m.smtp_pass||'',smtp_from_name:m.smtp_from_name||'Agency ERP',smtp_from_email:m.smtp_from_email||''})
         setCo({company_name:m.company_name||'',company_email:m.company_email||'',company_phone:m.company_phone||'',company_address:m.company_address||''})
+        if (p?.role === 'admin') setAi({ openai_api_key: m.openai_api_key || '' })
       }
     })
   },[])
@@ -557,6 +560,29 @@ export default function AyarlarPage() {
               <button className="btn" onClick={()=>saveSettings(co)} disabled={saving} style={{alignSelf:'flex-start',padding:'8px 20px'}}>
                 {saving?'Kaydediliyor...':'Kaydet'}
               </button>
+            </div>
+          )}
+
+          {/* ── ChatGPT ── */}
+          {tab==='ai' && (
+            <div style={{display:'flex',flexDirection:'column',gap:14}}>
+              <p style={{fontSize:12.5,color:'var(--tx3)',lineHeight:1.6}}>
+                Günlük Rapor sayfasındaki "ChatGPT Günlük Özeti" bölümü için OpenAI API anahtarını buraya kaydet.
+                Anahtar veritabanında saklanır, sadece admin görebilir/değiştirebilir, tarayıcıya asla gönderilmez.
+              </p>
+              <div><label className="label">OpenAI API Key</label>
+                <input type="password" value={ai.openai_api_key} onChange={e=>setAi(p=>({...p,openai_api_key:e.target.value}))} className="inp" placeholder="sk-proj-..." autoComplete="off"/>
+              </div>
+              <div style={{display:'flex',gap:8}}>
+                <button className="btn" onClick={()=>saveSettings(ai)} disabled={saving} style={{padding:'8px 20px'}}>
+                  {saving?'Kaydediliyor...':'Kaydet'}
+                </button>
+                {ai.openai_api_key && (
+                  <span style={{fontSize:11.5,color:'var(--green)',display:'flex',alignItems:'center',gap:5}}>
+                    <CheckCircle2 size={13}/>Kayıtlı ({ai.openai_api_key.slice(0,7)}...{ai.openai_api_key.slice(-4)})
+                  </span>
+                )}
+              </div>
             </div>
           )}
 
