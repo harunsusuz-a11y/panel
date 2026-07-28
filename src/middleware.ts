@@ -103,11 +103,11 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
 
+    if (role === 'manager') return response
+
     if (ADMIN_MANAGER.some(p => pathname.startsWith(p))) {
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
-
-    if (role === 'manager') return response
 
     // Member kontrolü — MANAGER_PLUS sayfaları da engellenir
     if (MANAGER_PLUS.some(p => pathname.startsWith(p))) {
@@ -130,6 +130,7 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: ['/', '/login', '/dashboard/:path*'],
 }
+
 
 
 
