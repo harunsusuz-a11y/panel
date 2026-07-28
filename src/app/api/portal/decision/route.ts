@@ -78,8 +78,12 @@ export async function POST(req: Request) {
       approvalTitle = appr?.title || ''
       requestedBy = appr?.requested_by || null
 
-      if (decision === 'revision' && appr?.content_id) {
-        await sb.from('contents').update({ status: 'revision' }).eq('id', appr.content_id)
+      if (appr?.content_id) {
+        if (decision === 'approved') {
+          await sb.from('contents').update({ status: 'published' }).eq('id', appr.content_id)
+        } else if (decision === 'revision') {
+          await sb.from('contents').update({ status: 'revision' }).eq('id', appr.content_id)
+        }
       }
     }
 
@@ -128,3 +132,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: e?.message || 'Unknown error' }, { status: 500 })
   }
 }
+
