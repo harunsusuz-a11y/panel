@@ -370,7 +370,12 @@ export default function MusterilerPage() {
     try {
       const { data: ex } = await sb.from('client_portal_tokens')
         .select().eq('client_id', sel.id).eq('is_client_token', true).single()
-      if (ex) tokenData = ex
+      // Expired değilse kullan, expired ise yeni oluştur
+      if (ex && new Date(ex.expires_at) > new Date()) tokenData = ex
+      else if (ex) {
+        // Eski expired token'ı sil
+        await sb.from('client_portal_tokens').delete().eq('id', ex.id)
+      }
     } catch {}
     if (!tokenData) {
       const { data: nt } = await sb.from('client_portal_tokens')
@@ -1054,4 +1059,5 @@ export default function MusterilerPage() {
     </>
   )
 }
+
 
