@@ -206,8 +206,7 @@ export default function GorevlerPage() {
             userId: selectedReviewer,
             title: '👁 Onay Bekleniyor',
             body: `"${task?.title}" görevi senin onayını bekliyor.`,
-            url: '/dashboard/gorevler',
-            type: 'review_requested',
+                type: 'review_requested',
           }),
         })
         // Bildirim tablosuna kaydet
@@ -216,8 +215,7 @@ export default function GorevlerPage() {
           title: '👁 Onay Bekleniyor',
           body: `"${task?.title}" görevi senin onayını bekliyor.`,
           type: 'review_requested',
-          url: '/dashboard/gorevler',
-          read: false,
+          is_read: false,
         })
       } catch {}
     }
@@ -658,4 +656,5 @@ export default function GorevlerPage() {
     </>
   )
 }
+
 
