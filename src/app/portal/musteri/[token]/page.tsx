@@ -1,4 +1,4 @@
-import { createServiceRoleClient } from '@/lib/supabase/service'
+import { createClient } from '@supabase/supabase-js'
 import { notFound } from 'next/navigation'
 import { Download, CheckCircle2, FileText } from 'lucide-react'
 import ClientActions from '@/app/portal/[token]/ClientActions'
@@ -43,7 +43,10 @@ const BASE = `
 
 export default async function MusteriPortalPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params
-  const sb = createServiceRoleClient()
+  const sb = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
 
   const { data: tokenRow } = await sb
     .from('client_portal_tokens')
@@ -278,3 +281,4 @@ export default async function MusteriPortalPage({ params }: { params: Promise<{ 
     </html>
   )
 }
+
