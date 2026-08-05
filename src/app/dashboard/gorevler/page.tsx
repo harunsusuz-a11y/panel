@@ -124,6 +124,11 @@ export default function GorevlerPage() {
 
   async function add() {
     if (!form.title.trim()) { showToast('Hata: Başlık zorunlu'); return }
+    if (!form.client_id) { showToast('Hata: Firma zorunlu'); return }
+    if (!form.project_id) { showToast('Hata: Proje zorunlu'); return }
+    if (!form.assigned_to && (myRole === 'admin' || myRole === 'manager')) { showToast('Hata: Sorumlu zorunlu'); return }
+    if (!form.due_date) { showToast('Hata: Deadline zorunlu'); return }
+    if (!form.description.trim()) { showToast('Hata: Açıklama zorunlu'); return }
     setAdding(true)
     const sb = createClient(); const { data: { user } } = await sb.auth.getUser()
     const isAdminOrManager = myRole === 'admin' || myRole === 'manager'
@@ -374,21 +379,21 @@ export default function GorevlerPage() {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <div><label className="label">Başlık *</label><input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} className="inp" autoFocus /></div>
-              <div><label className="label">Firma</label>
+              <div><label className="label">Firma *</label>
                 <select value={form.client_id} onChange={e => handleClientChange(e.target.value)} className="inp">
                   <option value="">— Firma Seçin —</option>
                   {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
               <div className="modal-grid">
-                <div><label className="label">Proje</label>
+                <div><label className="label">Proje *</label>
                   <select value={form.project_id} onChange={e => handleProjectChange(e.target.value)} className="inp">
                     <option value="">— Seçin —</option>
                     {filteredProjects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                   </select>
                 </div>
                 {(myRole === 'admin' || myRole === 'manager') ? (
-                  <div><label className="label">Sorumlu</label>
+                  <div><label className="label">Sorumlu *</label>
                     <select value={form.assigned_to} onChange={e => setForm(f => ({ ...f, assigned_to: e.target.value }))} className="inp">
                       <option value="">— Seçin —</option>
                       {profiles.map(p => <option key={p.id} value={p.id}>{p.full_name}</option>)}
@@ -406,10 +411,10 @@ export default function GorevlerPage() {
                     <option value="critical">Kritik</option><option value="high">Yüksek</option><option value="normal">Normal</option><option value="low">Düşük</option>
                   </select>
                 </div>
-                <div><label className="label">Deadline</label><input type="date" value={form.due_date} onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} className="inp" /></div>
+                <div><label className="label">Deadline *</label><input type="date" value={form.due_date} onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} className="inp" /></div>
               </div>
-              <div><label className="label">Açıklama</label><textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} className="inp" rows={2} /></div>
-              <button className="btn" onClick={add} disabled={adding || !form.title.trim()} style={{ width: '100%', justifyContent: 'center', padding: '10px' }}>
+              <div><label className="label">Açıklama *</label><textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} className="inp" rows={2} /></div>
+              <button className="btn" onClick={add} disabled={adding || !form.title.trim() || !form.client_id || !form.project_id || !form.due_date || !form.description.trim()} style={{ width: '100%', justifyContent: 'center', padding: '10px' }}>
                 {adding ? 'Oluşturuluyor...' : 'Görev Oluştur'}
               </button>
             </div>
