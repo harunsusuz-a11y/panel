@@ -53,7 +53,7 @@ export default function MusterilerPage() {
   const [toast,     setToast]     = useState('')
   const [clientModal, setClientModal] = useState(false)
   const [saving,    setSaving]    = useState(false)
-  const [clientForm, setClientForm] = useState({ name:'', email:'', phone:'', company:'', status:'active', notes:'' })
+  const [clientForm, setClientForm] = useState({ name:'', email:'', phone:'', company:'', brand_name:'', status:'active', notes:'' })
 
   // ── Ana sekme ────────────────────────────────────────
   const [tab, setTab] = useState<'projeler'|'gorevler'|'icerik'|'finans'>('projeler')
@@ -94,7 +94,7 @@ export default function MusterilerPage() {
   // Müşteri bazlı portal
   const [clientPortalModal, setClientPortalModal] = useState(false)
   const [clientEditModal, setClientEditModal] = useState(false)
-  const [clientEditForm, setClientEditForm] = useState({ name:'', email:'', phone:'', company:'', status:'active', notes:'' })
+  const [clientEditForm, setClientEditForm] = useState({ name:'', email:'', phone:'', company:'', brand_name:'', status:'active', notes:'' })
   const [clientPortalLink,  setClientPortalLink]  = useState('')
   const [clientPortalCopied,setClientPortalCopied]= useState(false)
 
@@ -166,12 +166,12 @@ export default function MusterilerPage() {
     showToast('✓ Müşteri eklendi!')
     setClientModal(false)
     loadClients()
-    setClientForm({name:'',email:'',phone:'',company:'',status:'active',notes:''})
+    setClientForm({name:'',email:'',phone:'',company:'',brand_name:'',status:'active',notes:''})
   }
 
   function openEditClient() {
     if (!sel) return
-    setClientEditForm({ name:sel.name||'', email:sel.email||'', phone:sel.phone||'', company:sel.company||'', status:sel.status||'active', notes:sel.notes||'' })
+    setClientEditForm({ name:sel.name||'', email:sel.email||'', phone:sel.phone||'', company:sel.company||'', brand_name:sel.brand_name||'', status:sel.status||'active', notes:sel.notes||'' })
     setClientEditModal(true)
   }
 
@@ -488,6 +488,7 @@ export default function MusterilerPage() {
                 </div>
                 <div style={{flex:1,minWidth:0}}>
                   <p style={{fontSize:14.5,fontWeight:700}}>{sel.name}</p>
+                  {sel.brand_name&&<p style={{fontSize:11,color:'var(--tx3)',marginTop:1}}>🏷 {sel.brand_name}</p>}
                   <div style={{display:'flex',gap:10,marginTop:2,flexWrap:'wrap'}}>
                     {sel.email&&<span style={{fontSize:11,color:'var(--tx3)',display:'flex',alignItems:'center',gap:3}}><Mail size={9} strokeWidth={2}/>{sel.email}</span>}
                     {sel.phone&&<span style={{fontSize:11,color:'var(--tx3)',display:'flex',alignItems:'center',gap:3}}><Phone size={9} strokeWidth={2}/>{sel.phone}</span>}
@@ -850,6 +851,7 @@ export default function MusterilerPage() {
                 <div><label className="label">E-posta</label><input value={clientForm.email} onChange={e=>setClientForm(p=>({...p,email:e.target.value}))} className="inp"/></div>
                 <div><label className="label">Telefon</label><PhoneInput value={clientForm.phone} onChange={v=>setClientForm(p=>({...p,phone:v}))}/></div>
                 <div><label className="label">Şirket</label><input value={clientForm.company} onChange={e=>setClientForm(p=>({...p,company:e.target.value}))} className="inp"/></div>
+                <div><label className="label">Marka Adı</label><input value={clientForm.brand_name} onChange={e=>setClientForm(p=>({...p,brand_name:e.target.value}))} className="inp" placeholder="Marka adı..."/></div>
                 <div><label className="label">Durum</label>
                   <select value={clientForm.status} onChange={e=>setClientForm(p=>({...p,status:e.target.value}))} className="inp">
                     <option value="active">Aktif</option><option value="passive">Pasif</option>
@@ -964,6 +966,7 @@ export default function MusterilerPage() {
                 <div><label className="label">E-posta</label><input value={clientEditForm.email} onChange={e=>setClientEditForm(p=>({...p,email:e.target.value}))} className="inp"/></div>
                 <div><label className="label">Telefon</label><PhoneInput value={clientEditForm.phone} onChange={v=>setClientEditForm(p=>({...p,phone:v}))}/></div>
                 <div><label className="label">Şirket</label><input value={clientEditForm.company} onChange={e=>setClientEditForm(p=>({...p,company:e.target.value}))} className="inp"/></div>
+                <div><label className="label">Marka Adı</label><input value={clientEditForm.brand_name} onChange={e=>setClientEditForm(p=>({...p,brand_name:e.target.value}))} className="inp" placeholder="Marka adı..."/></div>
                 <div><label className="label">Durum</label>
                   <select value={clientEditForm.status} onChange={e=>setClientEditForm(p=>({...p,status:e.target.value}))} className="inp">
                     <option value="active">Aktif</option><option value="passive">Pasif</option>
