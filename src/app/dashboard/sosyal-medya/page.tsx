@@ -7,8 +7,6 @@ import { TrendingUp, TrendingDown, Minus, Save, ChevronLeft, ChevronRight } from
 const PLATFORMS = [
   { value: 'instagram', label: 'Instagram' },
   { value: 'tiktok', label: 'TikTok' },
-  { value: 'facebook', label: 'Facebook' },
-  { value: 'twitter', label: 'Twitter/X' },
   { value: 'linkedin', label: 'LinkedIn' },
   { value: 'youtube', label: 'YouTube' },
 ]
