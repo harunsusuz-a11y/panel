@@ -144,7 +144,11 @@ export default function MusterilerPage() {
 
   // ── Müşteri CRUD ─────────────────────────────────────
   async function addClient() {
-    if (!clientForm.name.trim()) { showToast('Hata: İsim zorunlu'); return }
+    if (!clientForm.name.trim()) { showToast('Hata: Müşteri adı zorunlu'); return }
+    if (!clientForm.email.trim()) { showToast('Hata: E-posta zorunlu'); return }
+    if (!clientForm.phone.trim()) { showToast('Hata: Telefon zorunlu'); return }
+    if (!clientForm.company.trim()) { showToast('Hata: Şirket zorunlu'); return }
+    if (!clientForm.brand_name.trim()) { showToast('Hata: Marka adı zorunlu'); return }
     setSaving(true)
     const sb = createClient(); const {data:{user}} = await sb.auth.getUser()
     // Tek insert, dönen ID ile portal token oluştur — yarış koşulu yok
@@ -848,10 +852,10 @@ export default function MusterilerPage() {
             <div style={{display:'flex',flexDirection:'column',gap:12}}>
               <div><label className="label">Müşteri Adı *</label><input value={clientForm.name} onChange={e=>setClientForm(p=>({...p,name:e.target.value}))} className="inp" autoFocus/></div>
               <div className="modal-grid">
-                <div><label className="label">E-posta</label><input value={clientForm.email} onChange={e=>setClientForm(p=>({...p,email:e.target.value}))} className="inp"/></div>
-                <div><label className="label">Telefon</label><PhoneInput value={clientForm.phone} onChange={v=>setClientForm(p=>({...p,phone:v}))}/></div>
-                <div><label className="label">Şirket</label><input value={clientForm.company} onChange={e=>setClientForm(p=>({...p,company:e.target.value}))} className="inp"/></div>
-                <div><label className="label">Marka Adı</label><input value={clientForm.brand_name} onChange={e=>setClientForm(p=>({...p,brand_name:e.target.value}))} className="inp" placeholder="Marka adı..."/></div>
+                <div><label className="label">E-posta *</label><input value={clientForm.email} onChange={e=>setClientForm(p=>({...p,email:e.target.value}))} className="inp"/></div>
+                <div><label className="label">Telefon *</label><PhoneInput value={clientForm.phone} onChange={v=>setClientForm(p=>({...p,phone:v}))}/></div>
+                <div><label className="label">Şirket *</label><input value={clientForm.company} onChange={e=>setClientForm(p=>({...p,company:e.target.value}))} className="inp"/></div>
+                <div><label className="label">Marka Adı *</label><input value={clientForm.brand_name} onChange={e=>setClientForm(p=>({...p,brand_name:e.target.value}))} className="inp" placeholder="Marka adı..."/></div>
                 <div><label className="label">Durum</label>
                   <select value={clientForm.status} onChange={e=>setClientForm(p=>({...p,status:e.target.value}))} className="inp">
                     <option value="active">Aktif</option><option value="passive">Pasif</option>
@@ -859,7 +863,7 @@ export default function MusterilerPage() {
                 </div>
               </div>
               <div><label className="label">Notlar</label><textarea value={clientForm.notes} onChange={e=>setClientForm(p=>({...p,notes:e.target.value}))} className="inp" rows={2}/></div>
-              <button className="btn" onClick={addClient} disabled={saving} style={{width:'100%',justifyContent:'center',padding:'10px'}}>{saving?'Kaydediliyor...':'Müşteri Ekle'}</button>
+              <button className="btn" onClick={addClient} disabled={saving || !clientForm.name.trim() || !clientForm.email.trim() || !clientForm.phone.trim() || !clientForm.company.trim() || !clientForm.brand_name.trim()} style={{width:'100%',justifyContent:'center',padding:'10px'}}>{saving?'Kaydediliyor...':'Müşteri Ekle'}</button>
             </div>
           </div>
         </div>
