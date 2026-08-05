@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
-import { TrendingUp, TrendingDown, Minus, Plus, Save, ChevronLeft, ChevronRight, Instagram, BarChart2 } from 'lucide-react'
+import { TrendingUp, TrendingDown, Minus, Save, ChevronLeft, ChevronRight } from 'lucide-react'
 
 const PLATFORMS = [
   { value: 'instagram', label: 'Instagram' },
