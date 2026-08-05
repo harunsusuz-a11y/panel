@@ -474,7 +474,7 @@ export default function MusterilerPage() {
                     </div>
                     <div style={{flex:1,minWidth:0}}>
                       <p style={{fontSize:12.5,fontWeight:600,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',color:sel?.id===c.id?'var(--ac)':'var(--tx)'}}>{c.name}</p>
-                      <p style={{fontSize:10,color:c.status==='active'?'var(--green)':'var(--tx3)',marginTop:1}}>{c.status==='active'?'Aktif':'Pasif'}</p>
+                      <p style={{fontSize:10,color:'var(--tx3)',marginTop:1}}>{c.brand_name ? c.brand_name+' · ' : ''}{c.status==='active'?'Aktif':'Pasif'}</p>
                     </div>
                   </div>
                 </div>
