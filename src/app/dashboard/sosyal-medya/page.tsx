@@ -251,22 +251,38 @@ export default function SosyalMedyaPage() {
         </div>
 
         {/* Platform */}
-        <div style={{display:'flex',gap:6,marginBottom:16,flexWrap:'wrap'}}>
+        <div style={{display:'flex',gap:5,marginBottom:14,flexWrap:'wrap',alignItems:'center'}}>
+          <span style={{fontSize:10,color:'var(--tx3)',fontWeight:700,letterSpacing:1,marginRight:4}}>PLATFORM</span>
           {PLATFORMS.map(p => (
-            <button key={p.value} className={`sm-tab${selPlatform===p.value?' active':''}`} onClick={() => setSelPlatform(p.value)}>{p.label}</button>
+            <button key={p.value} onClick={() => setSelPlatform(p.value)} style={{
+              padding:'4px 14px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',transition:'all .15s',
+              border: selPlatform===p.value ? '1.5px solid var(--ac)' : '1px solid var(--bdr)',
+              background: selPlatform===p.value ? 'var(--ac)' : 'transparent',
+              color: selPlatform===p.value ? '#fff' : 'var(--tx3)'
+            }}>{p.label}</button>
           ))}
         </div>
 
-        {/* Tab */}
-        <div style={{display:'flex',gap:6,marginBottom:16,justifyContent:'space-between',alignItems:'center'}}>
-          <div style={{display:'flex',gap:6}}>
-            <button className={`sm-tab${tab==='giris'?' active':''}`} onClick={() => setTab('giris')}>Veri Girişi</button>
-            <button className={`sm-tab${tab==='ozet'?' active':''}`} onClick={() => setTab('ozet')}>Özet Görünüm</button>
+        {/* Tab + Aksiyonlar */}
+        <div style={{display:'flex',gap:8,marginBottom:16,alignItems:'center',justifyContent:'space-between'}}>
+          <div style={{display:'flex',background:'var(--s2)',borderRadius:9,padding:3,gap:2}}>
+            <button onClick={() => setTab('giris')} style={{
+              padding:'6px 16px',borderRadius:7,fontSize:12,fontWeight:600,cursor:'pointer',border:'none',
+              background: tab==='giris' ? 'var(--s1)' : 'transparent',
+              color: tab==='giris' ? 'var(--tx)' : 'var(--tx3)',
+              boxShadow: tab==='giris' ? '0 1px 3px rgba(0,0,0,.08)' : 'none'
+            }}>Veri Girişi</button>
+            <button onClick={() => setTab('ozet')} style={{
+              padding:'6px 16px',borderRadius:7,fontSize:12,fontWeight:600,cursor:'pointer',border:'none',
+              background: tab==='ozet' ? 'var(--s1)' : 'transparent',
+              color: tab==='ozet' ? 'var(--tx)' : 'var(--tx3)',
+              boxShadow: tab==='ozet' ? '0 1px 3px rgba(0,0,0,.08)' : 'none'
+            }}>Özet Görünüm</button>
           </div>
           {tab==='ozet' && (
             <div style={{display:'flex',gap:6}}>
-              <button className="btn" style={{gap:6,fontSize:12}} onClick={load}><RefreshCw size={13}/>Yenile</button>
-              <button className="btn" style={{gap:6,fontSize:12,background:'var(--ac)',color:'#fff'}} onClick={printPDF}><Download size={13}/>PDF İndir</button>
+              <button className="btn" style={{gap:5,fontSize:12,padding:'6px 12px'}} onClick={load}><RefreshCw size={12}/>Yenile</button>
+              <button className="btn" style={{gap:5,fontSize:12,padding:'6px 14px',background:'var(--ac)',color:'#fff',border:'none'}} onClick={printPDF}><Download size={12}/>PDF İndir</button>
             </div>
           )}
         </div>
@@ -348,7 +364,12 @@ export default function SosyalMedyaPage() {
             {loading ? (
               <div style={{textAlign:'center',color:'var(--tx3)',padding:40}}>Yükleniyor...</div>
             ) : ozetData.length===0 ? (
-              <div style={{textAlign:'center',color:'var(--tx3)',padding:40}}>Bu hafta için {platform.label} verisi girilmemiş.</div>
+              <div style={{textAlign:'center',padding:'60px 20px'}}>
+                <div style={{fontSize:36,marginBottom:12}}>📊</div>
+                <div style={{fontSize:14,fontWeight:700,color:'var(--tx)',marginBottom:6}}>Henüz veri girilmemiş</div>
+                <div style={{fontSize:12,color:'var(--tx3)',marginBottom:18}}>Bu hafta için {platform.label} verisi yok.</div>
+                <button className="btn" style={{margin:'0 auto',background:'var(--ac)',color:'#fff',border:'none',padding:'8px 18px'}} onClick={() => setTab('giris')}>+ Veri Girişine Geç</button>
+              </div>
             ) : (
               <div style={{display:'flex',flexDirection:'column',gap:12}}>
                 {ozetData.map(c => {
