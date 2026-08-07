@@ -336,10 +336,14 @@ export default function AyarlarPage() {
     if (!ng.netgsm_username){showToast('Hata: Önce bilgileri kaydedin');return}
     setTesting(true)
     try {
-      const url=`https://api.netgsm.com.tr/sms/send/get/?usercode=${ng.netgsm_username}&password=${ng.netgsm_password}&gsmno=${testPhone.replace(/\s/g,'')}&message=Agency ERP - baglanti testi basarili!&msgheader=${ng.netgsm_header||'AJANSPANEL'}&dil=TR`
-      const res=await fetch(url); const txt=await res.text()
-      if(txt.startsWith('00')||txt.startsWith('01')) showToast('✓ Test SMS gönderildi!')
-      else showToast('Netgsm yanıtı: '+txt)
+      const res = await fetch('/api/sms/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: testPhone, message: 'Daydream Production - bağlantı testi başarılı!' })
+      })
+      const data = await res.json()
+      if (data.success) showToast('✓ Test SMS gönderildi!')
+      else showToast('Hata: ' + (data.error || data.response || 'Bilinmeyen hata'))
     } catch(e:any){showToast('Hata: '+e.message)}
     setTesting(false)
   }
