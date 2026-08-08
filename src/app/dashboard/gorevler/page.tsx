@@ -32,7 +32,7 @@ export default function GorevlerPage() {
   const [myId,     setMyId]     = useState('')
   const [myRole,   setMyRole]   = useState('')
   const [confirmId, setConfirmId] = useState<string|null>(null)
-  const [weekFilter, setWeekFilter] = useState<'this'|'next'|'all'>('this')
+  const [weekFilter, setWeekFilter] = useState<string>('this')
   const [doneOpen, setDoneOpen]     = useState(false)
   const [detailTab, setDetailTab] = useState<'info'|'comments'|'time'|'files'>('info')
   const [comments, setComments] = useState<any[]>([])
@@ -297,7 +297,7 @@ export default function GorevlerPage() {
     if (!t.due_date) return weekFilter === 'all'
     const due = new Date(t.due_date)
     if (weekFilter === 'this') {
-      const { mon, sun } = getWeekRange(0)
+      const { sun } = getWeekRange(0)
       // Geciken görevler de bu haftada görünsün
       return due <= sun
     }
@@ -373,8 +373,8 @@ export default function GorevlerPage() {
           <div className="kb-wrap">
             {COLS.map(col => {
               const isDone = col.id === 'done'
-              const colTasks = tasks.filter(t => t.status === col.id && (isDone || matchesWeekFilter(t)))
               const allDoneTasks = tasks.filter(t => t.status === 'done')
+              const colTasks = isDone ? allDoneTasks : tasks.filter(t => t.status === col.id && matchesWeekFilter(t))
               const isOpen = isDone ? doneOpen : true
               return (
                 <div key={col.id} className="kb-col">
