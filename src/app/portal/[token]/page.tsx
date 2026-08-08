@@ -50,6 +50,16 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
     approval = appr
   }
 
+  // İçerik detayını al
+  let contentItem: any = null
+  let contentFiles: any[] = []
+  if (tokenRow.content_id) {
+    const { data: ct } = await sb.from('contents').select('*, client:clients(name,brand_name)').eq('id', tokenRow.content_id).single()
+    contentItem = ct
+    const { data: cf } = await sb.from('content_files').select('*').eq('content_id', tokenRow.content_id).order('version', { ascending: false })
+    contentFiles = cf || []
+  }
+
   // Aşamalar ve dosyalar (proje varsa)
   let stages: any[] = []
   let files:  any[] = []
@@ -176,6 +186,48 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
 
           {/* Müşteri Onay Butonu */}
           <ClientActions token={token} currentDecision={tokenRow.client_decision || 'pending'} projectId={project?.id} />
+
+          {/* İçerik Detayı */}
+          {contentItem && (
+            <div className="card" style={{marginBottom:16}}>
+              <div className="card-h">
+                <span className="card-title">İçerik</span>
+              </div>
+              <div style={{padding:'14px 18px'}}>
+                <p style={{fontSize:16,fontWeight:700,color:'#f0f0f5',marginBottom:8}}>{contentItem.title}</p>
+                {contentItem.caption && (
+                  <div style={{background:'#1a1a22',borderRadius:8,padding:'10px 12px',marginBottom:12}}>
+                    <p style={{fontSize:11,color:'#50506a',fontWeight:600,marginBottom:4}}>CAPTION</p>
+                    <p style={{fontSize:13,color:'#c0c0d8',lineHeight:1.6,whiteSpace:'pre-wrap'}}>{contentItem.caption}</p>
+                  </div>
+                )}
+                {contentItem.revision_note && (
+                  <div style={{background:'rgba(239,68,68,.08)',border:'1px solid rgba(239,68,68,.2)',borderRadius:8,padding:'10px 12px',marginBottom:12}}>
+                    <p style={{fontSize:11,color:'#ef4444',fontWeight:700,marginBottom:3}}>⚠️ Revizyon Notu</p>
+                    <p style={{fontSize:12,color:'#c0c0d8'}}>{contentItem.revision_note}</p>
+                  </div>
+                )}
+                {contentFiles.length > 0 && (
+                  <div>
+                    <p style={{fontSize:11,color:'#50506a',fontWeight:600,marginBottom:8}}>DOSYALAR</p>
+                    {contentFiles.map((f: any) => (
+                      <div key={f.id} style={{display:'flex',alignItems:'center',gap:10,padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.05)'}}>
+                        <span style={{fontSize:16}}>{f.file_name?.match(/\.(jpg|jpeg|png|gif|webp)$/i)?'🖼':f.file_name?.match(/\.(mp4|mov)$/i)?'🎬':'📎'}</span>
+                        <div style={{flex:1,minWidth:0}}>
+                          <p style={{fontSize:12,fontWeight:500,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',color:'#f0f0f5'}}>{f.file_name}</p>
+                          <p style={{fontSize:10,color:'#50506a'}}>v{f.version}{f.note ? ' · ' + f.note : ''}</p>
+                        </div>
+                        <a href={`/api/download?url=${encodeURIComponent(f.file_url)}&name=${encodeURIComponent(f.file_name)}`}
+                          download={f.file_name} className="dl-btn" style={{fontSize:11,padding:'5px 10px'}}>
+                          İndir
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Dosyalar */}
           {files.length > 0 && (
