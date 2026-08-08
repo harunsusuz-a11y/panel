@@ -2,14 +2,13 @@
 import { useState } from 'react'
 import TopBar from '@/components/TopBar'
 import {
-  BookOpen, Users, CheckSquare, CalendarDays, FileText,
-  Activity, ShieldCheck, Receipt, BarChart2, TrendingUp,
+  Users, CheckSquare, CalendarDays, FileText,
+  Activity, ShieldCheck, Receipt, TrendingUp,
   UserCog, SlidersHorizontal, ChevronRight, ChevronDown,
-  LayoutDashboard, AlertCircle, Search, Bell, Workflow,
-  Zap, Globe, Lock, Clock, MessageSquare, Star, StickyNote,
+  LayoutDashboard, Search, Bell,
+  Zap, Globe, Star, StickyNote,
   Wrench, LayoutTemplate, Share2, Calculator, UserCheck,
-  Plug, Video, AlertTriangle, HeadphonesIcon, FileBarChart,
-  Instagram, Send
+  Plug, Video, AlertTriangle, BarChart2
 } from 'lucide-react'
 
 const SECTIONS = [
@@ -157,7 +156,7 @@ const MODULES = [
     ],
   },
   {
-    icon: Instagram, name: 'Sosyal Medya Raporu', color: 'var(--ac)',
+    icon: TrendingUp, name: 'Sosyal Medya Raporu', color: 'var(--ac)',
     tag: 'Admin + Manager',
     summary: 'Marka ve platform bazında haftalık sosyal medya performans takibi.',
     items: [
@@ -191,7 +190,7 @@ const MODULES = [
     ],
   },
   {
-    icon: FileBarChart, name: 'Günlük Rapor', color: 'var(--blue)',
+    icon: BarChart2, name: 'Günlük Rapor', color: 'var(--blue)',
     tag: 'Admin',
     summary: 'Günlük operasyon özeti. ChatGPT ile otomatik yönetici özeti.',
     items: [
@@ -223,7 +222,7 @@ const MODULES = [
     ],
   },
   {
-    icon: Workflow, name: 'Otomasyonlar', color: 'var(--blue)',
+    icon: Activity, name: 'Otomasyonlar', color: 'var(--blue)',
     tag: 'Admin + Manager',
     summary: 'Tekrar eden bildirimleri sistem otomatik gönderir.',
     items: [
@@ -289,7 +288,7 @@ const MODULES = [
     ],
   },
   {
-    icon: HeadphonesIcon, name: 'Destek Talepleri', color: 'var(--ac)',
+    icon: Bell, name: 'Destek Talepleri', color: 'var(--ac)',
     tag: 'Herkes',
     summary: 'Ekip içi destek ve sorun bildirme sistemi.',
     items: [
