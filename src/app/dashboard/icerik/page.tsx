@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import TopBar from '@/components/TopBar'
-import { Plus, X, ChevronRight, Send, Instagram, Youtube, Linkedin, MoreHorizontal, Calendar, User, Building2, Image, FileText, Film, Megaphone, BookOpen, GripVertical } from 'lucide-react'
+import { Plus, X, ChevronRight, Send, Image, FileText, Film, GripVertical } from 'lucide-react'
 
 const PLATFORMS = [
   { value: 'instagram', label: 'Instagram', emoji: '📸' },
