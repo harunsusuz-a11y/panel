@@ -161,7 +161,7 @@ export default function ClientActions({ token, currentDecision, projectId }: {
             {uploaded.map((f,i) => (
               <div key={i} style={{display:'flex',alignItems:'center',gap:10,padding:'7px 10px',background:'rgba(34,211,160,.08)',borderRadius:8,marginBottom:4}}>
                 <CheckCircle2 size={14} color="#22d3a0"/>
-                <a href={f.url} target="_blank" rel="noopener noreferrer"
+                <a href={`/api/download?url=${encodeURIComponent(f.url)}&name=${encodeURIComponent(f.name)}`} download={f.name}
                   style={{flex:1,fontSize:12,color:'#22d3a0',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',textDecoration:'none'}}>
                   {f.name}
                 </a>
