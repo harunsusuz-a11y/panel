@@ -193,7 +193,7 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
                     <p style={{fontSize:13,fontWeight:500,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{f.name}</p>
                     <p style={{fontSize:11.5,color:'#50506a',marginTop:2}}>{fmtSize(f.file_size)}</p>
                   </div>
-                  <a href={f.file_url || f.file_path} download={f.name} target="_blank" rel="noreferrer" className="dl-btn">İndir</a>
+                  <a href={`/api/download?url=${encodeURIComponent(f.file_url || f.file_path || '')}&name=${encodeURIComponent(f.name || 'dosya')}`} download={f.name} target="_blank" rel="noreferrer" className="dl-btn">İndir</a>
                 </div>
               ))}
             </div>
