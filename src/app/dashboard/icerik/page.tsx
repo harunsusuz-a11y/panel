@@ -154,20 +154,6 @@ export default function IcerikPage() {
     if (myRole === 'member' && item?.assigned_to !== myId) { showToast('Yetki yok'); return }
     const sb = createClient()
 
-    // Onaya gönderilince approval kaydı oluştur
-    if (status === 'pending') {
-      const { data: existing } = await sb.from('approvals').select('id,status')
-        .eq('content_id', id).order('created_at', { ascending: false }).limit(1)
-      if (!existing?.length || existing[0].status !== 'pending') {
-        const { data: { user } } = await sb.auth.getUser()
-        await sb.from('approvals').insert({
-          title: item?.title || 'İçerik', type: 'content', status: 'pending',
-          client_id: item?.client_id || null, content_id: id,
-          requested_by: user?.id, notes: item?.notes || null,
-        })
-      }
-    }
-
     const updateData: any = { status }
     if (note) updateData.revision_note = note
     if (status !== 'revision') updateData.revision_note = null
@@ -223,6 +209,64 @@ export default function IcerikPage() {
     await sb.from('content_files').delete().eq('id', fileId)
     setSelFiles(prev => prev.filter(f => f.id !== fileId))
     showToast('Dosya silindi')
+  }
+
+  async function sendToClient(item: any) {
+    if (!item.client_id) { showToast('Marka atanmamış'); return }
+    const sb = createClient()
+    const { data: { user } } = await sb.auth.getUser()
+
+    // Token oluştur
+    const token = Math.random().toString(36).slice(2) + Date.now().toString(36)
+    const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+
+    // Approval kaydı oluştur
+    let approvalId: string | null = null
+    const { data: existing } = await sb.from('approvals').select('id,status')
+      .eq('content_id', item.id).order('created_at', { ascending: false }).limit(1)
+    if (!existing?.length || existing[0].status !== 'pending') {
+      const { data: newApp } = await sb.from('approvals').insert({
+        title: item.title, type: 'content', status: 'pending',
+        client_id: item.client_id, content_id: item.id,
+        requested_by: user?.id, notes: item.notes || null,
+      }).select().single()
+      approvalId = newApp?.id || null
+    } else {
+      approvalId = existing[0].id
+    }
+
+    // Portal token kaydet
+    const portalUrl = `${window.location.origin}/portal/${token}`
+    await sb.from('client_portal_tokens').insert({
+      client_id: item.client_id, content_id: item.id,
+      approval_id: approvalId, token, expires_at: expires
+    })
+
+    // Approval'a portal link yaz
+    if (approvalId) {
+      await sb.from('approvals').update({ portal_link: portalUrl, client_sent_at: new Date().toISOString() }).eq('id', approvalId)
+    }
+
+    // Müşteri telefonu al
+    const { data: client } = await sb.from('clients').select('phone, name, brand_name').eq('id', item.client_id).single()
+    if (client?.phone) {
+      const msg = `${client.brand_name || client.name}: "${item.title}" içeriği onayınızı bekliyor. İncelemek için: ${portalUrl}`
+      await fetch('/api/sms/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: client.phone, message: msg })
+      })
+      showToast('✓ Müşteriye portal linki SMS ile gönderildi')
+    } else {
+      // SMS yok, linki kopyala
+      navigator.clipboard?.writeText(portalUrl).catch(()=>{})
+      showToast('✓ Portal linki kopyalandı (müşteri telefonu yok)')
+    }
+
+    // İçerik durumunu approved'a al
+    await sb.from('contents').update({ status: 'approved' }).eq('id', item.id)
+    setItems(prev => prev.map(x => x.id === item.id ? { ...x, status: 'approved' } : x))
+    if (sel?.id === item.id) setSel((s: any) => s ? { ...s, status: 'approved' } : null)
   }
 
   async function deleteContent(id: string) {
@@ -511,12 +555,21 @@ export default function IcerikPage() {
                   </div>
                 </div>
 
+                {/* ── MÜŞTERİYE GÖNDER ── */}
+                {sel.status==='pending'&&(myRole==='admin'||myRole==='manager')&&(
+                  <button className="btn"
+                    style={{background:'#3b82f6',color:'#fff',border:'none',width:'100%',justifyContent:'center',padding:'10px',fontWeight:700}}
+                    onClick={()=>sendToClient(sel)}>
+                    <Send size={13}/> Müşteriye Gönder (Portal + SMS)
+                  </button>
+                )}
+
                 {/* ── GEÇİŞLER ── */}
                 {TRANSITIONS[sel.status]?.length>0&&(
                   <div>
                     <span className="lbl">Durumu Değiştir</span>
                     <div style={{display:'flex',flexDirection:'column',gap:5}}>
-                      {TRANSITIONS[sel.status].map(next=>{
+                      {TRANSITIONS[sel.status].filter(next=>!(sel.status==='pending'&&next==='approved')).map(next=>{
                         const col = COLUMNS.find(c=>c.id===next)!
                         return (
                           <button key={next} className="tr-btn"
