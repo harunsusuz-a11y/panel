@@ -32,6 +32,8 @@ export default function GorevlerPage() {
   const [myId,     setMyId]     = useState('')
   const [myRole,   setMyRole]   = useState('')
   const [confirmId, setConfirmId] = useState<string|null>(null)
+  const [weekFilter, setWeekFilter] = useState<'this'|'next'|'all'>('this')
+  const [doneOpen, setDoneOpen]     = useState(false)
   const [detailTab, setDetailTab] = useState<'info'|'comments'|'time'|'files'>('info')
   const [comments, setComments] = useState<any[]>([])
   const [timeLogs, setTimeLogs] = useState<any[]>([])
@@ -281,6 +283,31 @@ export default function GorevlerPage() {
   const fmtMin = (m: number) => m < 60 ? `${m}dk` : `${Math.floor(m / 60)}sa ${m % 60}dk`
   const isOverdue = (t: any) => t.status !== 'done' && t.due_date && new Date(t.due_date) < new Date()
 
+  // Hafta filtresi yardımcıları
+  function getWeekRange(offset: number) {
+    const now = new Date()
+    const day = now.getDay() === 0 ? 6 : now.getDay() - 1 // Pazartesi=0
+    const mon = new Date(now); mon.setDate(now.getDate() - day + offset * 7); mon.setHours(0,0,0,0)
+    const sun = new Date(mon); sun.setDate(mon.getDate() + 6); sun.setHours(23,59,59,999)
+    return { mon, sun }
+  }
+
+  function matchesWeekFilter(t: any) {
+    if (weekFilter === 'all') return true
+    if (!t.due_date) return weekFilter === 'all'
+    const due = new Date(t.due_date)
+    if (weekFilter === 'this') {
+      const { mon, sun } = getWeekRange(0)
+      // Geciken görevler de bu haftada görünsün
+      return due <= sun
+    }
+    if (weekFilter === 'next') {
+      const { mon, sun } = getWeekRange(1)
+      return due >= mon && due <= sun
+    }
+    return true
+  }
+
   // Reviewer bekleyen görevler (benim reviewer olduğum)
   const reviewPending = tasks.filter(t => t.reviewer_id === myId && t.status === 'review')
 
@@ -300,6 +327,29 @@ export default function GorevlerPage() {
           <button className="btn" onClick={() => setModal(true)}><Plus size={14} strokeWidth={2} />Yeni Görev</button>
         } />
         {toast && <div className={`toast ${toast.startsWith('Hata') ? 'toast-err' : 'toast-ok'}`}>{toast}</div>}
+
+        {/* Hafta Filtresi */}
+        <div style={{ display:'flex', gap:6, padding:'8px 14px', borderBottom:'1px solid var(--bdr)', flexShrink:0, alignItems:'center' }}>
+          <span style={{ fontSize:10.5, fontWeight:700, color:'var(--tx3)', marginRight:4 }}>HAFTA</span>
+          {(['this','next','all'] as const).map((w,i) => (
+            <button key={w} onClick={() => setWeekFilter(w)}
+              style={{ padding:'4px 12px', borderRadius:20, fontSize:12, fontWeight:600, cursor:'pointer', border:'1px solid var(--bdr)',
+                background: weekFilter===w ? 'var(--ac)' : 'transparent',
+                color: weekFilter===w ? '#fff' : 'var(--tx3)'
+              }}>
+              {w==='this' ? 'Bu Hafta' : w==='next' ? 'Sonraki Hafta' : 'Tümü'}
+            </button>
+          ))}
+          {weekFilter !== 'all' && (
+            <span style={{ fontSize:11, color:'var(--tx3)', marginLeft:8 }}>
+              {tasks.filter(t => t.status !== 'done' && !matchesWeekFilter(t) && isOverdue(t)).length > 0 &&
+                <span style={{ color:'var(--red)', fontWeight:700 }}>
+                  ⚠ {tasks.filter(t => t.status !== 'done' && isOverdue(t)).length} geciken
+                </span>
+              }
+            </span>
+          )}
+        </div>
 
         {/* Onay bekleyen banner */}
         {reviewPending.length > 0 && (
@@ -322,14 +372,24 @@ export default function GorevlerPage() {
         {loading ? <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--tx3)', fontSize: 13 }}>Yükleniyor...</div> : (
           <div className="kb-wrap">
             {COLS.map(col => {
-              const colTasks = tasks.filter(t => t.status === col.id)
+              const isDone = col.id === 'done'
+              const colTasks = tasks.filter(t => t.status === col.id && (isDone || matchesWeekFilter(t)))
+              const allDoneTasks = tasks.filter(t => t.status === 'done')
+              const isOpen = isDone ? doneOpen : true
               return (
                 <div key={col.id} className="kb-col">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '7px 10px', background: 'var(--s2)', borderRadius: 8, border: '1px solid var(--bdr)', flexShrink: 0 }}>
+                  <div onClick={() => isDone && setDoneOpen(!doneOpen)}
+                    style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '7px 10px', background: 'var(--s2)', borderRadius: 8, border: '1px solid var(--bdr)', flexShrink: 0, cursor: isDone ? 'pointer' : 'default' }}>
                     <div style={{ width: 7, height: 7, borderRadius: '50%', background: col.color }} />
                     <span style={{ fontSize: 12.5, fontWeight: 700, color: col.color, flex: 1 }}>{col.label}</span>
-                    <span style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--tx3)', background: 'var(--s3)', padding: '1px 7px', borderRadius: 5 }}>{colTasks.length}</span>
+                    {isDone && <span style={{ fontSize:10, color:'var(--tx3)' }}>{doneOpen ? '▲' : '▼'}</span>}
+                    <span style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--tx3)', background: 'var(--s3)', padding: '1px 7px', borderRadius: 5 }}>{isDone ? allDoneTasks.length : colTasks.length}</span>
                   </div>
+                  {!isOpen ? (
+                    <div style={{ textAlign:'center', padding:'12px 0', fontSize:12, color:'var(--tx3)', opacity:.6, border:'1px dashed var(--bdr)', borderRadius:8 }}>
+                      Tamamlananları görmek için tıkla
+                    </div>
+                  ) : (
                   <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 7 }}>
                     {colTasks.map(t => {
                       const p = PRI[t.priority] || PRI.normal
@@ -362,6 +422,7 @@ export default function GorevlerPage() {
                     })}
                     {colTasks.length === 0 && <div style={{ padding: '18px 0', textAlign: 'center', color: 'var(--tx3)', fontSize: 12, border: '1px dashed var(--bdr)', borderRadius: 8 }}>Görev yok</div>}
                   </div>
+                  )}
                 </div>
               )
             })}
