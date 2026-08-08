@@ -7,10 +7,11 @@ import {
   UserCog, SlidersHorizontal, ChevronRight, ChevronDown,
   LayoutDashboard, AlertCircle, Search, Bell, Workflow,
   Zap, Globe, Lock, Clock, MessageSquare, Star, StickyNote,
-  Wrench, LayoutTemplate
+  Wrench, LayoutTemplate, Share2, Calculator, UserCheck,
+  Plug, Video, AlertTriangle, HeadphonesIcon, FileBarChart,
+  Instagram, Send
 } from 'lucide-react'
 
-// ─── NAV ───────────────────────────────────────────────────
 const SECTIONS = [
   { id: 'nedir',    label: '🏢 Sistem Nedir?' },
   { id: 'ozellik',  label: '✨ Öne Çıkan Özellikler' },
@@ -21,18 +22,18 @@ const SECTIONS = [
   { id: 'sorular',  label: '💡 Sık Sorular' },
 ]
 
-// ─── VERİ ──────────────────────────────────────────────────
-
 const FEATURES = [
   { e: '⚡', t: 'Gerçek Zamanlı', d: 'Ekip aynı anda çalışır, değişiklikler anında herkese yansır. F5\'e gerek yok.' },
   { e: '📲', t: 'Push Bildirim + SMS', d: 'Görev gecikmesi, müşteri kararı, onay bildirimleri — telefona anlık ulaşır.' },
-  { e: '🤝', t: 'Müşteri Portali', d: 'Müşterinize özel link. Projelerini, onaylarını ve dosyalarını kendileri takip eder.' },
+  { e: '🤝', t: 'Müşteri Portali', d: 'Müşteriye özel SMS ile link gönderilir. Projelerini, içeriklerini ve dosyalarını kendileri takip eder.' },
   { e: '🔐', t: 'Rol Bazlı Erişim', d: 'Her kullanıcı yalnızca kendi alanını görür. Hem menüde hem sunucuda kontrol edilir.' },
   { e: '📊', t: 'Performans Takibi', d: 'Ekip bazlı verimlilik skorları, tamamlanan/geciken oranları ve süre kayıtları.' },
   { e: '🤖', t: 'Otomasyon', d: 'Geciken görevlerde, bekleyen onaylarda SMS/push otomatik gönderilir — sizin müdahaleniz gerekmez.' },
   { e: '🌐', t: 'PWA — Her Cihazda', d: 'Tarayıcıdan ana ekrana eklenebilir. iOS ve Android\'de uygulama gibi çalışır.' },
   { e: '📅', t: 'Takvim & Özel Günler', d: 'Deadline\'lar, yayın tarihleri ve ajans için önemli pazarlama günleri tek takvimde.' },
   { e: '📝', t: 'Kişisel Notlar', d: 'Her ekip üyesi kendi notlarını yazar, hatırlatma ekler, SMS\'le anımsatma alır.' },
+  { e: '📈', t: 'Sosyal Medya Raporu', d: 'Marka bazında haftalık Instagram, TikTok, LinkedIn ve YouTube verileri. PDF export.' },
+  { e: '📋', t: 'Kanban İçerik Akışı', d: 'İçerikler taslaktan yayına sürükle-bırak ile taşınır. Dosya versiyonlama ve revizyon notu.' },
   { e: '🛠️', t: 'Araç & Hesap Yönetimi', d: 'Ekibin kullandığı yazılımlar, abonelikler ve hesap bilgileri merkezi olarak tutulur.' },
 ]
 
@@ -40,20 +41,20 @@ const ROLES = [
   {
     avatar: 'AD', title: 'Admin (Founder)',
     color: 'var(--ac)', bg: 'var(--ac2)',
-    desc: 'Sistemin tüm yetkisine sahip kullanıcıdır. Finanstan kullanıcı yönetimine, onaylardan performans raporlarına kadar her modülü görür ve yönetir. Müşteri ilişkilerinde final karar yetkisi admindedir.',
+    desc: 'Sistemin tüm yetkisine sahip kullanıcıdır. Finanstan kullanıcı yönetimine, onaylardan performans raporlarına kadar her modülü görür ve yönetir.',
     caps: ['Tüm sayfalar ve veriler', 'Kullanıcı ekleme, rol ve şifre yönetimi', 'Finansal raporlar ve muhasebe', 'Otomasyon kuralları tanımlama', 'Sistem ayarları ve SMS entegrasyonu'],
   },
   {
     avatar: 'MG', title: 'Manager (Operasyon Müdürü)',
     color: 'var(--blue)', bg: 'var(--blue2)',
-    desc: 'Ajansın trafik kontrol kulesidir. Görev dağılımı, içerik akışı, müşteri iletişimi ve operasyonel süreçlerin yönetiminden sorumludur. Kullanıcı yönetimi ve finans raporları hariç her şeye erişir.',
-    caps: ['Müşteri ve proje yönetimi', 'Görev atama ve gecikme takibi', 'İçerik onay akışını yönetme', 'Müşteri portali link oluşturma', 'Operasyon ekranı ve raporlar'],
+    desc: 'Görev dağılımı, içerik akışı, müşteri iletişimi ve operasyonel süreçlerin yönetiminden sorumludur. Kullanıcı yönetimi ve finans raporları hariç her şeye erişir.',
+    caps: ['Müşteri ve proje yönetimi', 'Görev atama ve gecikme takibi', 'İçerik onay akışını yönetme', 'Müşteriye portal linki SMS ile gönderme', 'Operasyon ekranı ve raporlar'],
   },
   {
     avatar: 'ÜY', title: 'Member (Ekip Üyesi)',
     color: 'var(--green)', bg: 'var(--green2)',
-    desc: 'Grafiker, metin yazarı, sosyal medya uzmanı gibi üretim yapan ekip üyeleridir. Yalnızca kendilerine atanmış görevleri ve içerikleri görürler. Kendi çalışmalarını onaya gönderebilirler.',
-    caps: ['Sadece kendi görevleri', 'Sadece kendi içerikleri', 'Onaya gönderme yetkisi', 'Kişisel takvim ve notlar', 'Destek talebi açma'],
+    desc: 'Grafiker, metin yazarı, sosyal medya uzmanı gibi üretim yapan ekip üyeleridir. Yalnızca kendilerine atanmış görevleri ve içerikleri görürler.',
+    caps: ['Sadece kendi görevleri', 'Sadece kendi içerikleri', 'İçerik dosyası yükleme ve onaya gönderme', 'Kişisel takvim ve notlar', 'Destek talebi açma'],
   },
 ]
 
@@ -72,57 +73,69 @@ const MODULES = [
     ],
   },
   {
-    icon: Users, name: 'Müşteriler & Projeler', color: 'var(--blue)',
+    icon: Users, name: 'Müşteriler', color: 'var(--blue)',
     tag: 'Admin + Manager',
-    summary: 'Müşteri ve proje yönetiminin tek çatı altında toplandığı merkez.',
+    summary: 'Tüm müşterilerin ve marka bilgilerinin yönetildiği merkez.',
     items: [
-      'Her müşteri için projeler, görevler, içerikler ve finansal kayıtlar',
-      'Proje aşamaları tanımlama — "Onay gerekiyor" işaretlenebilir',
-      'Kanban tabanlı görev akışı proje bazında',
-      'Dosya yükleme ve müşteriye teslim',
-      'Müşteri Paneli: Tüm projeleri kapsayan kalıcı portal linki üretme',
-      'WhatsApp ile doğrudan müşteriye link iletme',
+      'Müşteri adı, marka adı, e-posta, telefon ve şirket bilgileri',
+      'Tüm alanlar zorunlu — eksik müşteri kaydı oluşturulamaz',
+      'Müşteri kartında marka adı görünür',
+      'Müşteri Portali: kalıcı token ile şifresiz erişim linki',
+      'Aktif / Pasif durum takibi',
+    ],
+  },
+  {
+    icon: FileText, name: 'Projeler', color: 'var(--blue)',
+    tag: 'Admin + Manager',
+    summary: 'Müşteri bazlı proje takibi ve aşama yönetimi.',
+    items: [
+      'Proje oluşturma, aşama tanımlama ve ilerleme takibi',
+      'Proje bazlı dosya yükleme ve müşteriye teslim',
+      'Proje portal linki — müşteri projesini takip eder',
+      'Proje tamamlanınca otomatik bildirim',
     ],
   },
   {
     icon: CheckSquare, name: 'Görevler', color: 'var(--ac)',
     tag: 'Herkes (rol bazlı)',
-    summary: 'Kanban tabanlı görev yönetimi. Ekibin her anı kayıt altında.',
+    summary: 'Kanban tabanlı görev yönetimi. Tüm alanlar zorunlu.',
     items: [
       '4 sütunlu kanban: Bekliyor → Devam → Kontrol → Tamamlandı',
+      'Zorunlu alanlar: Başlık, Firma, Proje, Sorumlu, Deadline, Açıklama',
       'Öncelik seviyeleri: Kritik, Yüksek, Normal, Düşük',
       'Otomatik süre takibi — "Devam"a alınınca sayaç başlar',
-      'Görev bazlı yorum ve notlar',
-      'Deadline yaklaştığında otomatik bildirim',
+      'Deadline yaklaştığında otomatik SMS + push bildirim',
       'Member: Sadece kendi görevi; sadece ilerletme yetkisi',
     ],
   },
   {
-    icon: FileText, name: 'İçerik Yönetimi', color: 'var(--amber)',
+    icon: FileText, name: 'İçerik Merkezi', color: 'var(--amber)',
     tag: 'Herkes (rol bazlı)',
-    summary: '5 aşamalı içerik üretim workflow\'u. Taslaktan yayına kadar tam kontrol.',
+    summary: '5 aşamalı kanban ile içerik üretim akışı. Dosya versiyonlama ve müşteri onayı entegre.',
     items: [
-      'Taslak → İç Onay → Müşteri Onayı → Revizyon → Yayında',
-      'Her aşamada kaç içerik olduğu anlık görülür',
-      'Müşteri bazlı filtreleme',
-      'İçerik onaylanınca müşteri portali üzerinden gösterilir',
-      'Revizyon gelince içerik otomatik geri alınır',
+      'Kanban kolonları: Taslak → İç Onay → Müşteri Onayı → Revizyon → Yayında',
+      'Platform filtresi: Instagram, TikTok, LinkedIn, YouTube',
+      'İçerik türleri: Post, Story, Reels, Blog, Reklam',
+      'Caption metin, yayın tarihi ve sorumlu ataması',
+      'Dosya yükleme — v1, v2, v3 versiyonlama, kim yükledi görünür',
+      '"Müşteriye Gönder" butonu → portal token oluşturur → müşteriye SMS gider',
+      'Revizyon modalı — ekibe not bırakılır, kart üzerinde kırmızı görünür',
+      'Müşteri onaylayınca/revizyon isteyince içerik otomatik güncellenir',
     ],
   },
   {
     icon: ShieldCheck, name: 'Onay Sistemi', color: 'var(--amber)',
-    tag: 'Herkes (kısıtlı)',
-    summary: '4 adımlı onay akışı. Müşteri kararı anında ekibe bildirilir.',
+    tag: 'Admin + Manager',
+    summary: 'İç onay akışı. Proje ve dosya bazlı onay talepleri.',
     items: [
-      '1. Talep oluştur → 2. İç onay → 3. Müşteriye gönder → 4. Müşteri kararı',
+      'Onay talebi oluştur — proje veya dosya bazında',
       'İç onay yapılmadan müşteriye gönderilemez',
       'Müşteri onaylayınca veya revizyon isteyince push bildirim',
-      'Revizyon notu ve gerekçe müşteri tarafından yazılabilir',
       'Tüm onay geçmişi arşivlenir',
     ],
   },
   {
-    icon: Activity, name: 'Operasyon Ekranı', color: 'var(--ac)',
+    icon: Activity, name: 'Operasyon', color: 'var(--ac)',
     tag: 'Admin + Manager',
     summary: 'Ajansın trafik kontrol merkezi. Günlük operasyonun tamamı tek sayfada.',
     items: [
@@ -134,6 +147,29 @@ const MODULES = [
     ],
   },
   {
+    icon: AlertTriangle, name: 'Gecikmeler', color: 'var(--red)',
+    tag: 'Admin + Manager',
+    summary: 'Deadline\'ı geçmiş tüm görevlerin tek sayfada listesi.',
+    items: [
+      'Kaç gün geciktiği, sorumlusu ve önceliği görünür',
+      'Geciken görevleri direkt bu sayfadan güncelleme',
+      'Otomatik SMS gönderimi geciken görevler için',
+    ],
+  },
+  {
+    icon: Instagram, name: 'Sosyal Medya Raporu', color: 'var(--ac)',
+    tag: 'Admin + Manager',
+    summary: 'Marka ve platform bazında haftalık sosyal medya performans takibi.',
+    items: [
+      'Platformlar: Instagram, TikTok, LinkedIn, YouTube',
+      'Metrikler: Post, Story, Like, Yorum, Kaydetme, Paylaşım, Takipçi, Erişim, Gösterim',
+      'Önceki hafta karşılaştırması — % değişim okları',
+      'Otomatik Engagement Rate hesabı',
+      'Özet görünüm — tüm markaların tek sayfada özeti',
+      'PDF İndir — haftalık raporu yazdırabilir veya kaydedebilirsin',
+    ],
+  },
+  {
     icon: Bell, name: 'Bildirimler', color: 'var(--ac)',
     tag: 'Herkes',
     summary: 'Ajansın hiçbir anını kaçırmamanızı sağlar.',
@@ -142,7 +178,6 @@ const MODULES = [
       'Müşteri kararı (onay/revizyon) → admin + manager\'a anlık push',
       'İç onay bekleniyor → 24 saatte bir hatırlatma',
       'Destek talebi açıldı → admin + manager\'a bildirim',
-      'Tüm bildirimler ilgili sayfaya yönlendirir',
     ],
   },
   {
@@ -151,13 +186,23 @@ const MODULES = [
     summary: 'Ekip ve müşteri bazlı verimlilik analizi.',
     items: [
       'Ekip bazlı performans skoru — tamamlanan/geciken oranı',
-      'Müşteri bazlı içerik durumu timeline',
       'Süre kayıtları — kim hangi göreve ne kadar zaman harcadı',
       'Tüm sistem aktivite logu',
     ],
   },
   {
-    icon: Receipt, name: 'Finans & Muhasebe', color: 'var(--green)',
+    icon: FileBarChart, name: 'Günlük Rapor', color: 'var(--blue)',
+    tag: 'Admin',
+    summary: 'Günlük operasyon özeti. ChatGPT ile otomatik yönetici özeti.',
+    items: [
+      'Aktif kullanıcılar, oluşturulan/tamamlanan görevler, onay hareketleri',
+      'Kişi bazında aktivite detayı — kim ne yaptı',
+      'OpenAI API bağlıysa ChatGPT ile Türkçe yönetici özeti',
+      'Geçmiş tarihlere gidilerek raporlanabilir',
+    ],
+  },
+  {
+    icon: Receipt, name: 'Finans', color: 'var(--green)',
     tag: 'Admin + Manager',
     summary: 'Ajans gelir-gider takibi ve finansal özet.',
     items: [
@@ -165,6 +210,16 @@ const MODULES = [
       'Ödendi / Bekliyor / Gecikti durumları',
       'Son 6 aylık gelir trend grafiği',
       'Net kâr ve bekleyen tahsilat özeti',
+    ],
+  },
+  {
+    icon: Calculator, name: 'Muhasebe', color: 'var(--green)',
+    tag: 'Admin',
+    summary: 'Detaylı muhasebe kayıtları ve kategori bazlı takip.',
+    items: [
+      'Gelir/gider kategorileri',
+      'Fatura ve makbuz kaydı',
+      'Dönemsel muhasebe özeti',
     ],
   },
   {
@@ -191,26 +246,87 @@ const MODULES = [
     ],
   },
   {
+    icon: Video, name: 'Toplantılar', color: 'var(--blue)',
+    tag: 'Admin + Manager',
+    summary: 'Ekip ve müşteri toplantılarının planlanması ve takibi.',
+    items: [
+      'Toplantı oluşturma — tarih, saat, katılımcılar',
+      'Yaklaşan toplantı listesi',
+      'Toplantı notları ekleme',
+    ],
+  },
+  {
     icon: StickyNote, name: 'Kişisel Notlar', color: 'var(--ac)',
     tag: 'Herkes',
     summary: 'Her ekip üyesinin kendine ait not ve hatırlatma alanı.',
     items: [
       'Not ekle, düzenle, sil — tamamen kişisel',
       'Hatırlatma tarihi ve saati belirle',
-      'SMS hatırlatma — tam zamanında telefona gelir',
+      'SMS hatırlatma — not başlığı ve içeriği tam olarak gelir',
       'Notlar yalnızca sana görünür',
+    ],
+  },
+  {
+    icon: Share2, name: 'Paylaşım Planlayıcı', color: 'var(--ac)',
+    tag: 'Admin + Manager',
+    summary: 'n8n entegrasyonu ile otomatik sosyal medya paylaşım planlama.',
+    items: [
+      'Paylaşım zamanı ve platform belirleme',
+      'n8n ile otomatik sıralı gönderim',
+      'Planlanan paylaşımların takibi',
     ],
   },
   {
     icon: Globe, name: 'Müşteri Portali', color: 'var(--green)',
     tag: 'Müşterilere özel',
-    summary: 'Müşterinizin kendi projesini takip ettiği, onay verdiği alan.',
+    summary: 'Müşterinizin kendi projesini ve içeriklerini takip ettiği, onay verdiği alan.',
     items: [
-      'Şifresiz, link ile giriş — müşteriye ek hesap yükü yok',
-      'Tüm projeler, aşamalar ve dosyalar görünür',
-      'Onay / Revizyon kararı verebilir, not ekleyebilir',
-      'Dosyaları doğrudan indirebilir',
+      'Şifresiz, SMS ile gelen link — müşteriye ek hesap yükü yok',
+      'Proje aşamaları, dosyalar görünür ve indirilebilir',
+      'İçerik onayla / revizyon iste — not ekleyebilir',
+      'Müşteri de dosya yükleyebilir (revize edilmiş materyaller)',
       'Ajans onaylamadan içerik portale düşmez',
+    ],
+  },
+  {
+    icon: HeadphonesIcon, name: 'Destek Talepleri', color: 'var(--ac)',
+    tag: 'Herkes',
+    summary: 'Ekip içi destek ve sorun bildirme sistemi.',
+    items: [
+      'Ekip üyesi destek talebi açar',
+      'Admin + Manager\'a bildirim gider',
+      'Talep durumu — açık, işlemde, kapatıldı',
+    ],
+  },
+  {
+    icon: UserCheck, name: 'Ekip & Yetkiler', color: 'var(--blue)',
+    tag: 'Admin',
+    summary: 'Ekip üyelerinin rol ve yetki yönetimi.',
+    items: [
+      'Ekip üyelerini listele ve rol değiştir',
+      'Departman ve telefon bilgisi yönetimi',
+      'Aktif/pasif kullanıcı kontrolü',
+    ],
+  },
+  {
+    icon: UserCog, name: 'Kullanıcılar', color: 'var(--blue)',
+    tag: 'Admin',
+    summary: 'Kullanıcı davet etme ve hesap yönetimi.',
+    items: [
+      'E-posta ile davet gönderme',
+      'Rol atama: Admin, Manager, Member',
+      'Şifre sıfırlama',
+    ],
+  },
+  {
+    icon: Plug, name: 'Entegrasyonlar', color: 'var(--ac)',
+    tag: 'Admin',
+    summary: 'Harici servis bağlantıları ve API entegrasyonları.',
+    items: [
+      'Netgsm SMS API bağlantısı',
+      'OpenAI / ChatGPT entegrasyonu',
+      'Google OAuth girişi',
+      'Push bildirim (web-push) yapılandırması',
     ],
   },
   {
@@ -220,7 +336,6 @@ const MODULES = [
     items: [
       'Her araç için ad, URL, kullanıcı adı, şifre',
       'Aylık/yıllık abonelik takibi',
-      'Kime ait, hangi proje için kullanılıyor',
       'Yalnızca admin görür — güvenli saklama',
     ],
   },
@@ -230,9 +345,21 @@ const MODULES = [
     summary: 'Tekrar eden haftalık görev listelerini tek tıkla oluştur.',
     items: [
       'Şablon oluştur — başlık, açıklama, öncelik, deadline ve sorumlu kişi',
-      'Birden fazla kişiye aynı anda atanabilir',
       'Şablon çalıştırılınca görevler otomatik oluşturulur',
       'Her çalıştırmada ilgili kişilere push bildirim gönderilir',
+    ],
+  },
+  {
+    icon: SlidersHorizontal, name: 'Ayarlar', color: 'var(--ac)',
+    tag: 'Herkes (kısıtlı)',
+    summary: 'Kişisel profil ve sistem ayarları.',
+    items: [
+      'Profil güncelleme — ad, telefon, avatar',
+      'Şifre değiştirme',
+      'Bildirim tercihleri — push açma/kapama',
+      'Netgsm SMS ayarları (Admin)',
+      'E-posta ve şirket ayarları (Admin)',
+      'ChatGPT API key (Admin)',
     ],
   },
 ]
@@ -241,12 +368,14 @@ const WORKFLOWS = [
   {
     title: '📤 İçerik Üretim ve Müşteri Onayı', color: 'var(--amber)',
     steps: [
-      { who: 'Manager', action: 'Brief alınır, içerik sisteme girilir ve sorumlu kişiye atanır' },
-      { who: 'Ekip Üyesi', action: 'İçeriği hazırlar → "Onaya Gönder" butonuna basar' },
-      { who: 'Admin / Manager', action: 'Onay sayfasında inceler, onaylar veya reddeder — ilgili kişiye bildirim gider' },
-      { who: 'Manager', action: 'Onaylanan içerik için "Portal Linki Oluştur" → Müşteriye WhatsApp\'tan gönderilir' },
-      { who: 'Müşteri', action: 'Kendi portaline girer, onaylar veya revizyon notu yazar' },
-      { who: 'Admin / Manager', action: 'Müşteri kararı anlık bildirimle gelir, dashboard\'da görünür' },
+      { who: 'Manager', action: 'Brief alınır, İçerik Merkezi\'nde yeni içerik oluşturulur, sorumluya atanır' },
+      { who: 'Ekip Üyesi', action: 'Dosyayı (görsel, video) yükler — v1 olarak kaydedilir' },
+      { who: 'Ekip Üyesi', action: '"İç Onay" kolonuna sürükler veya butona basar' },
+      { who: 'Admin / Manager', action: 'İnceler, onaylar. "Müşteriye Gönder" butonuna basar' },
+      { who: 'Sistem', action: 'Portal token oluşturulur, müşteriye SMS gider: "İçerik onayınızı bekliyor: [link]"' },
+      { who: 'Müşteri', action: 'Portale girer, içeriği ve dosyayı inceler, onaylar veya revizyon notu yazar' },
+      { who: 'Admin / Manager', action: 'Müşteri kararı anlık bildirimle gelir — onaylandıysa "Yayında"ya alınır' },
+      { who: 'Ekip Üyesi', action: 'Revizyon geldiyse — düzenler, v2 yükler, tekrar İç Onay\'a gönderir' },
     ]
   },
   {
@@ -256,7 +385,7 @@ const WORKFLOWS = [
       { who: 'Manager', action: 'Görevler oluşturulur, ekip üyelerine atanır, deadline belirlenir' },
       { who: 'Ekip', action: 'Kanban üzerinden ilerler: Bekliyor → Devam → Kontrol → Tamamlandı' },
       { who: 'Manager', action: 'Dosyalar proje detayından müşteri için yüklenir' },
-      { who: 'Manager', action: '"Müşteri Paneli" linki müşteriye iletilir' },
+      { who: 'Manager', action: '"Müşteri Paneli" linki oluşturulur, SMS ile iletilir' },
       { who: 'Müşteri', action: 'Portalden projesini takip eder, dosyalarını indirir' },
     ]
   },
@@ -271,28 +400,38 @@ const WORKFLOWS = [
     ]
   },
   {
+    title: '📊 Sosyal Medya Haftalık Rapor', color: 'var(--ac)',
+    steps: [
+      { who: 'Gizem / Sorumlu', action: 'Sosyal Medya sayfasına girer, haftayı seçer' },
+      { who: 'Gizem / Sorumlu', action: 'Platformu seçer (Instagram, TikTok...) ve markayı seçer' },
+      { who: 'Gizem / Sorumlu', action: 'Bu haftanın ve önceki haftanın metriklerini girer' },
+      { who: 'Sistem', action: '% değişim ve Engagement Rate otomatik hesaplanır' },
+      { who: 'Manager', action: 'Özet sekmesinden tüm markaları görür, PDF İndir ile raporu kaydeder' },
+    ]
+  },
+  {
     title: '📝 Kişisel Not ve SMS Hatırlatma', color: 'var(--ac)',
     steps: [
       { who: 'Ekip Üyesi', action: 'Notlarım sayfasından yeni not oluşturur' },
       { who: 'Ekip Üyesi', action: 'Hatırlatma tarihi ve saati seçer, SMS toggle\'ını açar' },
-      { who: 'Sistem', action: 'Belirlenen saatte profilindeki numaraya SMS gönderilir' },
+      { who: 'Sistem', action: 'Belirlenen saatte "Not başlığı: içeriği" şeklinde SMS gönderilir' },
       { who: 'Ekip Üyesi', action: 'Notun üzerinde "SMS gönderildi ✓" ibaresi görünür' },
     ]
   },
 ]
 
 const TIPS = [
-  { e: '🔴', q: 'Geciken görevleri nasıl takip ederim?', a: 'Dashboard → "Geciken Görev" kartına tıkla. Gecikmeler sayfasında kaç gün geciktiği, kim sorumlu olduğu ve öncelik sırasına göre listelenir. Buradan direkt tamamlandı yapılabilir.' },
-  { e: '📤', q: 'Müşteriye içerik nasıl gönderilir?', a: 'Onay → Talep oluştur → İç onay al → "Portal Linki Oluştur" → Linki kopyala, WhatsApp\'tan ilet. Müşteri şifresiz portale girer, onay verir veya revizyon notu yazar.' },
+  { e: '🔴', q: 'Geciken görevleri nasıl takip ederim?', a: 'Dashboard → "Geciken Görev" kartına tıkla ya da Gecikmeler sayfasına git. Kaç gün geciktiği, kim sorumlu olduğu ve öncelik sırasına göre listelenir.' },
+  { e: '📤', q: 'Müşteriye içerik nasıl gönderilir?', a: 'İçerik Merkezi → İçeriği "İç Onay"a al → "Müşteriye Gönder" butonuna bas. Sistem otomatik portal linki oluşturur ve müşteriye SMS gönderir. Müşteri şifresiz portale girer.' },
   { e: '📱', q: 'Telefona bildirim almak istiyorum', a: 'Ayarlar → Bildirimler sekmesine gir → "Bildirimleri Aktifleştir" butonuna tıkla. Tarayıcı izin sorar, kabul et. Uygulama kapalıyken bile bildirim alırsın.' },
   { e: '👤', q: 'Bazı sayfaları neden göremiyorum?', a: 'Rol kısıtlaması. Member rolü yalnızca kendine atanmış görevleri ve içerikleri görür. Admin rolünü değiştirebilir — Kullanıcılar sayfasından.' },
-  { e: '📲', q: 'SMS sistemi çalışmıyor', a: 'Ayarlar → Netgsm SMS bölümünden API bilgilerinin girildiğini kontrol et. "Test SMS Gönder" ile anlık deneme yapabilirsin.' },
-  { e: '🔄', q: 'Veri güncel mi bilmiyorum', a: 'Sağ üstteki "Canlı" göstergesi yeşilse veri gerçek zamanlı akıyor. Değişiklikler F5\'e gerek kalmadan anında yansır.' },
-  { e: '🤝', q: 'Müşteri portalini nasıl paylaşırım?', a: 'Müşteriler → Müşteri kartı → "Müşteri Paneli" butonu kalıcı link üretir. Proje bazlı link istiyorsan: Proje → "Portal" butonu. Kalıcı link tüm proje geçmişini gösterir.' },
+  { e: '📲', q: 'SMS sistemi çalışmıyor', a: 'Ayarlar → Netgsm SMS bölümünden API bilgilerinin girildiğini kontrol et. Hesapta SMS paketi olması gerekiyor — Toplu SMS paketi (OTP değil). "Test SMS Gönder" ile anlık deneme yapabilirsin.' },
+  { e: '📊', q: 'Sosyal medya raporunu nasıl PDF yaparım?', a: 'Sosyal Medya sayfası → Özet Görünüm sekmesi → "PDF İndir" butonuna tıkla. Tarayıcı yazdırma diyalogu açılır, "PDF olarak kaydet" seçeneğiyle kaydedebilirsin.' },
+  { e: '🔄', q: 'İçeriği revize edince ne yapmalıyım?', a: 'Revizyon kolonundaki içeriği aç → Yeni dosyayı yükle (otomatik v2 olarak kaydedilir) → "İç Onay"a geri gönder → "Müşteriye Gönder" → yeni SMS gider.' },
+  { e: '🤝', q: 'Müşteri portalini nasıl paylaşırım?', a: 'İki yol: 1) İçerik Merkezi\'nde "Müşteriye Gönder" → SMS otomatik gider. 2) Müşteriler sayfasından "Müşteri Paneli" butonu kalıcı link üretir, tüm proje geçmişini gösterir.' },
   { e: '🛠️', q: 'Yeni ekip üyesi nasıl eklenir?', a: 'Kullanıcılar sayfası → "Kullanıcı Ekle" → E-posta ile davet gönderilir. Kişi giriş yaptıktan sonra admin rolünü ve şifresini belirler.' },
+  { e: '📋', q: 'Görev oluştururken hangi alanlar zorunlu?', a: 'Başlık, Firma, Proje, Sorumlu, Deadline ve Açıklama zorunludur. Hepsi doldurulmadan "Görev Oluştur" butonu aktif olmaz.' },
 ]
-
-// ─── BİLEŞENLER ────────────────────────────────────────────
 
 function Accordion({ title, color, Icon, tag, children }: { title: string; color: string; Icon: any; tag: string; children: React.ReactNode }) {
   const [open, setOpen] = useState(false)
@@ -323,8 +462,6 @@ function Section({ id, title, children }: { id: string; title: string; children:
     </section>
   )
 }
-
-// ─── ANA SAYFA ─────────────────────────────────────────────
 
 export default function DokumantasyonPage() {
   const [search, setSearch] = useState('')
@@ -374,7 +511,6 @@ export default function DokumantasyonPage() {
         />
 
         <div className="doc-wrap">
-          {/* Sol Menü */}
           <div className="doc-sb">
             <p style={{ fontSize: 9.5, fontWeight: 700, color: 'var(--tx3)', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 10, padding: '0 4px' }}>İçindekiler</p>
             {SECTIONS.map(s => (
@@ -389,10 +525,8 @@ export default function DokumantasyonPage() {
             </div>
           </div>
 
-          {/* İçerik */}
           <div className="doc-body">
 
-            {/* ── SİSTEM NEDİR ── */}
             <Section id="nedir" title="🏢 Bu Sistem Nedir?">
               <div style={{ background: 'linear-gradient(135deg,var(--ac2),var(--blue2))', border: '1px solid rgba(124,106,247,.2)', borderRadius: 14, padding: '24px 26px', marginBottom: 20 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
@@ -405,17 +539,16 @@ export default function DokumantasyonPage() {
                   otomasyona kadar ajansın tüm operasyonel süreçleri tek çatı altında toplanmıştır.
                 </p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 14 }}>
-                  {['Özel Geliştirme', 'Gerçek Zamanlı', 'PWA — Her Cihazda', 'Müşteri Portali', 'SMS & Push Bildirim', 'Rol Bazlı Erişim'].map(t => (
+                  {['Özel Geliştirme', 'Gerçek Zamanlı', 'PWA — Her Cihazda', 'Müşteri Portali', 'SMS & Push Bildirim', 'Rol Bazlı Erişim', 'Dosya Versiyonlama', 'PDF Rapor'].map(t => (
                     <span key={t} style={{ fontSize: 11.5, fontWeight: 600, background: 'rgba(124,106,247,.15)', color: 'var(--ac)', padding: '3px 10px', borderRadius: 6, border: '1px solid rgba(124,106,247,.2)' }}>{t}</span>
                   ))}
                 </div>
               </div>
-
               <div style={{ background: 'var(--s1)', border: '1px solid var(--bdr)', borderRadius: 12, padding: '18px 20px' }}>
                 <p style={{ fontSize: 13.5, fontWeight: 700, marginBottom: 12 }}>💼 Hangi Sorunu Çözüyor?</p>
                 {[
-                  { e: '❌', b: 'Eskiden:', t: 'WhatsApp\'ta boğulan onaylar, Excel\'de kaybolan görevler, unutulan deadlineler, müşteriye manuel iletilen linkler' },
-                  { e: '✅', b: 'Artık:', t: 'Tek platform — görev atama, içerik onayı, müşteri portali, otomatik bildirim ve performans takibi hepsi burada' },
+                  { e: '❌', b: 'Eskiden:', t: 'WhatsApp\'ta boğulan onaylar, Excel\'de kaybolan görevler, unutulan deadlineler, müşteriye manuel iletilen linkler, Drive\'da kayıp dosyalar' },
+                  { e: '✅', b: 'Artık:', t: 'Tek platform — görev atama, içerik kanbanı, dosya versiyonlama, müşteri portali, otomatik SMS, sosyal medya raporu ve performans takibi hepsi burada' },
                 ].map(r => (
                   <div key={r.e} style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
                     <span style={{ fontSize: 18, flexShrink: 0 }}>{r.e}</span>
@@ -425,7 +558,6 @@ export default function DokumantasyonPage() {
               </div>
             </Section>
 
-            {/* ── ÖNE ÇIKAN ÖZELLİKLER ── */}
             <Section id="ozellik" title="✨ Öne Çıkan Özellikler">
               <div className="feat-grid">
                 {FEATURES.map(f => (
@@ -438,12 +570,11 @@ export default function DokumantasyonPage() {
               </div>
             </Section>
 
-            {/* ── KULLANICI ROLLERİ ── */}
             <Section id="roller" title="👥 Kullanıcı Rolleri">
               <div style={{ background: 'var(--s2)', border: '1px solid var(--bdr)', borderRadius: 10, padding: '12px 16px', marginBottom: 16 }}>
                 <p style={{ fontSize: 13, color: 'var(--tx2)', lineHeight: 1.7 }}>
                   Sistemde 3 kullanıcı tipi vardır. Her rol yalnızca kendi yetkisi dahilindeki sayfalara ve verilere erişebilir.
-                  Bu kısıtlama sadece menüde değil, sunucu tarafında da geçerlidir — URL manipülasyonu çalışmaz.
+                  Bu kısıtlama sadece menüde değil, sunucu tarafında da geçerlidir.
                 </p>
               </div>
               {ROLES.map(r => (
@@ -451,9 +582,7 @@ export default function DokumantasyonPage() {
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 14 }}>
                     <div style={{ width: 44, height: 44, borderRadius: '50%', background: r.bg, color: r.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, flexShrink: 0, border: `2px solid ${r.color}40` }}>{r.avatar}</div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                        <p style={{ fontSize: 14.5, fontWeight: 700 }}>{r.title}</p>
-                      </div>
+                      <p style={{ fontSize: 14.5, fontWeight: 700, marginBottom: 6 }}>{r.title}</p>
                       <p style={{ fontSize: 13, color: 'var(--tx2)', lineHeight: 1.7 }}>{r.desc}</p>
                     </div>
                   </div>
@@ -472,16 +601,13 @@ export default function DokumantasyonPage() {
               ))}
             </Section>
 
-            {/* ── MODÜLLER ── */}
-            <Section id="moduller" title="📦 Modüller — Ne İşe Yarar?">
+            <Section id="moduller" title={`📦 Modüller — ${MODULES.length} Modül`}>
               {search && filtered.length < MODULES.length && (
                 <div style={{ marginBottom: 12, padding: '8px 12px', background: 'var(--blue2)', borderRadius: 8, fontSize: 12.5, color: 'var(--blue)' }}>
                   &quot;{search}&quot; için {filtered.length} modül
                 </div>
               )}
-              {filtered.length === 0 && (
-                <p style={{ color: 'var(--tx3)', fontSize: 13, padding: '20px 0' }}>Sonuç bulunamadı.</p>
-              )}
+              {filtered.length === 0 && <p style={{ color: 'var(--tx3)', fontSize: 13, padding: '20px 0' }}>Sonuç bulunamadı.</p>}
               {filtered.map(m => (
                 <Accordion key={m.name} title={m.name} color={m.color} Icon={m.icon} tag={m.tag}>
                   <p style={{ fontSize: 13, color: 'var(--tx2)', lineHeight: 1.7, marginBottom: 12 }}>{m.summary}</p>
@@ -497,7 +623,6 @@ export default function DokumantasyonPage() {
               ))}
             </Section>
 
-            {/* ── İŞ AKIŞLARI ── */}
             <Section id="akislar" title="🔄 İş Akışları — Adım Adım">
               {WORKFLOWS.map(wf => (
                 <div key={wf.title} style={{ background: 'var(--s1)', border: '1px solid var(--bdr)', borderRadius: 12, overflow: 'hidden', marginBottom: 14 }}>
@@ -520,19 +645,18 @@ export default function DokumantasyonPage() {
               ))}
             </Section>
 
-            {/* ── MÜŞTERİ DENEYİMİ ── */}
             <Section id="musteri" title="🤝 Müşteri Deneyimi — Müşteriniz Sistemi Nasıl Görür?">
               <div style={{ background: 'linear-gradient(135deg,var(--green2),var(--blue2))', border: '1px solid rgba(34,211,160,.2)', borderRadius: 14, padding: '22px 24px', marginBottom: 16 }}>
                 <p style={{ fontSize: 14.5, fontWeight: 700, marginBottom: 10 }}>🌐 Müşteri Portali</p>
                 <p style={{ fontSize: 13.5, color: 'var(--tx2)', lineHeight: 1.9, marginBottom: 14 }}>
-                  Müşterinize ajans yönetim sistemine hesap açmanıza gerek yok. Onlara özel üretilen
-                  bir link ile kendi portallerine şifresiz girerler. Tüm proje geçmişini, dosyalarını
-                  ve onay süreçlerini buradan takip ederler.
+                  Müşterinize ayrıca hesap açmanıza gerek yok. "Müşteriye Gönder" butonuna basınca sistem
+                  otomatik bir portal linki oluşturur ve müşterinin telefon numarasına SMS gönderir.
+                  Müşteri bu linkle şifresiz portale girer.
                 </p>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 10 }}>
                   {[
-                    { e: '🔗', t: 'Şifresiz Erişim', d: 'Sadece link — ek hesap yükü yok' },
-                    { e: '📁', t: 'Tüm Dosyalar', d: 'İndirebilir, arşivleyebilir' },
+                    { e: '📲', t: 'SMS ile Link', d: 'Otomatik gönderilir — extra adım yok' },
+                    { e: '📁', t: 'Dosyalar', d: 'İndirebilir, müşteri de dosya yükleyebilir' },
                     { e: '✅', t: 'Onay / Revizyon', d: 'Kararını not ile birlikte iletir' },
                     { e: '🏗️', t: 'Proje Aşamaları', d: 'İlerlemeyi anlık görür' },
                   ].map(c => (
@@ -546,11 +670,10 @@ export default function DokumantasyonPage() {
               </div>
               <div style={{ background: 'var(--s2)', borderRadius: 10, padding: '14px 16px', border: '1px solid var(--bdr)', fontSize: 13, color: 'var(--tx2)', lineHeight: 1.8 }}>
                 <strong style={{ color: 'var(--tx)' }}>📌 Önemli:</strong> Ajansın iç onayını vermediği hiçbir içerik müşteri portalinde görünmez.
-                Müşteri yalnızca size hazır dediğiniz içerikleri görür. Tüm kararlar (onay/revizyon) kayıt altında tutulur ve ekibe anlık bildirilir.
+                Müşteri yalnızca size hazır dediğiniz içerikleri görür. Tüm kararlar kayıt altında tutulur ve ekibe anlık bildirilir.
               </div>
             </Section>
 
-            {/* ── SIK SORULAR ── */}
             <Section id="sorular" title="💡 Sık Sorulan Sorular">
               {TIPS.map((tip, i) => (
                 <div key={i} className="tip-card">
@@ -561,7 +684,6 @@ export default function DokumantasyonPage() {
                   </div>
                 </div>
               ))}
-
               <div style={{ marginTop: 20, background: 'var(--ac2)', border: '1px solid rgba(124,106,247,.2)', borderRadius: 14, padding: '22px 24px', textAlign: 'center' }}>
                 <Zap size={24} style={{ color: 'var(--ac)', margin: '0 auto 10px' }} strokeWidth={2} />
                 <p style={{ fontSize: 15, fontWeight: 800, marginBottom: 8 }}>Sistem tamamen size özel geliştirildi</p>
