@@ -23,6 +23,7 @@ const MANAGER_PLUS = [
   '/dashboard/musteriler',
   '/dashboard/operasyon',
   '/dashboard/gecikmeler',
+  '/dashboard/ankete-katilanlar',
   '/dashboard/performans',
   '/dashboard/otomasyonlar',
   '/dashboard/destek',
