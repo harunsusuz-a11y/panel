@@ -75,7 +75,7 @@ export default function AnketPage() {
         {/* Sol panel */}
         <aside className="an-side">
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <svg width="60" height="60" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Daydream" style={{ flexShrink: 0 }}>
+            <svg width="96" height="96" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Daydream" style={{ flexShrink: 0 }}>
               <rect width="100" height="100" rx="16" fill="#0c0c10" />
               <path d="M22 16 L22 84 L38 84 C62 84 76 70 76 50 C76 30 62 16 38 16 Z" fill="white" />
               <path d="M30 24 L30 76 L38 76 C56 76 67 65 67 50 C67 35 56 24 38 24 Z" fill="#0c0c10" />
