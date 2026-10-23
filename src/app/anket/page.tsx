@@ -8,7 +8,7 @@ const QUESTIONS = [
   { key: 'q4', text: 'Planlama, revizyon ve teslim sürecinden memnun kaldınız mı?' },
 ] as const
 
-const WINE = '#7a2a45'
+const WINE = '#111111'
 
 export default function AnketPage() {
   const [step, setStep] = useState<1 | 2 | 3>(1)
@@ -51,7 +51,7 @@ export default function AnketPage() {
     <>
       <style>{`
         .an{display:flex;min-height:100vh;background:#fff;color:#1a1a1a;font-family:Inter,system-ui,sans-serif}
-        .an-side{width:36%;max-width:580px;background:#212124;color:#fff;padding:48px;display:flex;flex-direction:column}
+        .an-side{width:36%;max-width:580px;background:#0a0a0a;color:#fff;padding:48px;display:flex;flex-direction:column}
         .an-main{flex:1;padding:48px 24px;display:flex;justify-content:center}
         .an-box{width:100%;max-width:512px}
         .an-sc{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
@@ -89,7 +89,7 @@ export default function AnketPage() {
           <div style={{ marginTop: 80 }}>
             <div style={{ fontSize: 10, letterSpacing: '.14em', color: '#aaa', fontWeight: 600 }}>MÜŞTERİ DENEYİMİ</div>
             <h1 style={{ fontSize: 38, fontWeight: 400, lineHeight: 1.15, margin: '18px 0 0', letterSpacing: '-.5px' }}>
-              İyi işlerin<br />devamı,<br /><span style={{ color: '#e08fb0' }}>iyi iletişim.</span>
+              İyi işlerin<br />devamı,<br /><span style={{ color: '#9a9a9a' }}>iyi iletişim.</span>
             </h1>
             <p className="an-hide" style={{ fontSize: 12, color: '#ccc', lineHeight: 1.7, marginTop: 28 }}>
               Birlikte üretiyoruz.<br />Birlikte gelişiyoruz.
@@ -101,7 +101,7 @@ export default function AnketPage() {
               const active = step === it.s, done = step > it.s
               return (
                 <div key={it.n} style={{ display: 'flex', alignItems: 'center', gap: 10, opacity: active || done ? 1 : .55 }}>
-                  <span style={{ width: 22, height: 22, borderRadius: '50%', fontSize: 9, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', background: active || done ? WINE : 'transparent', border: `1px solid ${active || done ? WINE : '#555'}` }}>
+                  <span style={{ width: 22, height: 22, borderRadius: '50%', fontSize: 9, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', background: active || done ? '#fff' : 'transparent', color: active || done ? '#111' : '#fff', border: `1px solid ${active || done ? '#fff' : '#555'}` }}>
                     {it.n}
                   </span>
                   <span style={{ fontSize: 12, fontWeight: active ? 600 : 400 }}>{it.l}</span>
@@ -151,7 +151,7 @@ export default function AnketPage() {
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#777', marginTop: 8 }}>
                         <span>Hiç memnun değilim</span><span>Çok memnunum</span>
                       </div>
-                      {missing && <div style={{ fontSize: 11, color: '#c0392b', marginTop: 6 }}>Bir puan seçin</div>}
+                      {missing && <div style={{ fontSize: 11, color: '#111', fontWeight: 600, marginTop: 6 }}>Bir puan seçin</div>}
                     </div>
                   )
                 })}
@@ -185,7 +185,7 @@ export default function AnketPage() {
                 <input tabIndex={-1} autoComplete="off" value={website} onChange={e => setWebsite(e.target.value)}
                   style={{ position: 'absolute', left: -9999, opacity: 0, height: 0 }} aria-hidden="true" />
 
-                {error && <div style={{ fontSize: 12, color: '#c0392b', marginBottom: 12 }}>{error}</div>}
+                {error && <div style={{ fontSize: 12, color: '#111', fontWeight: 600, marginBottom: 12 }}>{error}</div>}
 
                 <div style={{ borderTop: '1px solid #e6e6e6', paddingTop: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <button className="an-ghost" onClick={() => setStep(1)}>← Geri</button>
