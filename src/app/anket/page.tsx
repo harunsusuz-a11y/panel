@@ -75,7 +75,7 @@ export default function AnketPage() {
         {/* Sol panel */}
         <aside className="an-side">
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <svg width="44" height="44" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Daydream" style={{ flexShrink: 0 }}>
+            <svg width="60" height="60" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Daydream" style={{ flexShrink: 0 }}>
               <rect width="100" height="100" rx="16" fill="#0c0c10" />
               <path d="M22 16 L22 84 L38 84 C62 84 76 70 76 50 C76 30 62 16 38 16 Z" fill="white" />
               <path d="M30 24 L30 76 L38 76 C56 76 67 65 67 50 C67 35 56 24 38 24 Z" fill="#0c0c10" />
@@ -84,12 +84,6 @@ export default function AnketPage() {
               <polygon points="46,62 53,44 60,62" fill="white" />
               <polygon points="42,62 48,50 54,62" fill="white" />
             </svg>
-            <div>
-              <div style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-1px', lineHeight: 1 }}>
-                daydream<span style={{ color: '#d94f86' }}>.</span>
-              </div>
-              <div style={{ fontSize: 9, letterSpacing: '.14em', color: '#aaa', marginTop: 4 }}>FROM DREAM TO SCENE</div>
-            </div>
           </div>
 
           <div style={{ marginTop: 80 }}>
