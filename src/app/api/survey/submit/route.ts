@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createServiceRoleClient } from '@/lib/supabase/service'
+import { createClient } from '@supabase/supabase-js'
 
 const clamp = (v: unknown) => {
   const n = Number(v)
@@ -19,9 +19,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Lütfen tüm soruları puanlayın.' }, { status: 400 })
     }
 
-    // Bu endpoint kasıtlı olarak oturumsuz (müşteriler giriş yapmadan katılır);
-    // sadece INSERT yapar, doğrulanmış alanlarla.
-    const { error } = await createServiceRoleClient().from('survey_responses').insert({
+    // Müşteriler giriş yapmadan katılır: anon anahtar + sadece INSERT izni (RLS politikası survey_insert_anon).
+    // Servis anahtarına bağımlı değil; okuma/silme anonim için kapalı.
+    const sb = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    )
+    const { error } = await sb.from('survey_responses').insert({
       full_name: clean(b.full_name, 120),
       company: clean(b.company, 120),
       q1_satisfaction: q1,
@@ -30,7 +35,10 @@ export async function POST(req: Request) {
       q4_process: q4,
       comment: clean(b.comment, 2000),
     })
-    if (error) return NextResponse.json({ error: 'Kaydedilemedi.' }, { status: 500 })
+    if (error) {
+      console.error('survey insert error:', error.message)
+      return NextResponse.json({ error: 'Kaydedilemedi.' }, { status: 500 })
+    }
     return NextResponse.json({ ok: true })
   } catch {
     return NextResponse.json({ error: 'Geçersiz istek.' }, { status: 400 })
